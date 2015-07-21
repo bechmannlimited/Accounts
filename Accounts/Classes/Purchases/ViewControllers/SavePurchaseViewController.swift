@@ -48,27 +48,31 @@ class SavePurchaseViewController: SaveItemViewController {
         showOrHideSaveButton()
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
         
-        super.viewDidLoad()
         
         tableView.setEditing(true, animated: false)
         
         if purchase.objectId != nil {
             
-            tableView.hidden = true
-            view.showLoader()
+            //tableView.hidden = true
+            //view.showLoader()
             
-            purchase.fetchIfNeededInBackgroundWithBlock({ (object, error) -> Void in
+            purchase.fetchIfNeeded()
+            purchase.user.fetchIfNeeded()
+            
+            for transaction in purchase.transactions {
                 
-                if let purchase = object as? Purchase {
-                    
-                    self.purchase = purchase
-                    self.purchase.user.fetchIfNeeded()
-                    self.refresh(nil)
-                }
-            })
+                transaction.fetchIfNeeded()
+                transaction.fromUser?.fetchIfNeeded()
+                transaction.toUser?.fetchIfNeeded()
+            }
+            
+            //tableView.hidden = false
+            //view.hideLoader()
         }
         
         setAskToPopMessageForAlert("Going back delete changes to this purchase! Are you sure?")
+        
+        super.viewDidLoad()
     }
     
     override func viewDidAppear(animated: Bool) {

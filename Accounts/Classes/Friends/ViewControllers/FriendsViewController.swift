@@ -38,7 +38,7 @@ class FriendsViewController: ACBaseViewController {
         
         if kDevice == .Phone {
             
-            tableView = UITableView(frame: CGRectZero, style: .Plain)
+            tableView = UITableView(frame: CGRectZero, style: .Grouped)
         }
         
         setupTableView(tableView, delegate: self, dataSource: self)

@@ -313,7 +313,7 @@ class TransactionsViewController: ACBaseViewController {
             loadMoreView.showLoader()
             
             query?.cancel()
-            query?.skip = transactions.count
+            query?.skip = transactions.count + 1
             query?.limit = 16
             
             query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
@@ -425,6 +425,8 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         }
         
         cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
+        cell.detailTextLabel?.textColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.positiveColor() : AccountColor.negativeColor()
+        
         cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
         cell.imageView?.tintWithColor(AccountColor.blueColor())
         

@@ -18,12 +18,6 @@ class SaveItemViewController: ACFormViewController {
     
     var delegate: SaveItemDelegate?
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
-    }
-    
     func pop() {
         
         self.dismissViewControllerFromCurrentContextAnimated(true)

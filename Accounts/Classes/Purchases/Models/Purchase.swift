@@ -72,9 +72,13 @@ class Purchase: PFObject {
             
             for transaction in self.transactions {
                 
-                if transaction.toUser != User.currentUser() {
+                if transaction.toUser?.objectId != User.currentUser()?.objectId {
                     
                     pushNotificationTargets.append(transaction.toUser!)
+                }
+                if transaction.fromUser?.objectId != User.currentUser()?.objectId {
+                    
+                    pushNotificationTargets.append(transaction.fromUser!)
                 }
             }
             
@@ -82,13 +86,6 @@ class Purchase: PFObject {
             let message = "Purchase: \(self.title) \(noun)!"
             
             ParseUtilities.sendPushNotificationsInBackgroundToUsers(pushNotificationTargets, message: message)
-        }
-        
-        for transaction in transactions {
-            
-            transaction.purchaseObjectId = objectId
-            transaction.transactionDate = purchasedDate!
-            transaction.title = title
         }
         
         PFObject.saveAllInBackground(transactions, block: { (success, error) -> Void in
@@ -100,14 +97,28 @@ class Purchase: PFObject {
 
                     if success{
                         
+                        for transaction in self.transactions {
+                            
+                            println(self.objectId)
+                            transaction.purchaseObjectId = self.objectId
+                            transaction.transactionDate = self.purchasedDate!
+                            transaction.title = self.title
+                        }
+                        
+                        PFObject.saveAllInBackground(self.transactions, block: { (success, error) -> Void in
+                            
+                            completion(success: success)
+                        })
+                        
                         sendPushNotifications()
                     }
                     else{
                         
                         ParseUtilities.showAlertWithErrorIfExists(error)
+                        completion(success: false)
                     }
                     
-                    completion(success: success)
+                    
                 })
             }
             else {
@@ -219,25 +230,16 @@ class Purchase: PFObject {
     
     func deletePurchaseAndTransactions(completion:() -> ()) {
         
-        relationForKey("transactions").query()?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+        for transaction in transactions {
             
-            if let transactions = objects as? [Transaction] {// needed?
-                
-                PFObject.deleteAllInBackground(objects, block: { (success, error) -> Void in
-                    
-                    if success{
-                        
-                        self.deleteInBackgroundWithBlock({ (success, error) -> Void in
-                            
-                            completion()
-                            ParseUtilities.showAlertWithErrorIfExists(error)
-                        })
-                    }
-                    
-                    ParseUtilities.showAlertWithErrorIfExists(error)
-                })
-            }
-        })
+            transaction.delete()
+        }
+        
+        deleteInBackgroundWithBlock { (success, error) -> Void in
+            
+            completion()
+            ParseUtilities.showAlertWithErrorIfExists(error)
+        }
     }
 }
 
