@@ -1,0 +1,33 @@
+{
+  "name": "ABToolKit",
+  "version": "0.1.0",
+  "summary": "A short description of ABToolKit.",
+  "description": "                       An optional longer description of ABToolKit\n\n                       * Markdown format.\n                       * Don't worry about the indent, we strip it!\n",
+  "homepage": "https://github.com/a1exb1/ABToolKit-pod",
+  "license": "MIT",
+  "authors": {
+    "Alex Bechmann": "alex_bechmann@hotmail.com"
+  },
+  "source": {
+    "git": "https://github.com/a1exb1/ABToolKit-pod.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "requires_arc": true,
+  "source_files": "Pod/Classes/**/*",
+  "resource_bundles": {
+    "ABToolKit": [
+      "Pod/Assets/*.*"
+    ]
+  },
+  "dependencies": {
+    "Alamofire": [
+      "~> 1.2.1"
+    ],
+    "SwiftyJSON": [
+      "~> 2.2.0"
+    ]
+  }
+}

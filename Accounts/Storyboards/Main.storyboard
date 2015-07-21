@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7706" systemVersion="14D136" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="sJ2-DI-iLJ">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7703"/>
+    </dependencies>
+    <scenes>
+        <!--Friends View Controller-->
+        <scene sceneID="Ckv-T3-Yur">
+            <objects>
+                <viewController id="yqe-Z5-V0D" customClass="FriendsViewController" customModule="Accounts" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="U7g-Wu-dZL"/>
+                        <viewControllerLayoutGuide type="bottom" id="6de-M8-ACU"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="mXk-r7-z1v">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="aXd-vH-sBZ"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="CUP-Tl-s4C" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2123" y="-379"/>
+        </scene>
+        <!--Verify User View Controller-->
+        <scene sceneID="K9Q-98-Pn6">
+            <objects>
+                <viewController id="t4v-Y4-S1i" customClass="VerifyUserViewController" customModule="Accounts" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="EUL-qK-gMV"/>
+                        <viewControllerLayoutGuide type="bottom" id="lhZ-sa-afP"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="f82-ew-Xn4">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="QvV-Ad-dqp" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="98" y="-527"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="L3v-PN-ZsC">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="sJ2-DI-iLJ" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" systemItem="contacts" id="Cpx-HO-c3K"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="lBi-5x-Nq1">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="yqe-Z5-V0D" kind="relationship" relationship="rootViewController" id="hxZ-vE-rgG"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="MKg-gA-Mzs" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1311" y="-379"/>
+        </scene>
+    </scenes>
+</document>

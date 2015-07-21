@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>2231EDA2-82C6-46B7-B919-488DD4C0B09D</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Accounts</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>26A55522BE1EF1BB53374F5FB5C9F1E4037592A2</key>
+		<string>https://github.com/bechmannlimited/Accounts.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Accounts.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>26A55522BE1EF1BB53374F5FB5C9F1E4037592A2</key>
+		<string>..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/bechmannlimited/Accounts.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>26A55522BE1EF1BB53374F5FB5C9F1E4037592A2</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>26A55522BE1EF1BB53374F5FB5C9F1E4037592A2</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Accounts</string>
+		</dict>
+	</array>
+</dict>
+</plist>
