@@ -14,6 +14,7 @@ import Parse
 class SavePurchaseViewController: SaveItemViewController {
 
     var purchase = Purchase()
+    var purchaseObjectId: String?
     
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
