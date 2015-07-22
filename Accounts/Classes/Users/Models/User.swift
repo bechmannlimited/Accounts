@@ -65,37 +65,19 @@ class User: PFUser {
 
         friends = [User]()
         
-        User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-
-            if let friends = objects as? [User] {
+        Task.executeTaskInBackground({ () -> () in
+            
+            self.friends = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()?.findObjects() as! [User]
+            
+            for friend in self.friends{
                 
-                User.currentUser()?.friends = objects as! [User]
-                
-                if let arr = objects as? [User] {
-                    
-                    self.friends = arr
-                }
-                
-                let requiredRequestsCount = self.friends.count
-                var completedRequests = 0
-                
-                for friend in self.friends{
-                    
-                    // get difference // needs a cloud code function instead
-                    PFCloud.callFunctionInBackground("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) { (response, error) -> Void in
-                        
-                        let responseJson = JSON(response!)
-                        friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                        
-                        completedRequests++
-                        
-                        if completedRequests == requiredRequestsCount {
-                            
-                            completion()
-                        }
-                    }
-                }
+                let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
+                friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
             }
+            
+        }, completion: { () -> () in
+            
+            completion()
         })
     }
     
