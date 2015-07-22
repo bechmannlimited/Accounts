@@ -94,6 +94,23 @@ class Transaction: PFObject {
         
         return errors.count == 0
     }
+    
+    func sendPushNotifications(isNew: Bool) {
+        
+        let verb: String = isNew ? "added" : "updated"
+        
+        var targets = [User]()
+        
+        for user in [self.fromUser!, self.toUser!] {
+            
+            if user.objectId != User.currentUser()?.objectId{
+                
+                targets.append(user)
+            }
+        }
+        
+        ParseUtilities.sendPushNotificationsInBackgroundToUsers(targets, message: "Transaction \(title) \(verb) by \(User.currentUser()!.appropriateDisplayName())!")
+    }
 }
 
 extension Transaction: PFSubclassing {

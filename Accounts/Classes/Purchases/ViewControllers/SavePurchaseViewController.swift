@@ -132,9 +132,22 @@ extension SavePurchaseViewController: FormViewDelegate {
             FormViewConfiguration.normalCell("Friends")
         ]
         
+        // get purchase user first
         for transaction in purchase.transactions {
             
-            transactionConfigs.append(FormViewConfiguration.textFieldCurrency(transaction.toUser!.username!, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
+            if transaction.toUser?.objectId == purchase.user.objectId {
+                
+                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(transaction.toUser!.appropriateDisplayName(), value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
+            }
+        }
+        
+        // get all others
+        for transaction in purchase.transactions {
+            
+            if transaction.toUser?.objectId != purchase.user.objectId {
+                
+                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(transaction.toUser!.appropriateDisplayName(), value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
+            }
         }
         
         sections.append(transactionConfigs)
@@ -172,6 +185,8 @@ extension SavePurchaseViewController: FormViewDelegate {
         }
         
         self.setTextFieldValueAndUpdateConfig("Amount", value: Formatter.formatCurrencyAsString(self.purchase.amount), cell: self.formViewCells["Amount"])
+        
+        tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 1)], withRowAnimation: .None)
     }
     
     func formViewTextFieldCurrencyEditingChanged(identifier: String, value: Double) {
@@ -241,7 +256,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         if identifier == "Friends" {
             
             let usersToChooseFrom = User.userListExcludingID(purchase.user.objectId)
-            
+
             let v = SelectUsersViewController(identifier: identifier, users: purchase.usersInTransactions(), selectUsersDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
             navigationController?.pushViewController(v, animated: true)
         }
@@ -271,15 +286,7 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             cell.textLabel?.text = "Split with"
             
-            var friendCount = purchase.transactions.count
-            
-//            for friend in purchase.friends {
-//                
-//                if friend.objectId == purchase.user.objectId {
-//                    
-//                    friendCount--
-//                }
-//            }
+            var friendCount = purchase.transactions.count - 1
             
             cell.detailTextLabel?.text = "\(friendCount)"
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator

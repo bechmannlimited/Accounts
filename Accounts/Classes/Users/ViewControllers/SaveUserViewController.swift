@@ -11,26 +11,34 @@ import UIKit
 import ABToolKit
 import SwiftyJSON
 import Parse
+import Bolts
+
+private let kDisplayNameIndexPath = NSIndexPath(forRow: 2, inSection: 0)
+private let kPasswordIndexPath = NSIndexPath(forRow: 0, inSection: 1)
+private let kVerifyPasswordIndexPath = NSIndexPath(forRow: 1, inSection: 1)
 
 class SaveUserViewController: ACFormViewController {
     
     var user = User.object()
     var isLoading = false
+    var isExistingUser = false
     
     override func viewDidLoad() {
         
-        if user.objectId == nil {
+        if !isExistingUser {
             
             title = "Register"
         }
         else {
             
+            user.username = User.currentUser()?.username
+            user.email = User.currentUser()?.email
+            user.displayName = User.currentUser()?.displayName
+            
             title = "Edit profile"
         }
         
         showOrHideRegisterButton()
-        
-        
         
         super.viewDidLoad()
     }
@@ -52,7 +60,7 @@ class SaveUserViewController: ACFormViewController {
     
     func showOrHideRegisterButton() {
         
-        let saveButton = user.objectId == nil ? UIBarButtonItem(title: "Register", style: .Plain, target: self, action: "save") : UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: "save")
+        let saveButton = !isExistingUser ? UIBarButtonItem(title: "Register", style: .Plain, target: self, action: "save") : UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: "save")
         
         navigationItem.rightBarButtonItem = saveButton
         navigationItem.rightBarButtonItem?.tintColor = kNavigationBarPositiveActionColor
@@ -62,12 +70,17 @@ class SaveUserViewController: ACFormViewController {
     
     func save() {
         
-        if user.objectId != nil {
+        if isExistingUser {
             
             isLoading = true
             showOrHideRegisterButton()
             
-            user.saveInBackgroundWithBlock({ (success, error) -> Void in
+            User.currentUser()?.username = user.username
+            User.currentUser()?.email = user.email
+            User.currentUser()?.displayName = user.displayName
+            User.currentUser()?.password = user.password
+            
+            User.currentUser()?.saveInBackgroundWithBlock({ (success, error) -> Void in
                 
                 if success {
                     
@@ -114,10 +127,12 @@ extension SaveUserViewController: FormViewDelegate {
         sections.append([
             FormViewConfiguration.textField("Username", value: String.emptyIfNull(user.username) , identifier: "Username"),
             FormViewConfiguration.textField("Email", value: String.emptyIfNull(user.email), identifier: "Email"),
-            FormViewConfiguration.textField("Password", value: String.emptyIfNull(user.password), identifier: "Password")
+            FormViewConfiguration.textField("Display name", value: String.emptyIfNull(user.displayName), identifier: "DisplayName")
         ])
         sections.append([
-            FormViewConfiguration.textField("Display name", value: String.emptyIfNull(user.displayName), identifier: "DisplayName")
+            
+            FormViewConfiguration.textField("Password", value: String.emptyIfNull(user.password), identifier: "Password"),
+            FormViewConfiguration.textField("Verify password", value: String.emptyIfNull(user.password), identifier: "PasswordForVerification")
         ])
         return sections
     }
@@ -143,8 +158,12 @@ extension SaveUserViewController: FormViewDelegate {
             user.email = text
             break
             
-        case "displayName":
+        case "DisplayName":
             user.displayName = text
+            break
+            
+        case "PasswordForVerification":
+            user.passwordForVerification = text
             break
             
         default: break;
@@ -158,13 +177,16 @@ extension SaveUserViewController: UITableViewDelegate {
         
         let cell = super.tableView(tableView, cellForRowAtIndexPath: indexPath) as! FormViewTextFieldCell
         
-        if indexPath.row == 2 {
+        if indexPath == kPasswordIndexPath || indexPath == kVerifyPasswordIndexPath {
             
             cell.textField.secureTextEntry = true
         }
         
-        cell.textField.autocapitalizationType = UITextAutocapitalizationType.None
-        
+        if indexPath != kDisplayNameIndexPath {
+            
+            cell.textField.autocapitalizationType = UITextAutocapitalizationType.None
+        }
+
         return cell
     }
 }

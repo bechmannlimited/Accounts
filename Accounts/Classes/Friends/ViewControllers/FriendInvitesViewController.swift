@@ -129,7 +129,7 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
             user = invites[indexPath.section][indexPath.row].toUser
         }
 
-        cell.textLabel?.text = user!.username
+        cell.textLabel?.text = user!.appropriateDisplayName()
         
         if indexPath.section == kUnconfirmedInvitesSection {
             

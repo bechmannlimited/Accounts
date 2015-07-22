@@ -14,7 +14,7 @@ import SwiftyUserDefaults
 class SaveTransactionViewController: SaveItemViewController {
 
     var transaction = Transaction()
-    
+    var isNew = true
     
     override func viewDidLoad() {
 
@@ -57,6 +57,7 @@ class SaveTransactionViewController: SaveItemViewController {
                 self.transaction.fetchIfNeeded()
                 self.transaction.toUser?.fetchIfNeeded()
                 self.transaction.fromUser?.fetchIfNeeded()
+                self.isNew = false
                 
             }, completion: { () -> () in
                 
@@ -72,13 +73,15 @@ class SaveTransactionViewController: SaveItemViewController {
 
         updateUIForSavingOrDeleting()
         
-        transaction.saveEventually { (success, error) -> Void in
+        transaction.saveInBackgroundWithBlock { (success, error) -> Void in
 
             if success {
 
                 self.delegate?.transactionDidChange(self.transaction)
                 self.self.popAll()
                 self.delegate?.itemDidChange()
+                
+                self.transaction.sendPushNotifications(self.isNew)
             }
             else {
             
@@ -132,7 +135,7 @@ extension SaveTransactionViewController: FormViewDelegate {
         if identifier == "Friend" {
             
             cell.textLabel?.text = "Transfer to"
-            if let username = transaction.toUser?.username {
+            if let username = transaction.toUser?.appropriateDisplayName() {
                 
                 cell.detailTextLabel?.text = "\(username)"
                 cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
@@ -148,7 +151,7 @@ extension SaveTransactionViewController: FormViewDelegate {
         if identifier == "User" {
             
             cell.textLabel?.text = "Transfer from"
-            if let username = transaction.fromUser?.username {
+            if let username = transaction.fromUser?.appropriateDisplayName() {
                 
                 cell.detailTextLabel?.text = "\(username)"
                 cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator

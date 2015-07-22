@@ -103,6 +103,7 @@ class TransactionsViewController: ACBaseViewController {
         
         query = PFQuery.orQueryWithSubqueries([queryForFromUser!, queryForToUser!])
         query?.includeKey("purchase")
+        query?.orderByAscending("purchasedDate")
     }
     
     func getDifferenceAndRefreshIfNeccessary(refreshControl: UIRefreshControl?) {
@@ -407,11 +408,17 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         
         var amount = transaction.localeAmount
         
-        if transaction.purchaseObjectId != nil {
+        if let purchaseObjectId = transaction.purchaseObjectId {
 
-            //get purchase with a query
+            cell.detailTextLabel?.text = ""
             
-            //amount = transaction.purchase.localeAmount
+            Purchase.query()?.getObjectInBackgroundWithId(purchaseObjectId, block: { (object, error) -> Void in
+                
+                if let purchase = object as? Purchase {
+                    
+                    cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(purchase.amount)
+                }
+            })
             
             //let dateString:String = transaction.purchase.purchasedDate!.toString(DateFormat.Date.rawValue)
             cell.textLabel?.text = "\(transaction.title)"

@@ -32,6 +32,10 @@ class FriendsViewController: ACBaseViewController {
     var toolbar = UIToolbar()
     
     var isLoading = false
+    var data: Array<Array<User>> = [[],[],[]]
+    
+    var invitesCount = 0
+    var hasCheckedForInvites = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,7 +64,6 @@ class FriendsViewController: ACBaseViewController {
         super.viewWillAppear(animated)
         
         refresh(nil)
-        tableView.reloadData()
         setEditing(false, animated: false)
     }
     
@@ -77,10 +80,10 @@ class FriendsViewController: ACBaseViewController {
         
         if view.bounds.width >= kTableViewMaxWidth {
             
-            tableView.reloadData()
+            //tableView.reloadData()
         }
         
-        if data()[2].count > 0 && editing {
+        if data[2].count > 0 && editing {
             
             tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 2), atScrollPosition: .Top, animated: true)
         }
@@ -93,10 +96,13 @@ class FriendsViewController: ACBaseViewController {
         
         addBarButtonItem = User.currentUser()!.friends.count > 0 ? UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add") : emptyBarButtonItem
         
-        friendInvitesBarButtonItem = UIBarButtonItem(title: "Invites", style: .Plain, target: self, action: "friendInvites")
+        
+        let invitesText = invitesCount > 0 ? "Invites (\(invitesCount))" : "Invites"
+        
+        friendInvitesBarButtonItem = UIBarButtonItem(title: invitesText, style: .Plain, target: self, action: "friendInvites")
         openMenuBarButtonItem = UIBarButtonItem(image: kMenuIcon, style: .Plain, target: self, action: "openMenu")
         
-        let editBarButtonItem = data()[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
+        let editBarButtonItem = data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
         
         navigationItem.leftBarButtonItems = [
             openMenuBarButtonItem!,
@@ -122,7 +128,7 @@ class FriendsViewController: ACBaseViewController {
         presentViewController(v, animated: true, completion: nil)
     }
     
-    func data() -> Array<Array<User>> {
+    func setDataForTable() {
         
         var rc = Array<Array<User>>()
         
@@ -155,7 +161,7 @@ class FriendsViewController: ACBaseViewController {
             }
         }
         
-        return [friendsWhoOweMoney, friendsWhoYouOweMoney, friendsWhoAreEven]
+        data = [friendsWhoOweMoney, friendsWhoYouOweMoney, friendsWhoAreEven]
     }
     
     override func setupTableView(tableView: UITableView, delegate: UITableViewDelegate, dataSource: UITableViewDataSource) {
@@ -172,6 +178,7 @@ class FriendsViewController: ACBaseViewController {
         User.currentUser()?.getFriends({ () -> () in
             
             refreshControl?.endRefreshing()
+            self.setDataForTable()
             self.tableView.reloadData()
             self.view.hideLoader()
             
@@ -183,12 +190,19 @@ class FriendsViewController: ACBaseViewController {
             self.setBarButtonItems()
             self.showOrHideTableOrNoDataView()
         })
+        
+        User.currentUser()?.getInvites({ (invites) -> () in
+            
+            self.hasCheckedForInvites = true
+            self.invitesCount = invites[0].count
+            self.setBarButtonItems()
+        })
     }
     
     func openMenu() {
         
         let view = MenuViewController()
-        view.delegate = self
+        //view.delegate = self
         
         let v = UINavigationController(rootViewController:view)
         v.modalPresentationStyle = UIModalPresentationStyle.FormSheet
@@ -224,12 +238,12 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
-        return data().count
+        return data.count
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return data()[section].count
+        return data[section].count
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -242,7 +256,7 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         cell.backgroundColor = UIColor.whiteColor()
         //setTableViewCellAppearanceForBackgroundGradient(cell)
         
-        let friend = data()[indexPath.section][indexPath.row]
+        let friend = data[indexPath.section][indexPath.row]
         
         cell.textLabel?.text = friend.appropriateDisplayName()
         let amount = friend.localeDifferenceBetweenActiveUser //abs()
@@ -278,7 +292,7 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
-        let friend = data()[indexPath.section][indexPath.row]
+        let friend = data[indexPath.section][indexPath.row]
         
         var v = TransactionsViewController()
         v.friend = friend
@@ -287,7 +301,7 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
 
-        if data()[section].count > 0 {
+        if data[section].count > 0 {
             
             if section == 0 {
                 
@@ -318,16 +332,16 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         
-        let friend = data()[indexPath.section][indexPath.row]
+        let friend = data[indexPath.section][indexPath.row]
         
         UIAlertController.showAlertControllerWithButtonTitle("Delete", confirmBtnStyle: .Destructive, message: "Are you sure you want to remove \(friend.appropriateDisplayName()) as a friend?") { (response) -> () in
             
             if response == .Confirm {
                 
-                let index = find(User.currentUser()!.friends, friend)!
-                
                 tableView.beginUpdates()
-                User.currentUser()!.friends.removeAtIndex(index)
+                
+                self.data[indexPath.section].removeAtIndex(indexPath.row)
+                
                 tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Top)
                 tableView.endUpdates()
                 
@@ -350,7 +364,7 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
 
-        return data()[section].count > 0 ? UITableViewAutomaticDimension : CGFloat.min
+        return data[section].count > 0 ? UITableViewAutomaticDimension : CGFloat.min
     }
     
     override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
@@ -421,13 +435,13 @@ extension FriendsViewController: FriendInvitesDelegate {
     }
 }
 
-extension FriendsViewController: MenuDelegate {
-    
-    func menuDidClose() {
-        
-        refresh(nil)
-    }
-}
+//extension FriendsViewController: MenuDelegate {
+//    
+//    func menuDidClose() {
+//        
+//        refresh(nil)
+//    }
+//}
 
 extension FriendsViewController: SaveItemDelegate {
     

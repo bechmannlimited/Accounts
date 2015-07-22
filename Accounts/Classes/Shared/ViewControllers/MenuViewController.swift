@@ -10,6 +10,7 @@ import UIKit
 import ABToolKit
 import SwiftyUserDefaults
 import SwiftyJSON
+import Parse
 
 private let kProfileSection = 0
 private let kCurrencySection = 1
@@ -20,10 +21,10 @@ private let kLogoutIndexPath = NSIndexPath(forRow: 1, inSection: kProfileSection
 
 private let kCurrencyIndexPath = NSIndexPath(forRow: 0, inSection: kCurrencySection)
 
-protocol MenuDelegate {
-    
-    func menuDidClose()
-}
+//protocol MenuDelegate {
+//    
+//    func menuDidClose()
+//}
 
 class MenuViewController: ACBaseViewController {
 
@@ -34,7 +35,7 @@ class MenuViewController: ACBaseViewController {
         [kProfileIndexPath, kLogoutIndexPath]
     ]
     
-    var delegate: MenuDelegate?
+    //var delegate: MenuDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,7 +65,7 @@ class MenuViewController: ACBaseViewController {
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         
-        delegate?.menuDidClose()
+        //delegate?.menuDidClose()
     }
 }
 
@@ -118,14 +119,19 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 
                 if response == AlertResponse.Confirm {
                     
+                    //remove user from installation
+                    let installation = PFInstallation.currentInstallation()
+                    installation.removeObjectForKey(kParseInstallationUserKey)
+                    installation.save()
+                    
                     User.logOutInBackgroundWithBlock({ (error) -> Void in
                         
                         if let error = error {
                             
-                            
+                            ParseUtilities.showAlertWithErrorIfExists(error)
                         }
                         else{
-                            
+
                             let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Login")
                             self.presentViewController(v, animated: true, completion: nil)
                         }
@@ -140,17 +146,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         else if indexPath == kProfileIndexPath {
             
             let v = SaveUserViewController()
-            
-            let user = User()
-            let currentUser = User.currentUser()
-            
-//            user.objectId = currentUser!.objectId
-//            user.email = currentUser!.email
-//            user.username = currentUser!.username
-//            user.displayName = currentUser!.displayName
-//            
-            v.user = User.currentUser()!
-            
+            v.isExistingUser = true
             navigationController?.pushViewController(v, animated: true)
         }
     }

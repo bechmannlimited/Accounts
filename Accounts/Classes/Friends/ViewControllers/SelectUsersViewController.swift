@@ -175,7 +175,7 @@ extension SelectUsersViewController: UITableViewDelegate, UITableViewDataSource 
 //            friend = kActiveUser
 //        }
         
-        cell.textLabel?.text = user.username
+        cell.textLabel?.text = user.appropriateDisplayName()
         
         var selected = false
         

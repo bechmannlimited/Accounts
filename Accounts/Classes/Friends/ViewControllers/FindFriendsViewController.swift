@@ -150,7 +150,7 @@ extension FindFriendsViewController: UITableViewDelegate, UITableViewDataSource 
         
         let match = matches[indexPath.row]
         
-        cell.textLabel?.text = match.username
+        cell.textLabel?.text = match.appropriateDisplayName()
         cell.detailTextLabel?.text = "Add as friend"
         cell.detailTextLabel?.textColor = AccountColor.greenColor()
         

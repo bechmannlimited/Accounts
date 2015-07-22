@@ -28,7 +28,7 @@ public class ParseUtilities: NSObject {
         
         let query = PFInstallation.query()
         
-        for user in users {
+        for user in users{
             
             query?.whereKey("user", equalTo: user)
         }

@@ -17,12 +17,13 @@ class User: PFUser {
     var friends = [User]()
     var localeDifferenceBetweenActiveUser:Double = 0
     var allInvites = [[FriendRequest]]()
+    var passwordForVerification = ""
     
     @NSManaged var displayName: String?
     
     func modelIsValid() -> Bool {
         
-        return username?.length() > 0 && password?.length() > 0 && email?.length() > 0
+        return username?.length() > 0 && password?.length() > 0 && email?.length() > 0 && password == passwordForVerification
     }
     
     func modelIsValidForLogin() -> Bool {
@@ -83,15 +84,43 @@ class User: PFUser {
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {
         
-        let friendRequest = FriendRequest()
-        friendRequest.fromUser = User.currentUser()
-        friendRequest.toUser = friend
-        friendRequest.friendRequestStatus = FriendRequestStatus.Pending.rawValue
-        
-        friendRequest.saveInBackgroundWithBlock { (success, error) -> Void in
+        Task.executeTaskInBackground({ () -> () in
             
-            completion(success: success)
-        }
+            let friendRequest = FriendRequest()
+            friendRequest.fromUser = User.currentUser()
+            friendRequest.toUser = friend
+            
+            //check to see if they accepted it meanwhile
+            let query = FriendRequest.query()
+            query?.whereKey("fromUser", equalTo: friendRequest.toUser!)
+            query?.whereKey("toUser", equalTo: friendRequest.fromUser!)
+            
+            var acceptedFriendRequest = false
+            
+            if let match = query?.findObjects()?.first as? FriendRequest {
+                
+                if match.friendRequestStatus == FriendRequestStatus.Pending.rawValue {
+                    
+                    match.friendRequestStatus = FriendRequestStatus.Confirmed.rawValue
+                    PFObject.saveAllInBackground([[match, User.currentUser()!]])
+                    acceptedFriendRequest = true
+                    
+                    ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())")
+                }
+            }
+
+            if !acceptedFriendRequest {
+                
+                friendRequest.friendRequestStatus = FriendRequestStatus.Pending.rawValue
+                friendRequest.save()
+                
+                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "New friend request from \(User.currentUser()!.appropriateDisplayName())")
+            }
+
+        }, completion: { () -> () in
+            
+            completion(success:true)
+        })
     }
     
     func addFriendFromRequest(friendRequest: FriendRequest, completion:(success: Bool) -> ()) {
@@ -101,7 +130,32 @@ class User: PFUser {
         PFObject.saveAllInBackground([friendRequest, User.currentUser()!], block: { (success, error) -> Void in
             
             completion(success: success)
+            
+            ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.fromUser!], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())")
         })
+        
+//        Task.executeTaskInBackground({ () -> () in
+//            
+//            let query = FriendRequest.query()
+//            query?.whereKey("fromUser", equalTo: friendRequest.toUser!)
+//            query?.whereKey("toUser", equalTo: friendRequest.fromUser!)
+//            
+//            if let match = query?.findObjects()?.first as? FriendRequest {
+//                
+//                friendRequest.friendRequestStatus = FriendRequestStatus.Confirmed.rawValue
+//                PFObject.saveAll([friendRequest, User.currentUser()!])
+//            }
+//            else{
+//                
+//                UIAlertView(title: "Friend request not sent!", message: "The friend request has expired", delegate: nil, cancelButtonTitle: "Ok").show()
+//                
+//                completion(success: false)
+//            }
+//            
+//        }, completion: { () -> () in
+//            
+//            completion(success: true)
+//        })
     }
     
     func getInvites(completion:(invites:Array<Array<FriendRequest>>) -> ()) {

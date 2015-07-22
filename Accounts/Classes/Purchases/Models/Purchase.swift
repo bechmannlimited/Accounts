@@ -114,7 +114,7 @@ class Purchase: PFObject {
         }
         
         let noun: String = isNewPurchase ? "added" : "updated"
-        let message = "Purchase: \(self.title) \(noun)!"
+        let message = "Purchase: \(self.title) \(noun) by \(User.currentUser()!.appropriateDisplayName())!"
         
         ParseUtilities.sendPushNotificationsInBackgroundToUsers(pushNotificationTargets, message: message)
     }
@@ -187,9 +187,22 @@ class Purchase: PFObject {
         
         var users = Array<User>()
         
+        // get purchase user first
         for transaction in transactions {
             
-            users.append(transaction.toUser!)
+            if transaction.toUser?.objectId == user.objectId {
+                
+                users.append(transaction.toUser!)
+            }
+        }
+        
+        // get all others
+        for transaction in transactions {
+            
+            if transaction.toUser?.objectId != user.objectId {
+                
+                users.append(transaction.toUser!)
+            }
         }
         
         return users
