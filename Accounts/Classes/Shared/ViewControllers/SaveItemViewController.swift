@@ -49,9 +49,47 @@ class SaveItemViewController: ACFormViewController {
         }
     }
     
-    func setAskToPopMessageForAlert(message: String) {
+    func updateUIForServerInteraction() {
+        
+        tableView.userInteractionEnabled = false
+        isSaving = true
+        showOrHideSaveButton()
+        tableView.hidden = true
+        view.showLoader()
+    }
     
-        askToPopMessage = message
+    func updateUIForEditing() {
+        
+        tableView.userInteractionEnabled = true
+        isSaving = false
+        showOrHideSaveButton()
+        tableView.hidden = false
+        view.hideLoader()
+        
+    }
+    
+    func updateUIForSavingOrDeleting() {
+        
+        tableView.userInteractionEnabled = false
+        isSaving = true
+        showOrHideSaveButton()
+        tableView.hidden = false
+    }
+    
+    func showOrHideSaveButton() {
+        
+        if allowEditing {
+            
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: "save")
+            navigationItem.rightBarButtonItem?.tintColor = kNavigationBarPositiveActionColor
+        }
+        
+        navigationItem.rightBarButtonItem?.enabled = saveButtonEnabled()
+    }
+    
+    func saveButtonEnabled() -> Bool {
+        
+        return false
     }
 
 }

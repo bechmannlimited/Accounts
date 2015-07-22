@@ -18,11 +18,16 @@ class SaveTransactionViewController: SaveItemViewController {
     
     override func viewDidLoad() {
 
+        shouldLoadFormOnLoad = false
+        super.viewDidLoad()
+        
         if transaction.objectId == nil {
 
             transaction.fromUser = User.currentUser()
             transaction.transactionDate = NSDate()
             transaction.title = ""
+            showOrHideSaveButton()
+            reloadForm()
         }
 
         allowEditing = true // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
@@ -30,7 +35,6 @@ class SaveTransactionViewController: SaveItemViewController {
         if allowEditing && transaction.objectId == nil {
             
             title = "New transfer"
-            //transaction.user = kActiveUser
         }
         else if allowEditing && transaction.objectId != nil {
             
@@ -41,44 +45,32 @@ class SaveTransactionViewController: SaveItemViewController {
             title = "Transfer"
         }
         
-        showOrHideSaveButton()
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
         
-        super.viewDidLoad()
-        
         if transaction.objectId != nil {
             
-            tableView.hidden = true
-            view.showLoader()
+            updateUIForServerInteraction()
             
-            transaction.fetchIfNeededInBackgroundWithBlock({ (object, error) -> Void in
+            Task.executeTaskInBackground({ () -> () in
                 
-                if let transaction = object as? Transaction {
-                    
-                    self.transaction = transaction
-                    self.transaction.toUser?.fetchIfNeeded()
-                    self.transaction.fromUser?.fetchIfNeeded()
-                    
-                    self.showOrHideSaveButton()
-                    self.reloadForm()
-                    
-                    self.tableView.hidden = false
-                    self.view.hideLoader()
-                }
+                self.transaction.fetchIfNeeded()
+                self.transaction.toUser?.fetchIfNeeded()
+                self.transaction.fromUser?.fetchIfNeeded()
+                
+            }, completion: { () -> () in
+                
+                self.updateUIForEditing()
+                self.reloadForm()
             })
         }
         
-        setAskToPopMessageForAlert("Going back delete changes to this transaction! Are you sure?")
+        askToPopMessage = "Going back delete changes to this transaction! Are you sure?"
     }
     
     func save() {
 
-        isSaving = true
-        showOrHideSaveButton()
-        
-        tableView.hidden = true
-        view.showLoader()
+        updateUIForSavingOrDeleting()
         
         transaction.saveEventually { (success, error) -> Void in
 
@@ -89,27 +81,20 @@ class SaveTransactionViewController: SaveItemViewController {
                 self.delegate?.itemDidChange()
             }
             else {
-                
-                self.tableView.hidden = false
-                self.view.hideLoader()
+            
                 ParseUtilities.showAlertWithErrorIfExists(error)
             }
 
-            self.isSaving = false
-            self.showOrHideSaveButton()
+            self.updateUIForEditing()
         }
     }
     
-    func showOrHideSaveButton() {
+    override func saveButtonEnabled() -> Bool {
         
-        if allowEditing {
-            
-            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: "save")
-            navigationItem.rightBarButtonItem?.tintColor = kNavigationBarPositiveActionColor
-        }
-        
-        navigationItem.rightBarButtonItem?.enabled = allowEditing && transaction.modelIsValid() && !isSaving
+        return allowEditing && transaction.modelIsValid() && !isSaving
     }
+    
+    
 }
 
 extension SaveTransactionViewController: FormViewDelegate {
@@ -214,11 +199,7 @@ extension SaveTransactionViewController: FormViewDelegate {
                 
                 if response == AlertResponse.Confirm {
                     
-                    self.isSaving = true
-                    self.showOrHideSaveButton()
-                    
-                    self.tableView.hidden = true
-                    self.view.showLoader()
+                    self.updateUIForSavingOrDeleting()
                     
                     self.transaction.deleteInBackgroundWithBlock({ (success, error) -> Void in
                         

@@ -41,7 +41,7 @@ class SavePurchaseViewController: SaveItemViewController {
             purchase.transactions = []
             purchase.transactions.append(transaction)
             
-            showOrHideSaveButton()
+            updateUIForEditing()
         }
         else if allowEditing && purchaseObjectId != nil {
 
@@ -58,8 +58,8 @@ class SavePurchaseViewController: SaveItemViewController {
         
         if purchaseObjectId != nil {
             
-            tableView.hidden = true
             view.showLoader()
+            tableView.hidden = true
             
             Task.executeTaskInBackground({ () -> () in
                 
@@ -75,10 +75,8 @@ class SavePurchaseViewController: SaveItemViewController {
                 
             }, completion: { () -> () in
                 
-                self.tableView.hidden = false
-                self.view.hideLoader()
+                self.updateUIForEditing()
                 self.reloadForm()
-                self.showOrHideSaveButton()
             })
         }
         else{
@@ -86,73 +84,12 @@ class SavePurchaseViewController: SaveItemViewController {
             reloadForm()
         }
         
-        setAskToPopMessageForAlert("Going back delete changes to this purchase! Are you sure?")
+        askToPopMessage = "Going back delete changes to this purchase! Are you sure?"
     }
-    
-//    override func viewDidAppear(animated: Bool) {
-//        super.viewDidAppear(animated)
-//        
-//        if allowEditing && purchase.objectId == nil {
-//            
-//            getLocationIfFirstTime()
-//        }
-//    }
-//    
-//    func getLocationIfFirstTime() {
-//        
-//        LocationManager.requestPermissionForLocationIfFirstTime { (response) -> () in
-//            
-//            if response == .Confirm {
-//                
-//                var locationManager = LocationManager.sharedInstance
-//                locationManager.showVerboseMessage = true
-//                locationManager.autoUpdate = false
-//                locationManager.startUpdatingLocationWithCompletionHandler { (latitude, longitude, status, verboseMessage, error) -> () in
-//                    
-//                    println("lat:\(latitude) lon:\(longitude) status:\(status) error:\(error)")
-//                    println(verboseMessage)
-//                    println(error)
-//                }
-//            }
-//        }
-//    }
-//    
-//    override func refresh(refreshControl: UIRefreshControl?) {
-//        
-//        tableView.hidden = true
-//        view.showLoader()
-//        
-//        let query = purchase.relationForKey(kParse_Purchase_TransactionsRelation_Key).query()
-//        query?.includeKey("fromUser")
-//        query?.includeKey("toUser")
-//        
-//        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-//            
-//            if let transactions = objects as? [Transaction] {
-//                
-//                self.purchase.transactions = transactions
-//                self.purchase.originalTransactions = transactions
-//                
-//                self.tableView.hidden = false
-//                self.view.hideLoader()
-//                self.showOrHideSaveButton()
-//                self.reloadForm()
-//            }
-//            else {
-//                
-//                self.popAll()
-//            }
-//            
-//        })
-//    }
-    
+        
     func save() {
 
-        isSaving = true
-        showOrHideSaveButton()
-        
-        tableView.hidden = true
-        view.showLoader()
+        updateUIForSavingOrDeleting()
         
         purchase.savePurchase { (success) -> () in
             
@@ -164,25 +101,16 @@ class SavePurchaseViewController: SaveItemViewController {
             }
             else{
                 
-                self.tableView.hidden = false
-                self.view.hideLoader()
+                println("error saving purchase")
             }
             
-            self.isSaving = false
-            self.showOrHideSaveButton()
-            
+            self.updateUIForEditing()
         }
     }
     
-    func showOrHideSaveButton() {
+    override func saveButtonEnabled() -> Bool {
         
-        if allowEditing {
-            
-            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: "save")
-            navigationItem.rightBarButtonItem?.tintColor = kNavigationBarPositiveActionColor
-        }
-        
-        navigationItem.rightBarButtonItem?.enabled = allowEditing && purchase.modelIsValid() && !isSaving
+        return allowEditing && purchase.modelIsValid() && !isSaving
     }
 }
 
@@ -296,11 +224,7 @@ extension SavePurchaseViewController: FormViewDelegate {
                 
                 if response == AlertResponse.Confirm {
                     
-                    self.isSaving = true
-                    self.showOrHideSaveButton()
-                    
-                    self.tableView.hidden = true
-                    self.view.showLoader()
+                    self.updateUIForSavingOrDeleting()
                     
                     self.purchase.deletePurchaseAndTransactions({ () -> () in
                         
