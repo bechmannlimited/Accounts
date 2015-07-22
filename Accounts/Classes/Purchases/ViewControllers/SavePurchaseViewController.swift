@@ -21,9 +21,12 @@ class SavePurchaseViewController: SaveItemViewController {
     
     override func viewDidLoad() {
         
+        shouldLoadFormOnLoad = false
+        super.viewDidLoad()
+        
         allowEditing = true 
 
-        if allowEditing && purchase.objectId == nil {
+        if allowEditing && purchaseObjectId == nil {
 
             title = "New purchase"
             purchase.user = User.currentUser()!
@@ -35,9 +38,12 @@ class SavePurchaseViewController: SaveItemViewController {
             transaction.toUser = User.currentUser()
             transaction.amount = 0
             
+            purchase.transactions = []
             purchase.transactions.append(transaction)
+            
+            showOrHideSaveButton()
         }
-        else if allowEditing && purchase.objectId != nil {
+        else if allowEditing && purchaseObjectId != nil {
 
             title = "Edit purchase"
         }
@@ -46,97 +52,107 @@ class SavePurchaseViewController: SaveItemViewController {
             title = "Purchase"
         }
         
-        showOrHideSaveButton()
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
-        
         
         tableView.setEditing(true, animated: false)
         
-        if purchase.objectId != nil {
+        if purchaseObjectId != nil {
             
-            //tableView.hidden = true
-            //view.showLoader()
+            tableView.hidden = true
+            view.showLoader()
             
-            purchase.fetchIfNeeded()
-            purchase.user.fetchIfNeeded()
-            
-            for transaction in purchase.transactions {
+            Task.executeTaskInBackground({ () -> () in
                 
-                transaction.fetchIfNeeded()
-                transaction.fromUser?.fetchIfNeeded()
-                transaction.toUser?.fetchIfNeeded()
-            }
-            
-            //tableView.hidden = false
-            //view.hideLoader()
-        }
-        
-        setAskToPopMessageForAlert("Going back delete changes to this purchase! Are you sure?")
-        
-        super.viewDidLoad()
-    }
-    
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        if allowEditing && purchase.objectId == nil {
-            
-            getLocationIfFirstTime()
-        }
-    }
-    
-    func getLocationIfFirstTime() {
-        
-        LocationManager.requestPermissionForLocationIfFirstTime { (response) -> () in
-            
-            if response == .Confirm {
+                self.purchase = Purchase.query()!.getObjectWithId(self.purchaseObjectId!) as! Purchase
+                self.purchase.user.fetchIfNeeded()
                 
-                var locationManager = LocationManager.sharedInstance
-                locationManager.showVerboseMessage = true
-                locationManager.autoUpdate = false
-                locationManager.startUpdatingLocationWithCompletionHandler { (latitude, longitude, status, verboseMessage, error) -> () in
+                for transaction in self.purchase.transactions {
                     
-                    println("lat:\(latitude) lon:\(longitude) status:\(status) error:\(error)")
-                    println(verboseMessage)
-                    println(error)
+                    transaction.fetchIfNeeded()
+                    transaction.fromUser?.fetchIfNeeded()
+                    transaction.toUser?.fetchIfNeeded()
                 }
-            }
-        }
-    }
-    
-    override func refresh(refreshControl: UIRefreshControl?) {
-        
-        tableView.hidden = true
-        view.showLoader()
-        
-        let query = purchase.relationForKey(kParse_Purchase_TransactionsRelation_Key).query()
-        query?.includeKey("fromUser")
-        query?.includeKey("toUser")
-        
-        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-            
-            if let transactions = objects as? [Transaction] {
                 
-                self.purchase.transactions = transactions
-                self.purchase.originalTransactions = transactions
+            }, completion: { () -> () in
                 
                 self.tableView.hidden = false
                 self.view.hideLoader()
-                self.showOrHideSaveButton()
                 self.reloadForm()
-            }
-            else {
-                
-                self.popAll()
-            }
+                self.showOrHideSaveButton()
+            })
+        }
+        else{
             
-        })
+            reloadForm()
+        }
+        
+        setAskToPopMessageForAlert("Going back delete changes to this purchase! Are you sure?")
     }
+    
+//    override func viewDidAppear(animated: Bool) {
+//        super.viewDidAppear(animated)
+//        
+//        if allowEditing && purchase.objectId == nil {
+//            
+//            getLocationIfFirstTime()
+//        }
+//    }
+//    
+//    func getLocationIfFirstTime() {
+//        
+//        LocationManager.requestPermissionForLocationIfFirstTime { (response) -> () in
+//            
+//            if response == .Confirm {
+//                
+//                var locationManager = LocationManager.sharedInstance
+//                locationManager.showVerboseMessage = true
+//                locationManager.autoUpdate = false
+//                locationManager.startUpdatingLocationWithCompletionHandler { (latitude, longitude, status, verboseMessage, error) -> () in
+//                    
+//                    println("lat:\(latitude) lon:\(longitude) status:\(status) error:\(error)")
+//                    println(verboseMessage)
+//                    println(error)
+//                }
+//            }
+//        }
+//    }
+//    
+//    override func refresh(refreshControl: UIRefreshControl?) {
+//        
+//        tableView.hidden = true
+//        view.showLoader()
+//        
+//        let query = purchase.relationForKey(kParse_Purchase_TransactionsRelation_Key).query()
+//        query?.includeKey("fromUser")
+//        query?.includeKey("toUser")
+//        
+//        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+//            
+//            if let transactions = objects as? [Transaction] {
+//                
+//                self.purchase.transactions = transactions
+//                self.purchase.originalTransactions = transactions
+//                
+//                self.tableView.hidden = false
+//                self.view.hideLoader()
+//                self.showOrHideSaveButton()
+//                self.reloadForm()
+//            }
+//            else {
+//                
+//                self.popAll()
+//            }
+//            
+//        })
+//    }
     
     func save() {
 
         isSaving = true
         showOrHideSaveButton()
+        
+        tableView.hidden = true
+        view.showLoader()
         
         purchase.savePurchase { (success) -> () in
             
@@ -146,9 +162,15 @@ class SavePurchaseViewController: SaveItemViewController {
                 self.popAll()
                 self.delegate?.itemDidChange()
             }
+            else{
+                
+                self.tableView.hidden = false
+                self.view.hideLoader()
+            }
             
             self.isSaving = false
             self.showOrHideSaveButton()
+            
         }
     }
     
@@ -276,6 +298,9 @@ extension SavePurchaseViewController: FormViewDelegate {
                     
                     self.isSaving = true
                     self.showOrHideSaveButton()
+                    
+                    self.tableView.hidden = true
+                    self.view.showLoader()
                     
                     self.purchase.deletePurchaseAndTransactions({ () -> () in
                         

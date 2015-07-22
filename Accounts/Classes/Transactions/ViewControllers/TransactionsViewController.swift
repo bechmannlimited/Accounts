@@ -442,12 +442,7 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
             
             let v = SavePurchaseViewController()
             
-            //get purchase // temp fix
-            let query = Purchase.query()
-            query?.whereKey("objectId", equalTo: transaction.purchaseObjectId!)
-            let purchase = query?.findObjects()?.first as! Purchase
-            
-            v.purchase = purchase //transaction.purchase
+            v.purchaseObjectId = transaction.purchaseObjectId! //transaction.purchase
             v.delegate = self
             openView(v, sourceView: cell.contentView)
         }

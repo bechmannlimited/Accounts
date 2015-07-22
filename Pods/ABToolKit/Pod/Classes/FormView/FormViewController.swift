@@ -35,6 +35,7 @@ public class FormViewController: BaseViewController {
     public var data: Array<Array<FormViewConfiguration>> = []
     var selectedIndexPath: NSIndexPath?
     public var formViewDelegate: FormViewDelegate?
+    public var shouldLoadFormOnLoad = true
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -43,7 +44,11 @@ public class FormViewController: BaseViewController {
         
         shouldAdjustTableViewInsetsForKeyboard = true
         setupTableView(tableView, delegate: self, dataSource: self)
-        reloadForm()
+        
+        if shouldLoadFormOnLoad {
+            
+            reloadForm()
+        }
     }
     
     public func reloadForm() {

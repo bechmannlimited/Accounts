@@ -194,7 +194,6 @@ public class JsonRequest: NSObject {
         active = false
         self.alamofireRequest?.cancel()
     }
-    
 }
 
 

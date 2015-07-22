@@ -77,6 +77,9 @@ class SaveTransactionViewController: SaveItemViewController {
         isSaving = true
         showOrHideSaveButton()
         
+        tableView.hidden = true
+        view.showLoader()
+        
         transaction.saveEventually { (success, error) -> Void in
 
             if success {
@@ -87,6 +90,8 @@ class SaveTransactionViewController: SaveItemViewController {
             }
             else {
                 
+                self.tableView.hidden = false
+                self.view.hideLoader()
                 ParseUtilities.showAlertWithErrorIfExists(error)
             }
 
@@ -211,6 +216,9 @@ extension SaveTransactionViewController: FormViewDelegate {
                     
                     self.isSaving = true
                     self.showOrHideSaveButton()
+                    
+                    self.tableView.hidden = true
+                    self.view.showLoader()
                     
                     self.transaction.deleteInBackgroundWithBlock({ (success, error) -> Void in
                         
