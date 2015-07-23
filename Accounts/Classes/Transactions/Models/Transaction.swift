@@ -99,6 +99,11 @@ class Transaction: PFObject {
         
         let verb: String = isNew ? "added" : "updated"
         
+        ParseUtilities.sendPushNotificationsInBackgroundToUsers(pushNotificationTargets(), message: "Transaction \(title) \(verb) by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+    }
+    
+    func pushNotificationTargets() -> [User]{
+    
         var targets = [User]()
         
         for user in [self.fromUser!, self.toUser!] {
@@ -109,7 +114,7 @@ class Transaction: PFObject {
             }
         }
         
-        ParseUtilities.sendPushNotificationsInBackgroundToUsers(targets, message: "Transaction \(title) \(verb) by \(User.currentUser()!.appropriateDisplayName())!")
+        return targets
     }
 }
 

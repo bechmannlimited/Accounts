@@ -9,8 +9,10 @@
 import UIKit
 import Parse
 
+let kPushNotificationTypeKey = "PushNotificationType"
+
 public class ParseUtilities: NSObject {
-   
+    
     public class func showAlertWithErrorIfExists(error: NSError?) {
         
         if let err = error?.localizedDescription {
@@ -24,7 +26,7 @@ public class ParseUtilities: NSObject {
         
     }
     
-    class func sendPushNotificationsInBackgroundToUsers(users: [User], message: String) {
+    class func sendPushNotificationsInBackgroundToUsers(users: [User], message: String, data: [NSObject : AnyObject]?) {
         
         let query = PFInstallation.query()
         
@@ -36,7 +38,23 @@ public class ParseUtilities: NSObject {
         let pushNotification = PFPush()
         pushNotification.setQuery(query)
         pushNotification.setMessage(message)
+        
+        if let data = data {
+            
+            pushNotification.setData(data)
+        }
+        
         pushNotification.sendPushInBackground()
     }
     
+}
+
+public enum PushNotificationType: Int{
+    
+    case FriendRequestSent = 0
+    case FriendRequestAccepted = 1
+    case FriendRequestDeleted = 2
+    case PurchaseSaved = 3
+    case ItemSaved = 4
+    case TransactionSaved = 5
 }

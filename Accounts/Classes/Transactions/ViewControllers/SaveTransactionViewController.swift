@@ -210,6 +210,8 @@ extension SaveTransactionViewController: FormViewDelegate {
                         
                         self.popAll()
                         self.delegate?.itemDidGetDeleted()
+                        
+                        ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                     })
                 }
             })

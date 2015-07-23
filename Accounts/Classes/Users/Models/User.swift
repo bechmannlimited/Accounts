@@ -105,7 +105,7 @@ class User: PFUser {
                     PFObject.saveAllInBackground([[match, User.currentUser()!]])
                     acceptedFriendRequest = true
                     
-                    ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())")
+                    ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
                 }
             }
 
@@ -114,7 +114,7 @@ class User: PFUser {
                 friendRequest.friendRequestStatus = FriendRequestStatus.Pending.rawValue
                 friendRequest.save()
                 
-                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "New friend request from \(User.currentUser()!.appropriateDisplayName())")
+                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "New friend request from \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestSent.rawValue])
             }
 
         }, completion: { () -> () in
@@ -131,7 +131,7 @@ class User: PFUser {
             
             completion(success: success)
             
-            ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.fromUser!], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())")
+            ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.fromUser!], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
         })
         
 //        Task.executeTaskInBackground({ () -> () in

@@ -44,6 +44,8 @@ let kTableViewCellIpadCornerRadiusSize = CGSize(width: 5, height: 5)
 let kDefaultSeperatorColor = UITableView().separatorColor
 
 let kParseInstallationUserKey = "user"
+let kNotificationCenterPushNotificationKey = "pushNotificationUserInfoReceived"
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -123,7 +125,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         installation.saveInBackground()
-        println(deviceToken)
     }
     
     func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
@@ -135,11 +136,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-        PFPush.handlePush(userInfo)
+        //PFPush.handlePush(userInfo)
         if application.applicationState == UIApplicationState.Inactive {
             //PFAnalytics.trackAppOpenedWithRemoteNotificationPayload(userInfo)
         }
-        println(userInfo)
+
+        NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterPushNotificationKey, object: userInfo, userInfo: userInfo)
     }
     
     func setupAppearances() {

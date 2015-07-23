@@ -73,6 +73,25 @@ class FriendsViewController: ACBaseViewController {
         AppDelegate.registerForNotifications()
     }
     
+    override func didReceivePushNotification(notification: NSNotification) {
+        
+        println(notification.object)
+        
+        if let object: AnyObject = notification.object{
+            
+            let value = JSON(notification.object![kPushNotificationTypeKey]!!).intValue
+            
+            if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestAccepted {
+                
+                refresh(nil)
+            }
+            else if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestSent || PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestDeleted {
+                    
+                getInvites()
+            }
+        }
+    }
+    
     override func setEditing(editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         
@@ -190,6 +209,11 @@ class FriendsViewController: ACBaseViewController {
             self.setBarButtonItems()
             self.showOrHideTableOrNoDataView()
         })
+        
+        getInvites()
+    }
+    
+    func getInvites(){
         
         User.currentUser()?.getInvites({ (invites) -> () in
             

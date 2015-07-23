@@ -245,6 +245,8 @@ extension SavePurchaseViewController: FormViewDelegate {
                         
                         self.popAll()
                         self.delegate?.itemDidGetDeleted()
+                        
+                        ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                     })
                 }
             })

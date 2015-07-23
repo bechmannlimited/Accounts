@@ -17,6 +17,7 @@ class ACFormViewController: FormViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+         NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -24,6 +25,11 @@ class ACFormViewController: FormViewController {
         
         setupView()
         shouldAdjustTableViewInsetsForKeyboard = !isInsidePopover()
+    }
+    
+    func didReceivePushNotification(notification: NSNotification) {
+        
+        println("hi")
     }
 
     func setupNavigationBarAppearance() {

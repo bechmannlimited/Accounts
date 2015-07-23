@@ -14,10 +14,21 @@ class ACBaseViewController: BaseViewController {
     var blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))
     var gradient: CAGradientLayer = CAGradientLayer()
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
+    }
+    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
         setupView()
+    }
+    
+    func didReceivePushNotification(notification: NSNotification) {
+        
+        println("hi")
     }
     
     func setupNavigationBarAppearance() {

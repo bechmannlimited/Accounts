@@ -9,6 +9,7 @@
 
 import UIKit
 import ABToolKit
+import SwiftyJSON
 
 private let kUnconfirmedInvitesSection = 0
 private let kUnconfirmedSentInvitesSection = 1
@@ -42,6 +43,23 @@ class FriendInvitesViewController: ACBaseViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "findFriends")
         
         setupNoDataLabel(noDataView, text: "Tap plus to send someone a friend invitation")
+        
+       
+    }
+    
+    override func didReceivePushNotification(notification: NSNotification) {
+        
+        if let object: AnyObject = notification.object{
+            
+            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
+            
+            if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestAccepted ||
+                PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestSent ||
+                PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestDeleted {
+                
+                refresh(nil)
+            }
+        }
     }
     
     func showOrHideTableOrNoDataView() {
@@ -153,25 +171,15 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
         
         if indexPath.section == kUnconfirmedInvitesSection {
             
-            User.currentUser()?.addFriendFromRequest(friendRequest, completion: { (success) -> () in
-                
-                self.refresh(nil)
-                self.delegate?.friendsChanged()
-            })
-        }
-        
-        if indexPath.section == kUnconfirmedSentInvitesSection {
-            
             tableView.beginUpdates()
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Top)
             invites[indexPath.section].removeAtIndex(indexPath.row)
             tableView.endUpdates()
             
-            friendRequest.deleteInBackgroundWithBlock({ (success, error) -> Void in
+            User.currentUser()?.addFriendFromRequest(friendRequest, completion: { (success) -> () in
                 
-                println(success)
-                println(error)
                 self.refresh(nil)
+                self.delegate?.friendsChanged()
             })
         }
         
@@ -207,7 +215,28 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
     
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         
-        tableView.delegate?.tableView?(tableView, didSelectRowAtIndexPath: indexPath)
+        let friendRequest = invites[indexPath.section][indexPath.row]
+        
+        if indexPath.section == kUnconfirmedSentInvitesSection {
+            
+            tableView.beginUpdates()
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Top)
+            invites[indexPath.section].removeAtIndex(indexPath.row)
+            tableView.endUpdates()
+            
+            friendRequest.deleteInBackgroundWithBlock({ (success, error) -> Void in
+                
+                println(success)
+                println(error)
+                self.refresh(nil)
+                
+                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.toUser!], message: "", data: [kPushNotificationTypeKey: PushNotificationType.FriendRequestDeleted.rawValue])
+            })
+        }
+        else{
+            
+            tableView.delegate?.tableView?(tableView, didSelectRowAtIndexPath: indexPath)
+        }
     }
     
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {

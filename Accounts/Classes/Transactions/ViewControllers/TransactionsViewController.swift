@@ -93,13 +93,28 @@ class TransactionsViewController: ACBaseViewController {
         popoverViewController = nil // to make sure
     }
     
+    override func didReceivePushNotification(notification: NSNotification) {
+        
+        if let object: AnyObject = notification.object{
+            
+            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
+            
+            if PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved {
+                
+                executeActualRefreshByHiding(true, refreshControl: nil, take: transactions.count, completion: nil)
+            }
+        }
+    }
+    
     func setupQuery() {
         
         let queryForFromUser = Transaction.query()
         queryForFromUser?.whereKey("fromUser", equalTo: User.currentUser()!)
+        queryForFromUser?.whereKey("toUser", equalTo: friend)
         
         let queryForToUser = Transaction.query()
         queryForToUser?.whereKey("toUser", equalTo: User.currentUser()!)
+        queryForToUser?.whereKey("fromUser", equalTo: friend)
         
         query = PFQuery.orQueryWithSubqueries([queryForFromUser!, queryForToUser!])
         query?.includeKey("purchase")
@@ -429,9 +444,9 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
             let dateString:String = transaction.transactionDate.toString(DateFormat.Date.rawValue)
             cell.textLabel?.text = "\(transaction.title)"
             cell.imageView?.image = kTransactionImage
+            cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
         }
         
-        cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
         cell.detailTextLabel?.textColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.positiveColor() : AccountColor.negativeColor()
         
         cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
