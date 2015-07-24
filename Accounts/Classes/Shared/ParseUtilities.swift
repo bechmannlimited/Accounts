@@ -41,6 +41,7 @@ public class ParseUtilities: NSObject {
         var pushNotification = PFPush()
         pushNotification.setQuery(query)
         pushData["alert"] = message
+        pushData["sound"] = "default"
         pushNotification.setData(pushData)
         pushNotification.sendPushInBackground()
     }
