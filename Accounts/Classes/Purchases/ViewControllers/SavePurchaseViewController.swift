@@ -38,7 +38,6 @@ class SavePurchaseViewController: SaveItemViewController {
             transaction.toUser = User.currentUser()
             transaction.amount = 0
             
-            purchase.transactions = []
             purchase.transactions.append(transaction)
             
             updateUIForEditing()

@@ -140,7 +140,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if application.applicationState == UIApplicationState.Inactive {
             //PFAnalytics.trackAppOpenedWithRemoteNotificationPayload(userInfo)
         }
-
+        
+        println(userInfo)
         NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterPushNotificationKey, object: userInfo, userInfo: userInfo)
     }
     

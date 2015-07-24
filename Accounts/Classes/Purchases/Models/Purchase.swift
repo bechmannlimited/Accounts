@@ -24,7 +24,7 @@ class Purchase: PFObject {
     //var friends: [User] = []
     //var billSplitDictionary = Dictionary<User, Double>()
     
-    var originalTransactions = Array<Transaction>()
+    var previousTransactions = Array<Transaction>()
     
     var localeAmount: Double {
         
@@ -68,17 +68,41 @@ class Purchase: PFObject {
         
         Task.executeTaskInBackground({ () -> () in
             
-            PFObject.saveAll(self.transactions)
+            self.previousTransactions = self.transactions
+            self.transactions = []
+            
             self.save()
             
-            for transaction in self.transactions {
+            if let Oid = self.objectId {
                 
-                transaction.purchaseObjectId = self.objectId
-                transaction.transactionDate = self.purchasedDate!
-                transaction.title = self.title
+                let query = Transaction.query()
+                query?.whereKey("purchaseObjectId", equalTo: Oid)
+                var objects = query?.findObjects()
+                
+                for object in objects! {
+                    
+                    object.delete()
+                }
+            }
+
+            for transaction in self.previousTransactions {
+
+                let newTransaction = Transaction()
+                
+                newTransaction.purchaseObjectId = self.objectId
+                newTransaction.transactionDate = self.purchasedDate!
+                newTransaction.title = self.title
+                newTransaction.fromUser = self.user
+                newTransaction.toUser = transaction.toUser
+                newTransaction.amount = transaction.amount
+                
+                newTransaction.save()
+                self.transactions.append(newTransaction)
             }
             
-            PFObject.saveAll(self.transactions)
+            self.save()
+            
+            //PFObject.saveAll(self.transactions)
 
         }, completion: { () -> () in
             

@@ -22,6 +22,8 @@ class Transaction: PFObject {
     @NSManaged var purchaseObjectId: String?
     @NSManaged var transactionDate: NSDate
     
+    var purchase: Purchase?
+    
     var localeAmount: Double {
         
         get {

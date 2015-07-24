@@ -8,6 +8,7 @@
 
 import UIKit
 import Parse
+import SwiftyJSON
 
 let kPushNotificationTypeKey = "PushNotificationType"
 
@@ -35,15 +36,12 @@ public class ParseUtilities: NSObject {
             query?.whereKey("user", equalTo: user)
         }
         
-        let pushNotification = PFPush()
+        var pushData: [NSObject : AnyObject] = data != nil ? data! : [NSObject : AnyObject]()
+        
+        var pushNotification = PFPush()
         pushNotification.setQuery(query)
-        pushNotification.setMessage(message)
-        
-        if let data = data {
-            
-            pushNotification.setData(data)
-        }
-        
+        pushData["alert"] = message
+        pushNotification.setData(pushData)
         pushNotification.sendPushInBackground()
     }
     

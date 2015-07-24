@@ -173,9 +173,9 @@ class TransactionsViewController: ACBaseViewController {
         query?.skip = 0
         query?.limit = 16
         
-        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+        Task.executeTaskInBackground({ () -> () in
             
-            if var transactions = objects as? [Transaction] {
+            if var transactions = self.query?.findObjects() as? [Transaction] {
                 
                 for transaction in transactions {
                     
@@ -186,19 +186,29 @@ class TransactionsViewController: ACBaseViewController {
                     }
                 }
                 
+                for transaction in transactions {
+                    
+                    if let id = transaction.purchaseObjectId {
+                        
+                        transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
+                    }
+                }
+                
                 self.transactions = transactions
                 self.hasLoadedFirstTime = true
             }
             
+        }, completion: { () -> () in
+            
             refreshControl?.endRefreshing()
             self.tableView.reloadData()
-
+            
             self.view.hideLoader()
             self.showOrHideTableOrNoDataView()
-
+            
             //just in case
             self.loadMoreView.hideLoader()
-
+            
             self.findAndScrollToCalculatedSelectedCellAtIndexPath()
             
             completion?()
@@ -425,15 +435,10 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         
         if let purchaseObjectId = transaction.purchaseObjectId {
 
-            cell.detailTextLabel?.text = ""
-            
-            Purchase.query()?.getObjectInBackgroundWithId(purchaseObjectId, block: { (object, error) -> Void in
+            if let purchase = transaction.purchase {
                 
-                if let purchase = object as? Purchase {
-                    
-                    cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(purchase.amount)
-                }
-            })
+                amount = purchase.amount
+            }
             
             //let dateString:String = transaction.purchase.purchasedDate!.toString(DateFormat.Date.rawValue)
             cell.textLabel?.text = "\(transaction.title)"
@@ -444,13 +449,16 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
             let dateString:String = transaction.transactionDate.toString(DateFormat.Date.rawValue)
             cell.textLabel?.text = "\(transaction.title)"
             cell.imageView?.image = kTransactionImage
-            cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
+            
         }
         
-        cell.detailTextLabel?.textColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.positiveColor() : AccountColor.negativeColor()
+        let tintColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.positiveColor() : AccountColor.negativeColor()
         
+        cell.detailTextLabel?.textColor = tintColor
+        cell.imageView?.tintWithColor(tintColor)
+        cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
         cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-        cell.imageView?.tintWithColor(AccountColor.blueColor())
+        //cell.imageView?.tintWithColor(AccountColor.blueColor())
         
         return cell
     }

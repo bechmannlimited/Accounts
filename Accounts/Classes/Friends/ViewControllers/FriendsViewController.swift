@@ -81,7 +81,7 @@ class FriendsViewController: ACBaseViewController {
             
             let value = JSON(notification.object![kPushNotificationTypeKey]!!).intValue
             
-            if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestAccepted {
+            if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestAccepted || PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved {
                 
                 refresh(nil)
             }
