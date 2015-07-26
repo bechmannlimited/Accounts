@@ -76,10 +76,30 @@ class User: PFUser {
                 friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
             }
             
-        }, completion: { () -> () in
-            
-            completion()
+            }, completion: { () -> () in
+                
+                completion()
         })
+        
+//        let query = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
+//        query?.cachePolicy = PFCachePolicy.CacheThenNetwork
+//        
+//        
+//        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+//            
+//            if let friends = objects as? [User] {
+//                
+//                self.friends = friends
+//                
+//                for friend in self.friends{
+//                    
+//                    let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
+//                    friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+//                }
+//            }
+//            
+//            completion()
+//        })
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {

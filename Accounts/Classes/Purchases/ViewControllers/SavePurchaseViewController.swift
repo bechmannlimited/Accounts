@@ -281,7 +281,7 @@ extension SavePurchaseViewController: FormViewDelegate {
     
     func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
         
-        let cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "Cell")
+        let cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "")
         
         if identifier == "Friends" {
             

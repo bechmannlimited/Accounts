@@ -84,7 +84,7 @@ class TransactionsViewController: ACBaseViewController {
             findAndScrollToCalculatedSelectedCellAtIndexPath()
         }
         
-        //getDifferenceAndRefreshIfNeccessary(nil)
+        getDifferenceAndRefreshIfNeccessary(nil)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -99,9 +99,15 @@ class TransactionsViewController: ACBaseViewController {
             
             let value = JSON(object[kPushNotificationTypeKey]!!).intValue
             
-            if PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved {
+            if PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved{
                 
-                executeActualRefreshByHiding(true, refreshControl: nil, take: transactions.count, completion: nil)
+                if let userIds = object["userIds"] as? [String] {
+                    
+                    if contains(userIds, friend.objectId!){
+                        
+                        getDifferenceAndRefreshIfNeccessary(nil)
+                    }
+                }
             }
         }
     }
@@ -118,7 +124,7 @@ class TransactionsViewController: ACBaseViewController {
         
         query = PFQuery.orQueryWithSubqueries([queryForFromUser!, queryForToUser!])
         query?.includeKey("purchase")
-        query?.orderByAscending("purchasedDate")
+        query?.orderByAscending("transactionDate")
     }
     
     func getDifferenceAndRefreshIfNeccessary(refreshControl: UIRefreshControl?) {
@@ -136,10 +142,12 @@ class TransactionsViewController: ACBaseViewController {
 
             if previousDifference != difference {
 
+                println("found difference (transactionscontroller)")
                 self.executeActualRefreshByHiding(true, refreshControl: nil, take: nil, completion: nil)
             }
             else {
                 
+                println("found no difference")
                 refreshControl?.endRefreshing()
             }
         }

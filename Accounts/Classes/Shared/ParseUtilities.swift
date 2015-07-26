@@ -30,18 +30,25 @@ public class ParseUtilities: NSObject {
     class func sendPushNotificationsInBackgroundToUsers(users: [User], message: String, data: [NSObject : AnyObject]?) {
         
         let query = PFInstallation.query()
+        var userIds:[String] = []
         
         for user in users{
             
             query?.whereKey("user", equalTo: user)
+            userIds.append(user.objectId!)
         }
+        
+        userIds.append(User.currentUser()!.objectId!)
         
         var pushData: [NSObject : AnyObject] = data != nil ? data! : [NSObject : AnyObject]()
         
         var pushNotification = PFPush()
         pushNotification.setQuery(query)
+        
         pushData["alert"] = message
         pushData["sound"] = "default"
+        pushData["userIds"] = userIds
+            
         pushNotification.setData(pushData)
         pushNotification.sendPushInBackground()
     }
