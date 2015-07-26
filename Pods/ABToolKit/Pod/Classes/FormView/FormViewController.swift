@@ -33,6 +33,7 @@ public class FormViewController: BaseViewController {
     
     public var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     public var data: Array<Array<FormViewConfiguration>> = []
+    
     var selectedIndexPath: NSIndexPath?
     public var formViewDelegate: FormViewDelegate?
     public var shouldLoadFormOnLoad = true
@@ -105,6 +106,7 @@ extension FormViewController: UITableViewDelegate, UITableViewDataSource {
     
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
     
+        data = formViewDelegate!.formViewElements()
         let config:FormViewConfiguration = data[indexPath.section][indexPath.row]
         
         if config.formCellType == FormCellType.TextField || config.formCellType == FormCellType.TextFieldCurrency || config.formCellType == FormCellType.DatePicker {
@@ -150,6 +152,7 @@ extension FormViewController: UITableViewDelegate, UITableViewDataSource {
     
     public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
+        data = formViewDelegate!.formViewElements() // needed?
         let config:FormViewConfiguration = data[indexPath.section][indexPath.row]
         
         selectedIndexPath = selectedIndexPath != indexPath ? indexPath : nil

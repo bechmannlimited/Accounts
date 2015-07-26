@@ -13,7 +13,7 @@ import Parse
 
 class SavePurchaseViewController: SaveItemViewController {
 
-    var purchase = Purchase()
+    var purchase = Purchase.withDefaultValues()
     var purchaseObjectId: String?
     
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
@@ -245,7 +245,7 @@ extension SavePurchaseViewController: FormViewDelegate {
                         self.popAll()
                         self.delegate?.itemDidGetDeleted()
                         
-                        ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                        ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                     })
                 }
             })

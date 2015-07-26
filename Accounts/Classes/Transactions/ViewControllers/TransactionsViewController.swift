@@ -124,7 +124,7 @@ class TransactionsViewController: ACBaseViewController {
         
         query = PFQuery.orQueryWithSubqueries([queryForFromUser!, queryForToUser!])
         query?.includeKey("purchase")
-        query?.orderByAscending("transactionDate")
+        query?.orderByDescending("transactionDate")
     }
     
     func getDifferenceAndRefreshIfNeccessary(refreshControl: UIRefreshControl?) {
@@ -449,13 +449,13 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
             }
             
             //let dateString:String = transaction.purchase.purchasedDate!.toString(DateFormat.Date.rawValue)
-            cell.textLabel?.text = "\(transaction.title)"
+            cell.textLabel?.text = "\(transaction.title!)"
             cell.imageView?.image = kPurchaseImage
         }
         else {
             
             let dateString:String = transaction.transactionDate.toString(DateFormat.Date.rawValue)
-            cell.textLabel?.text = "\(transaction.title)"
+            cell.textLabel?.text = "\(transaction.title!)"
             cell.imageView?.image = kTransactionImage
             
         }

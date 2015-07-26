@@ -18,7 +18,7 @@ class Transaction: PFObject {
     @NSManaged var toUser: User?
     @NSManaged var amount: Double
     //@NSManaged var transactionDescription: String
-    @NSManaged var title: String
+    @NSManaged var title: String?
     @NSManaged var purchaseObjectId: String?
     @NSManaged var transactionDate: NSDate
     

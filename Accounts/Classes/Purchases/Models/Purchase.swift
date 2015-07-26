@@ -16,7 +16,7 @@ class Purchase: PFObject {
 
     @NSManaged var amount: Double
     //@NSManaged var purchaseDescription: String?
-    @NSManaged var title: String
+    @NSManaged var title: String?
     @NSManaged var user: User
     @NSManaged var purchasedDate:NSDate?
     
@@ -25,6 +25,17 @@ class Purchase: PFObject {
     //var billSplitDictionary = Dictionary<User, Double>()
     
     var previousTransactions = Array<Transaction>()
+    
+    class func withDefaultValues() -> Purchase{
+        
+        let purchase = Purchase()
+        purchase.user = User.currentUser()!
+        purchase.transactions = []
+        purchase.amount = 0
+        purchase.title = ""
+        
+        return purchase
+    }
     
     var localeAmount: Double {
         
