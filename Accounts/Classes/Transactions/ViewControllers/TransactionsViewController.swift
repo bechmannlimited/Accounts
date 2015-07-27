@@ -48,6 +48,8 @@ class TransactionsViewController: ACBaseViewController {
     var selectedTransactionID: String?
     var didJustDelete: Bool = false
     
+    var toolbar = UIToolbar()
+    
     //var refreshQuery: PFQuery?
     //var loadMoreQuery: PFQuery?
     var query: PFQuery?
@@ -66,14 +68,20 @@ class TransactionsViewController: ACBaseViewController {
         
         setupTableView(tableView, delegate: self, dataSource: self)
         title = "Transactions with \(friend.appropriateDisplayName())"
-        
-        addBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
-        navigationItem.rightBarButtonItem = addBarButtonItem
 
         setupLoadMoreView()
         setupNoDataLabel(noDataView, text: "Tap plus to add a purchase or transfer")
         
         executeActualRefreshByHiding(true, refreshControl: nil, take: nil, completion: nil)
+        
+        setupToolbar()
+        addBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
+        
+        toolbar.items = [
+            UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
+            addBarButtonItem!,
+            UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
+        ]
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -151,6 +159,21 @@ class TransactionsViewController: ACBaseViewController {
                 refreshControl?.endRefreshing()
             }
         }
+    }
+    
+    func setupToolbar(){
+        
+        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.sizeToFit()
+        view.addSubview(toolbar)
+        
+        toolbar.addHeightConstraint(relation: .Equal, constant: toolbar.frame.height)
+        toolbar.addLeftConstraint(toView: view, relation: .Equal, constant: 0)
+        toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
+        toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
+        
+        var previousInsets = tableView.contentInset
+        tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
     }
     
     override func setupTableView(tableView: UITableView, delegate: UITableViewDelegate, dataSource: UITableViewDataSource) {

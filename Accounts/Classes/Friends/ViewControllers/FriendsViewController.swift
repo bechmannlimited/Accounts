@@ -58,6 +58,8 @@ class FriendsViewController: ACBaseViewController {
         }
         
         setupNoDataLabel(noDataView, text: "To get started, click invites to add some friends!")
+        
+        setupToolbar()
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -90,6 +92,21 @@ class FriendsViewController: ACBaseViewController {
                 getInvites()
             }
         }
+    }
+    
+    func setupToolbar(){
+        
+        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.sizeToFit()
+        view.addSubview(toolbar)
+        
+        toolbar.addHeightConstraint(relation: .Equal, constant: toolbar.frame.height)
+        toolbar.addLeftConstraint(toView: view, relation: .Equal, constant: 0)
+        toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
+        toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
+        
+        var previousInsets = tableView.contentInset
+        tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
     }
     
     override func setEditing(editing: Bool, animated: Bool) {
@@ -128,9 +145,23 @@ class FriendsViewController: ACBaseViewController {
             editBarButtonItem
         ]
         navigationItem.rightBarButtonItems = [
-            addBarButtonItem!,
             friendInvitesBarButtonItem!
         ]
+        
+        if let addBtn = addBarButtonItem{
+            
+            toolbar.items = [
+                UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
+                addBarButtonItem!,
+                UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
+            ]
+        }
+        else{
+            
+            toolbar.items = []
+        }
+        
+        toolbar.hidden = User.currentUser()!.friends.count == 0
     }
     
     func friendInvites() {

@@ -39,7 +39,6 @@ class SaveItemViewController: ACFormViewController {
                 if response == AlertResponse.Confirm {
                     
                     self.pop()
-                    //self.delegate?.itemDidGetDeleted()
                 }
             }
         }

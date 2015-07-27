@@ -234,7 +234,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         
         if identifier == "Delete" {
             
-            UIAlertController.showAlertControllerWithButtonTitle("Delete", confirmBtnStyle: UIAlertActionStyle.Destructive, message: "Delete purchase: \(purchase.title) for \(Formatter.formatCurrencyAsString(purchase.localeAmount))?", completion: { (response) -> () in
+            UIAlertController.showAlertControllerWithButtonTitle("Delete", confirmBtnStyle: UIAlertActionStyle.Destructive, message: "Delete purchase: \(purchase.title!) for \(Formatter.formatCurrencyAsString(purchase.localeAmount))?", completion: { (response) -> () in
                 
                 if response == AlertResponse.Confirm {
                     
