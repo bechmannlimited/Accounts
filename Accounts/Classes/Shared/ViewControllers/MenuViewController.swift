@@ -146,7 +146,6 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         else if indexPath == kProfileIndexPath {
             
             let v = SaveUserViewController()
-            v.isExistingUser = true
             navigationController?.pushViewController(v, animated: true)
         }
     }

@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "053EA114578981A0092C01AD"
+               BlueprintIdentifier = "7B28E43B019CE2AF12A8AE03"
                BuildableName = "ABToolKit.bundle"
                BlueprintName = "Pods-ABToolKit-ABToolKit"
                ReferencedContainer = "container:Pods.xcodeproj">

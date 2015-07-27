@@ -19,16 +19,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-Bolts.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-Parse.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>Pods-SwiftyJSON.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -47,42 +37,32 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>053EA114578981A0092C01AD</key>
+		<key>7ABA1775EF42E0618A726191</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>1C2CC6EC13993B6365805367</key>
+		<key>7B28E43B019CE2AF12A8AE03</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>57440562250898AA165317D0</key>
+		<key>7F2447E8A788FEF7DD7B5746</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>73B53A226A827D1C88F63D46</key>
+		<key>90180CEBB9F612A34D437663</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>8699AD28AB6D43418914121C</key>
+		<key>A33264712E23409F32CF9D04</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>9AD3B6000A08E17A03F76CC6</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>A0331B2F71C9B93F55FD1D90</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>A1F2D23DCB606AC9A42D65FD</key>
+		<key>FCBFEB7539F2B8D9404AEA70</key>
 		<dict>
 			<key>primary</key>
 			<true/>

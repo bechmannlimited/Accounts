@@ -21,22 +21,14 @@ class SaveUserViewController: ACFormViewController {
     
     var user = User.object()
     var isLoading = false
-    var isExistingUser = false
     
     override func viewDidLoad() {
         
-        if !isExistingUser {
-            
-            title = "Register"
-        }
-        else {
-            
-            user.username = User.currentUser()?.username
-            user.email = User.currentUser()?.email
-            user.displayName = User.currentUser()?.displayName
-            
-            title = "Edit profile"
-        }
+        user.username = User.currentUser()?.username
+        user.email = User.currentUser()?.email
+        user.displayName = User.currentUser()?.displayName
+        
+        title = "Edit profile"
         
         showOrHideRegisterButton()
         
@@ -60,7 +52,7 @@ class SaveUserViewController: ACFormViewController {
     
     func showOrHideRegisterButton() {
         
-        let saveButton = !isExistingUser ? UIBarButtonItem(title: "Register", style: .Plain, target: self, action: "save") : UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: "save")
+        let saveButton = UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: "save")
         
         navigationItem.rightBarButtonItem = saveButton
         navigationItem.rightBarButtonItem?.tintColor = kNavigationBarPositiveActionColor
@@ -69,53 +61,30 @@ class SaveUserViewController: ACFormViewController {
     }
     
     func save() {
+
+        isLoading = true
+        showOrHideRegisterButton()
         
-        if isExistingUser {
+        User.currentUser()?.username = user.username
+        User.currentUser()?.email = user.email
+        User.currentUser()?.displayName = user.displayName
+        User.currentUser()?.password = user.password
+        
+        User.currentUser()?.saveInBackgroundWithBlock({ (success, error) -> Void in
             
-            isLoading = true
-            showOrHideRegisterButton()
-            
-            User.currentUser()?.username = user.username
-            User.currentUser()?.email = user.email
-            User.currentUser()?.displayName = user.displayName
-            User.currentUser()?.password = user.password
-            
-            User.currentUser()?.saveInBackgroundWithBlock({ (success, error) -> Void in
+            if success {
                 
-                if success {
-                    
-                    self.navigationController?.popViewControllerAnimated(true)
-                }
-                else if let error = error?.localizedDescription {
-                    
-                    UIAlertView(title: "Error", message: error, delegate: nil, cancelButtonTitle: "OK").show()
-                }
+                self.navigationController?.popViewControllerAnimated(true)
+            }
+            else if let error = error?.localizedDescription {
                 
-                self.isLoading = false
-                self.showOrHideRegisterButton()
-            })
-        }
-        else {
-            
-            isLoading = true
-            showOrHideRegisterButton()
-            
-            user.signUpInBackgroundWithBlock({ (success, error) -> Void in
-                
-                if success {
-                    
-                    var v = UIStoryboard.initialViewControllerFromStoryboardNamed("Main")
-                    self.presentViewController(v, animated: true, completion: nil)
-                }
-                else if let error = error?.localizedDescription {
-                    
-                    UIAlertView(title: "Error", message: error, delegate: nil, cancelButtonTitle: "OK").show()
-                }
-            })
+                UIAlertView(title: "Error", message: error, delegate: nil, cancelButtonTitle: "OK").show()
+            }
             
             self.isLoading = false
             self.showOrHideRegisterButton()
-        }
+        })
+
     }
 }
 

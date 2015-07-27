@@ -3,15 +3,11 @@ PODS:
     - Alamofire (~> 1.2.1)
     - SwiftyJSON (~> 2.2.0)
   - Alamofire (1.2.3)
-  - Bolts/Tasks (1.2.0)
-  - Parse (1.7.5.3):
-    - Bolts/Tasks (>= 1.2.0)
   - SwiftyJSON (2.2.0)
   - SwiftyUserDefaults (1.2.0)
 
 DEPENDENCIES:
   - ABToolKit (from `/Users/alexbechmann/Documents/iOS/cocoapods/ABToolKit`)
-  - Parse
   - SwiftyUserDefaults (from `/Users/alexbechmann/Downloads/SwiftyUserDefaults-master`)
 
 EXTERNAL SOURCES:
@@ -28,8 +24,6 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   ABToolKit: 355705e90dd72b552de9216f3f638f509b89b7dc
   Alamofire: 5550bf0b575ed1a4bf9be572f9463e1015cc169e
-  Bolts: d176cb1e0012175589e389a9db49b85e27787576
-  Parse: 373adbb1ad2e34d383542c3b28f678c49ebe4881
   SwiftyJSON: 0b3e6c07af17ff745e77e8e9984097b55c956e5c
   SwiftyUserDefaults: 3b4413c26f5cc4f4ed114cf75c42dbef189f0c1e
 
