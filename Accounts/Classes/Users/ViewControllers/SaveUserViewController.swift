@@ -86,6 +86,12 @@ class SaveUserViewController: ACFormViewController {
         })
 
     }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        User.currentUser()?.fetchIfNeeded()
+    }
 }
 
 extension SaveUserViewController: FormViewDelegate {

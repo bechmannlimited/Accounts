@@ -62,7 +62,6 @@
 		E47FD8141B5D7EDE004B4C56 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FD8131B5D7EDE004B4C56 /* LocationManager.swift */; };
 		E47FD8161B5EDFBF004B4C56 /* SaveItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FD8151B5EDFBF004B4C56 /* SaveItemViewController.swift */; };
 		E47FD8191B5FF042004B4C56 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FD8181B5FF042004B4C56 /* Task.swift */; };
-		E4E077331B67795E003E562F /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E077321B67795E003E562F /* LoginViewController.swift */; };
 		E4E7CAD91B66D24E0027833E /* StartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E7CAD81B66D24E0027833E /* StartViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -140,7 +139,6 @@
 		E47FD8151B5EDFBF004B4C56 /* SaveItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SaveItemViewController.swift; sourceTree = "<group>"; };
 		E47FD8181B5FF042004B4C56 /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
 		E4C2A43B1B68052000730BAB /* ABToolKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ABToolKit.framework; path = "Pods/../build/Debug-iphoneos/Pods/ABToolKit.framework"; sourceTree = "<group>"; };
-		E4E077321B67795E003E562F /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		E4E7CAD81B66D24E0027833E /* StartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -337,7 +335,6 @@
 			isa = PBXGroup;
 			children = (
 				E4E7CAD81B66D24E0027833E /* StartViewController.swift */,
-				E4E077321B67795E003E562F /* LoginViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -705,7 +702,6 @@
 				E47FD8141B5D7EDE004B4C56 /* LocationManager.swift in Sources */,
 				E442C3401B510E940061CAE6 /* Transaction.swift in Sources */,
 				E442C33B1B510E940061CAE6 /* BaseViewController+Extension.swift in Sources */,
-				E4E077331B67795E003E562F /* LoginViewController.swift in Sources */,
 				E442C3501B52BE030061CAE6 /* ParseKeys.swift in Sources */,
 				E442C3311B510E940061CAE6 /* SelectCurrencyViewController.swift in Sources */,
 				E442C3391B510E940061CAE6 /* ACBaseViewController.swift in Sources */,

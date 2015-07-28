@@ -11,6 +11,7 @@ import ABToolKit
 import SwiftyJSON
 import Alamofire
 import Parse
+import FBSDKCoreKit
 
 class User: PFUser {
     
@@ -19,6 +20,7 @@ class User: PFUser {
     var allInvites = [[FriendRequest]]()
     var passwordForVerification = ""
     
+    @NSManaged var facebookId: String?
     @NSManaged var displayName: String?
     
     func modelIsValid() -> Bool {
@@ -66,40 +68,37 @@ class User: PFUser {
 
         friends = [User]()
         
-        Task.executeTaskInBackground({ () -> () in
+        let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
+        graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
             
-            self.friends = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()?.findObjects() as! [User]
-            
-            for friend in self.friends{
+            Task.executeTaskInBackground({ () -> () in
                 
-                let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
-                friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-            }
-            
+                var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
+                var query2 = User.query()
+                
+                if let data: AnyObject! = result["data"]{
+                    
+                    let friendsJson = JSON(data)
+                    
+                    for (index: String, friendJson: JSON) in friendsJson {
+                        
+                        query2?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
+                    }
+                }
+                
+                self.friends = PFQuery.orQueryWithSubqueries([query1!, query2!]).findObjects() as! [User]
+
+                for friend in self.friends{
+                    
+                    let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
+                    friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+                }
+                
             }, completion: { () -> () in
-                
+                    
                 completion()
+            })
         })
-        
-//        let query = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
-//        query?.cachePolicy = PFCachePolicy.CacheThenNetwork
-//        
-//        
-//        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-//            
-//            if let friends = objects as? [User] {
-//                
-//                self.friends = friends
-//                
-//                for friend in self.friends{
-//                    
-//                    let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
-//                    friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-//                }
-//            }
-//            
-//            completion()
-//        })
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {

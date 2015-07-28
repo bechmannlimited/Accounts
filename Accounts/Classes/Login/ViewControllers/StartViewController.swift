@@ -10,6 +10,7 @@ import UIKit
 import Parse
 import ParseUI
 import ParseFacebookUtilsV4
+import SwiftyJSON
 
 class StartViewController: UIViewController {
 
@@ -48,8 +49,24 @@ class StartViewController: UIViewController {
 extension StartViewController: PFLogInViewControllerDelegate{
     
     func logInViewController(logInController: PFLogInViewController, didLogInUser user: PFUser) {
-        println(user)
-        goToApp()
+        
+        let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me", parameters: nil)
+        graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
+            
+            let result = JSON(result)
+                
+            user["facebookId"] = result["id"].stringValue
+            user["displayName"] = result["name"].stringValue
+            
+            Task.executeTaskInBackground({ () -> () in
+                
+                user.save()
+                
+            }, completion: { () -> () in
+                
+                self.goToApp()
+            })
+        })
     }
     
     func logInViewController(logInController: PFLogInViewController, didFailToLogInWithError error: NSError?) {
