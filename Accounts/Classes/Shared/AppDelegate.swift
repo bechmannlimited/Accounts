@@ -12,6 +12,8 @@ import SwiftyUserDefaults
 import Alamofire
 import Parse
 import Bolts
+import ParseFacebookUtilsV4
+
 
 //var kActiveUser:User = User.object()
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
@@ -90,11 +92,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             setWindowToLogin()
         }
         
-        if let launchOptions = launchOptions {
-            PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
-        } else {
-            PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions([NSObject:AnyObject]())
-        }
+//        if let launchOptions = launchOptions {
+//            PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
+//        } else {
+//            PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions([NSObject:AnyObject]())
+//        }
+
+        PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
         
         //return PFFacebookUtils.
         return FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -205,6 +209,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         return FBSDKApplicationDelegate.sharedInstance().application(application, openURL: url, sourceApplication: sourceApplication, annotation: annotation)
     }
+    
+//    func application(application: UIApplication, handleOpenURL url: NSURL) -> Bool {
+//    
+//        FBSDKAppEvents.
+//        return true
+//    }
 
 }
 

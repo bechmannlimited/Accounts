@@ -18,15 +18,18 @@ class StartViewController: UIViewController {
         if PFUser.currentUser() == nil {
             
             var loginViewController = PFLogInViewController()
-            loginViewController.delegate = self
+            
             loginViewController.fields = PFLogInFields.UsernameAndPassword | PFLogInFields.LogInButton | PFLogInFields.SignUpButton | PFLogInFields.PasswordForgotten | PFLogInFields.Facebook
             
             var signUpViewController = PFSignUpViewController()
-            signUpViewController.delegate = self
-            
             loginViewController.signUpController = signUpViewController
             
+            
+            
             self.presentViewController(loginViewController, animated: true, completion: nil)
+            
+            loginViewController.delegate = self
+            signUpViewController.delegate = self
         }
         else{
             
@@ -37,7 +40,7 @@ class StartViewController: UIViewController {
     func goToApp(){
         
         var v = UIStoryboard.initialViewControllerFromStoryboardNamed("Main")
-        self.presentViewController(v, animated: true, completion: nil)
+        UIViewController.topMostController().presentViewController(v, animated: true, completion: nil)
     }
 
 }

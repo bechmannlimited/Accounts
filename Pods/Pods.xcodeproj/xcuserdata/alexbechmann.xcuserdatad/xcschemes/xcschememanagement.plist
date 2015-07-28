@@ -19,6 +19,41 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Pods-Bolts.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-FBSDKCoreKit.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-FBSDKLoginKit.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-FBSDKShareKit.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-Parse.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-ParseFacebookUtilsV4.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-ParseUI.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-SwiftyJSON.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -37,32 +72,67 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>7ABA1775EF42E0618A726191</key>
+		<key>12303C7E58C184669A3DA5D3</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>7B28E43B019CE2AF12A8AE03</key>
+		<key>14EFDB24424F12190805C0DB</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>7F2447E8A788FEF7DD7B5746</key>
+		<key>36C042029822903F085859B4</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>90180CEBB9F612A34D437663</key>
+		<key>4CB5AE35E413D217B892D282</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>A33264712E23409F32CF9D04</key>
+		<key>559FD3528EE503333D671E5D</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>FCBFEB7539F2B8D9404AEA70</key>
+		<key>673DFB654B5234C5881431E1</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>705F6D2769236FA35A14AAB0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>763B2AFC04BBA342D078365A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>86EC5559801C270BC830935C</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>A32E164F2DD553F89A354DD1</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>AAC04329412FE67DBFE8F590</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>E2DCADF7F8A8CCCC2BFA9FC7</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>F5BEE27DF9C2041F243908D1</key>
 		<dict>
 			<key>primary</key>
 			<true/>

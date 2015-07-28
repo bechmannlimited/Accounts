@@ -50,12 +50,26 @@ code_sign() {
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework 'ABToolKit.framework'
   install_framework 'Alamofire.framework'
+  install_framework 'Bolts.framework'
+  install_framework 'FBSDKCoreKit.framework'
+  install_framework 'FBSDKLoginKit.framework'
+  install_framework 'FBSDKShareKit.framework'
+  install_framework 'Parse.framework'
+  install_framework 'ParseFacebookUtilsV4.framework'
+  install_framework 'ParseUI.framework'
   install_framework 'SwiftyJSON.framework'
   install_framework 'SwiftyUserDefaults.framework'
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework 'ABToolKit.framework'
   install_framework 'Alamofire.framework'
+  install_framework 'Bolts.framework'
+  install_framework 'FBSDKCoreKit.framework'
+  install_framework 'FBSDKLoginKit.framework'
+  install_framework 'FBSDKShareKit.framework'
+  install_framework 'Parse.framework'
+  install_framework 'ParseFacebookUtilsV4.framework'
+  install_framework 'ParseUI.framework'
   install_framework 'SwiftyJSON.framework'
   install_framework 'SwiftyUserDefaults.framework'
 fi
