@@ -9,6 +9,7 @@
 import UIKit
 import Parse
 import ParseUI
+import ParseFacebookUtilsV4
 
 class StartViewController: UIViewController {
 
@@ -20,11 +21,10 @@ class StartViewController: UIViewController {
             var loginViewController = PFLogInViewController()
             
             loginViewController.fields = PFLogInFields.UsernameAndPassword | PFLogInFields.LogInButton | PFLogInFields.SignUpButton | PFLogInFields.PasswordForgotten | PFLogInFields.Facebook
+            loginViewController.facebookPermissions = ["email", "public_profile", "user_friends"]
             
             var signUpViewController = PFSignUpViewController()
             loginViewController.signUpController = signUpViewController
-            
-            
             
             self.presentViewController(loginViewController, animated: true, completion: nil)
             

@@ -59,6 +59,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         setupAppearances()
         
+        
+        
         //parse
         User.registerSubclass()
         FriendRequest.registerSubclass()
@@ -70,38 +72,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Parse.setApplicationId("d24X8b7STLrPskMNRBVgs30iI1G6cG1lGqsPqeMN",
             clientKey: "fR5DJfzy5x9qlYLiD4xfLd46GmAH1QCWhV1Q8SKc")
         
-        // Register for Push Notitications
-        if application.applicationState != UIApplicationState.Background {
-            // Track an app open here if we launch with a push, unless
-            // "content_available" was used to trigger a background push (introduced in iOS 7).
-            // In that case, we skip tracking here to avoid double counting the app-open.
-            
-            let preBackgroundPush = !application.respondsToSelector("backgroundRefreshStatus")
-            let oldPushHandlerOnly = !self.respondsToSelector("application:didReceiveRemoteNotification:fetchCompletionHandler:")
-            var pushPayload = false
-            if let options = launchOptions {
-                pushPayload = options[UIApplicationLaunchOptionsRemoteNotificationKey] != nil
-            }
-            if (preBackgroundPush || oldPushHandlerOnly || pushPayload) {
-                //PFAnalytics.trackAppOpenedWithLaunchOptions(launchOptions)
-            }
-        }
-        
         if User.currentUser() == nil {
             
             setWindowToLogin()
         }
         
-//        if let launchOptions = launchOptions {
-//            PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
-//        } else {
-//            PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions([NSObject:AnyObject]())
-//        }
-
         PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
+        FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
-        //return PFFacebookUtils.
-        return FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
+        
+        return true
     }
     
     class func registerForNotifications() {
@@ -112,16 +92,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let settings = UIUserNotificationSettings(forTypes: userNotificationTypes, categories: nil)
         application.registerUserNotificationSettings(settings)
         application.registerForRemoteNotifications()
-    }
-    
-    func setupGoogleMapApi(){
-        
-        //GMSServices.provideAPIKey("AIzaSyCwDKp9Ev7BLRdf_Y4iymmDz4-PsmVISiw")
-    }
-    
-    func application(application: UIApplication, didRegisterUserNotificationSettings notificationSettings: UIUserNotificationSettings) {
-        
-        //UIApplication.sharedApplication().registerForRemoteNotifications()
     }
     
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
@@ -147,10 +117,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-        //PFPush.handlePush(userInfo)
-        if application.applicationState == UIApplicationState.Inactive {
-            //PFAnalytics.trackAppOpenedWithRemoteNotificationPayload(userInfo)
-        }
         
         println(userInfo)
         NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterPushNotificationKey, object: userInfo, userInfo: userInfo)
@@ -159,8 +125,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func setupAppearances() {
         
         UINavigationBar.appearance().tintColor = kNavigationBarTintColor
-        //UINavigationBar.appearance().barTintColor = kNavigationBarBarTintColor
-        //UINavigationBar.appearance().shadowImage = UIImage()
         UINavigationBar.appearance().setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
         UINavigationBar.appearance().barStyle = kNavigationBarStyle
         
