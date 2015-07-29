@@ -14,14 +14,13 @@ import SwiftyJSON
 private let kPlusImage = AppTools.iconAssetNamed("746-plus-circle-selected.png")
 private let kMinusImage = AppTools.iconAssetNamed("34-circle.minus.png")
 private let kMenuIcon = AppTools.iconAssetNamed("740-gear-toolbar-selected.png")
-//private let kFriendInvitesIcon = AppTools.iconAssetNamed("779-users-selected.png")
 private let kAnimationDuration:NSTimeInterval = 0.5
 
 private let kPopoverContentSize = CGSize(width: 320, height: 360)
 
 class FriendsViewController: ACBaseViewController {
     
-    var tableView = UITableView(frame: CGRectZero, style: UITableViewStyle.Grouped)
+    var tableView = UITableView(frame: CGRectZero, style: UITableViewStyle.Plain)
     
     var addBarButtonItem: UIBarButtonItem?
     var friendInvitesBarButtonItem: UIBarButtonItem?
@@ -40,13 +39,7 @@ class FriendsViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if kDevice == .Phone {
-            
-            tableView = UITableView(frame: CGRectZero, style: .Grouped)
-        }
-        
         setupTableView(tableView, delegate: self, dataSource: self)
-        //tableView.separatorColor = UIColor.clearColor()
         setBarButtonItems()
         
         title = "Friends"
@@ -54,7 +47,7 @@ class FriendsViewController: ACBaseViewController {
         
         if kDevice == .Pad {
             
-            tableView.separatorStyle = UITableViewCellSeparatorStyle.None
+            //tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
         setupNoDataLabel(noDataView, text: "To get started, click invites to add some friends!")
@@ -284,7 +277,7 @@ class FriendsViewController: ACBaseViewController {
             
             self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
             self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 1
-            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kDefaultSeperatorColor : .clearColor()
+            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kDefaultSeperatorColor : kDefaultSeperatorColor //.clearColor()
         })
     }
 }
@@ -327,19 +320,33 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
             tintColor = AccountColor.positiveColor()
         }
         
-        //cell.imageView?.image = friend.localeDifferenceBetweenActiveUser < 0 ? kMinusImage : kPlusImage
-        //cell.imageView?.tintWithColor(tintColor)
-        
         cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
         cell.detailTextLabel?.textColor = tintColor
         //cell.editingAccessoryType = UITableViewCellAccessoryType.DisclosureIndicator;
         cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
         
-        //images
-        let imageWidth = 50
-        cell.imageView?.image = AppTools.iconAssetNamed("769-male-selected.png")
-        cell.imageView?.layer.cornerRadius = cell.imageView!.image!.size.width / 2
-        cell.imageView?.tintWithColor(tintColor)
+        if let id = friend.facebookId {
+            
+            cell.imageView?.image = UIImage.imageWithColor(UIColor.clearColor(), size: CGSize(width: 50, height: 50))
+            cell.imageView?.showLoader()
+            
+            let url = "https://graph.facebook.com/\(id)/picture?width=\(50)&height=\(50)"
+            
+            ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
+                
+                cell.imageView?.hideLoader()
+                cell.imageView?.image = image
+                cell.layoutSubviews()
+                cell.imageView?.layer.cornerRadius = cell.imageView!.image!.size.width / 2
+            })
+        }
+        else{
+            
+            cell.imageView?.image = AppTools.iconAssetNamed("769-male-selected.png")
+            cell.imageView?.layer.cornerRadius = cell.imageView!.image!.size.width / 2
+            cell.imageView?.tintWithColor(tintColor)
+        }
+        
         cell.imageView?.clipsToBounds = true
         
         return cell
@@ -419,39 +426,7 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
 
-        return data[section].count > 0 ? UITableViewAutomaticDimension : CGFloat.min
-    }
-    
-    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        
-        let numberOfRowsInSections:Int = tableView.numberOfRowsInSection(indexPath.section)
-        
-        cell.layer.mask = nil
-        
-        var shouldRoundCorners = view.bounds.width > kTableViewMaxWidth
-        
-        if tableView.editing && shouldRoundCorners {
-            
-            shouldRoundCorners = indexPath.section != 2
-        }
-        
-        if shouldRoundCorners {
-            
-            if indexPath.row == 0 {
-                
-                cell.roundCorners(UIRectCorner.TopLeft | UIRectCorner.TopRight, cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
-            }
-            
-            if indexPath.row == numberOfRowsInSections - 1 {
-                
-                cell.roundCorners(UIRectCorner.BottomLeft | UIRectCorner.BottomRight, cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
-            }
-            
-            if indexPath.row == 0 && indexPath.row == numberOfRowsInSections - 1 {
-                
-                cell.roundCorners(UIRectCorner.AllCorners, cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
-            }
-        }
+        return data[section].count > 0 ? 35 : 0
     }
 }
 

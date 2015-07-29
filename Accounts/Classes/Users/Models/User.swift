@@ -73,20 +73,26 @@ class User: PFUser {
             
             Task.executeTaskInBackground({ () -> () in
                 
+                var queries = [PFQuery]()
                 var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
-                var query2 = User.query()
-                
-                if let data: AnyObject! = result["data"]{
+
+                if self.facebookId != nil {
                     
-                    let friendsJson = JSON(data)
+                    var query2 = User.query()
+                    
+                    let friendsJson = JSON(result)["data"]
                     
                     for (index: String, friendJson: JSON) in friendsJson {
                         
                         query2?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
                     }
+                    
+                    queries.append(query2!)
                 }
+
+                queries.append(query1!)
                 
-                self.friends = PFQuery.orQueryWithSubqueries([query1!, query2!]).findObjects() as! [User]
+                self.friends = PFQuery.orQueryWithSubqueries(queries).findObjects() as! [User]
 
                 for friend in self.friends{
                     

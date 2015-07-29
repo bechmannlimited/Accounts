@@ -17,6 +17,10 @@ private let kPopoverContentSize = CGSize(width: 390, height: 440)
 private let kLoaderTableFooterViewHeight = 70
 private let kAnimationDuration:NSTimeInterval = 0.5
 
+private let kBounceViewHeight:CGFloat = 146
+
+private let kDefaultNavigationBarShadowImage = UINavigationController().navigationBar.shadowImage
+
 protocol SaveItemDelegate {
     
     func itemDidGetDeleted()
@@ -54,6 +58,9 @@ class TransactionsViewController: ACBaseViewController {
     //var loadMoreQuery: PFQuery?
     var query: PFQuery?
     
+    var bounceView = BounceHeaderView()
+    var bounceViewHeightConstraint: NSLayoutConstraint?
+    
     var popoverViewController: UIViewController?
     
     override func viewDidLoad() {
@@ -63,11 +70,11 @@ class TransactionsViewController: ACBaseViewController {
         
         if kDevice == .Pad {
         
-            tableView.separatorStyle = UITableViewCellSeparatorStyle.None
+            //tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
         setupTableView(tableView, delegate: self, dataSource: self)
-        title = "Transactions with \(friend.appropriateDisplayName())"
+        //title = "Transactions with \(friend.appropriateDisplayName())"
 
         setupLoadMoreView()
         setupNoDataLabel(noDataView, text: "Tap plus to add a purchase or transfer")
@@ -92,7 +99,7 @@ class TransactionsViewController: ACBaseViewController {
             findAndScrollToCalculatedSelectedCellAtIndexPath()
         }
         
-        getDifferenceAndRefreshIfNeccessary(nil)
+        //getDifferenceAndRefreshIfNeccessary(nil)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -411,7 +418,28 @@ class TransactionsViewController: ACBaseViewController {
         presentViewController(v, animated: true, completion: nil)
     }
     
+    func setupBounceView(){
+        
+        tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top + kBounceViewHeight, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
+        
+        bounceView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        view.addSubview(bounceView)
+        
+        //bounceView.frame = CGRect(x: 0, y: 0, width: 100, height: kBounceViewHeight)
+        
+        bounceView.addTopConstraint(toView: view, relation: .Equal, constant: 0)
+        bounceView.addLeftConstraint(toView: view, relation: .Equal, constant: 0)
+        bounceView.addRightConstraint(toView: view, relation: .Equal, constant: 0)
+        bounceViewHeightConstraint = bounceView.addHeightConstraint(relation: .Equal, constant: kBounceViewHeight)
+        
+        //tableView.tableHeaderView = bounceView
+        
+        bounceView.backgroundColor = UIColor.blueColor()
+    }
+    
     override func setupTableViewConstraints(tableView: UITableView) {
+        
+        //setupBounceView()
         
         tableView.setTranslatesAutoresizingMaskIntoConstraints(false)
         
@@ -552,6 +580,11 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         
         return CGFloat.min + (kDevice == .Pad ? 40 : 0)
     }
+    
+    override func setupTableViewRefreshControl(tableView: UITableView) {
+        
+        
+    }
 }
 
 extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
@@ -593,13 +626,42 @@ extension TransactionsViewController: UIScrollViewDelegate {
         //NSInteger result = maximumOffset - currentOffset;
         
         //if not at top
-        let isAboveTop = scrollView.contentOffset.y + 64 <= 0
+        let isAboveTop = scrollView.contentOffset.y + 64 <= 0 // - kBounceViewHeight
         
         // Change 10.0 to adjust the distance from bottom
         if (maximumOffset - currentOffset <= 00.0 && !isAboveTop) {
             
             loadMore()
         }
+        
+        
+        // bounce view
+        
+//        var amountToMove: CGFloat = 0
+//        
+//        if let navHeight: CGFloat = navigationController?.navigationBar.frame.height {
+//            
+//            amountToMove = -(currentOffset + kBounceViewHeight + UIApplication.sharedApplication().statusBarFrame.height + navHeight)
+//        }
+//        
+//        bounceViewHeightConstraint?.constant = kBounceViewHeight + amountToMove
+//        
+//        // navigation bar
+//        
+//        if amountToMove > -146 {
+//            
+//            navigationController?.navigationBar.tintColor = UIColor.whiteColor()
+//            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
+//            navigationController?.navigationBar.shadowImage = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
+//        }
+//        else{
+//            
+//            navigationController?.navigationBar.tintColor = kNavigationBarTintColor
+//            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
+//            navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
+//        }
+//        
+//        bounceView.scrollViewDidScroll(scrollView, headerOffset: bounceView.frame.height)
     }
 
     func scrollViewWillBeginDragging(scrollView: UIScrollView) {
@@ -611,27 +673,6 @@ extension TransactionsViewController: UIScrollViewDelegate {
 extension TransactionsViewController: SaveItemDelegate {
     
     func itemDidGetDeleted() {
-        
-//        if let indexPath = selectedRow {
-//            
-//            let numberOfRows = tableView.numberOfRowsInSection(indexPath.section)
-//            
-//            let wasLastRow = indexPath.row + 1 == numberOfRows
-//            
-//            tableView.beginUpdates()
-//            transactions.removeAtIndex(indexPath.row)
-//            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Top)
-//            tableView.endUpdates()
-//
-//            getDifference(nil)
-//            
-//            if wasLastRow {
-//                
-//                //new last row 
-//                let newLastRowIndexPath = NSIndexPath(forRow: indexPath.row - 1, inSection: 0)
-//                tableView.reloadRowsAtIndexPaths([newLastRowIndexPath], withRowAnimation: UITableViewRowAnimation.None)
-//            }
-//        }
         
         didJustDelete = true
         itemDidChange()
@@ -666,3 +707,4 @@ extension TransactionsViewController: SaveItemDelegate {
         
     }
 }
+

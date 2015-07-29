@@ -30,8 +30,6 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
-        //[kProfileIndexPath],
-        //[kCurrencyIndexPath],
         [kProfileIndexPath, kLogoutIndexPath]
     ]
     
@@ -39,12 +37,11 @@ class MenuViewController: ACBaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        if kActiveUser.UserID == 6 {
+        
+//        if User.currentUser()?.facebookId == nil {
 //            
 //            data = [
-//                [kProfileIndexPath, kLogoutIndexPath],
-//                [kCurrencyIndexPath]
+//                [kProfileIndexPath, kLogoutIndexPath]
 //            ]
 //        }
         
