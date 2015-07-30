@@ -99,16 +99,28 @@ extension SaveUserViewController: FormViewDelegate {
     override func formViewElements() -> Array<Array<FormViewConfiguration>> {
         
         var sections = Array<Array<FormViewConfiguration>>()
-        sections.append([
-            FormViewConfiguration.textField("Username", value: String.emptyIfNull(user.username) , identifier: "Username"),
-            FormViewConfiguration.textField("Email", value: String.emptyIfNull(user.email), identifier: "Email"),
-            FormViewConfiguration.textField("Display name", value: String.emptyIfNull(user.displayName), identifier: "DisplayName")
-        ])
-        sections.append([
+        
+        if user.facebookId != nil {
             
-            FormViewConfiguration.textField("Password", value: String.emptyIfNull(user.password), identifier: "Password"),
-            FormViewConfiguration.textField("Verify password", value: String.emptyIfNull(user.password), identifier: "PasswordForVerification")
-        ])
+            sections.append([
+                FormViewConfiguration.textField("Display name", value: String.emptyIfNull(user.displayName), identifier: "DisplayName")
+            ])
+        }
+        else{
+            
+            sections.append([
+                FormViewConfiguration.textField("Username", value: String.emptyIfNull(user.username) , identifier: "Username"),
+                FormViewConfiguration.textField("Email", value: String.emptyIfNull(user.email), identifier: "Email"),
+                FormViewConfiguration.textField("Display name", value: String.emptyIfNull(user.displayName), identifier: "DisplayName")
+            ])
+            sections.append([
+                
+                FormViewConfiguration.textField("Password", value: String.emptyIfNull(user.password), identifier: "Password"),
+                FormViewConfiguration.textField("Verify password", value: String.emptyIfNull(user.password), identifier: "PasswordForVerification")
+            ])
+        }
+        
+        
         return sections
     }
     

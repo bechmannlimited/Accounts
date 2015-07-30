@@ -9,11 +9,14 @@
 import UIKit
 import ABToolKit
 
+let kDefaultNavigationBarShadowImage = UINavigationController().navigationBar.shadowImage
+
 extension BaseViewController {
     
     func setupView() {
         
         view.backgroundColor = kViewBackgroundColor
+        setNavigationControllerToDefault()
     }
     
     func addCloseButton() {
@@ -41,6 +44,14 @@ extension BaseViewController {
         //tableView.separatorStyle = kTableViewCellSeperatorStyle
         //tableView.separatorColor = kTableViewCellSeperatorColor
 //        tableView.backgroundColor = kTableViewBackgroundColor
+    }
+    
+    func setNavigationControllerToDefault(){
+        
+        navigationController?.navigationBar.tintColor = kNavigationBarTintColor
+        navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
+        navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
+        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.Default, animated: true)
     }
     
     func setTableViewCellAppearanceForBackgroundGradient(cell:UITableViewCell) {

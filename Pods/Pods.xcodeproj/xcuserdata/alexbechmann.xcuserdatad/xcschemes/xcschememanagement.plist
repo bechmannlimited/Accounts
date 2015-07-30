@@ -54,6 +54,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Pods-SVPullToRefresh.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-SwiftyJSON.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -72,67 +77,72 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>12303C7E58C184669A3DA5D3</key>
+		<key>0A494D8923575EE993099494</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>14EFDB24424F12190805C0DB</key>
+		<key>1F9F5FEB6C53CE3798424D69</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>36C042029822903F085859B4</key>
+		<key>2065B95DE5B4A56466A8C5FE</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>4CB5AE35E413D217B892D282</key>
+		<key>20CAC375F33096665A8B5149</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>559FD3528EE503333D671E5D</key>
+		<key>33B650ADE64467DE265DBED9</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>673DFB654B5234C5881431E1</key>
+		<key>569DA7B5589D5C4D2B6EA346</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>705F6D2769236FA35A14AAB0</key>
+		<key>570C10273759CC2C8E6ECB4F</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>763B2AFC04BBA342D078365A</key>
+		<key>66654D14D14EA128C8A3896D</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>86EC5559801C270BC830935C</key>
+		<key>67FD27A441799B71DAFFD3CA</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>A32E164F2DD553F89A354DD1</key>
+		<key>92F610A0496D1B6D3D078199</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>AAC04329412FE67DBFE8F590</key>
+		<key>AD390166A4A16B8AE9CCDFAE</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>E2DCADF7F8A8CCCC2BFA9FC7</key>
+		<key>BAD967E83F46E399DDE78E73</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>F5BEE27DF9C2041F243908D1</key>
+		<key>BCF983C258A0BF30618CA1E1</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>CEDED18CEFF0D5B22C662996</key>
 		<dict>
 			<key>primary</key>
 			<true/>

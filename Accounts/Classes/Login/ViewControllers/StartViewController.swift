@@ -12,7 +12,7 @@ import ParseUI
 import ParseFacebookUtilsV4
 import SwiftyJSON
 
-class StartViewController: UIViewController {
+class StartViewController: ACBaseViewController {
 
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
@@ -34,21 +34,18 @@ class StartViewController: UIViewController {
         }
         else{
             
-            goToApp()
+            view.showLoader()
+            checkForGraphRequestAndGoToAppWithUser(User.currentUser()!)
         }
     }
     
     func goToApp(){
         
         var v = UIStoryboard.initialViewControllerFromStoryboardNamed("Main")
-        UIViewController.topMostController().presentViewController(v, animated: true, completion: nil)
+        UIViewController.topMostController().presentViewController(v, animated: false, completion: nil)
     }
 
-}
-
-extension StartViewController: PFLogInViewControllerDelegate{
-    
-    func logInViewController(logInController: PFLogInViewController, didLogInUser user: PFUser) {
+    func checkForGraphRequestAndGoToAppWithUser(user: PFUser){
         
         let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me", parameters: nil)
         graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
@@ -56,7 +53,7 @@ extension StartViewController: PFLogInViewControllerDelegate{
             if let json: AnyObject = result {
                 
                 let result = JSON(json)
-                
+                println(result)
                 user["facebookId"] = result["id"].stringValue
                 user["displayName"] = result["name"].stringValue
                 
@@ -74,6 +71,14 @@ extension StartViewController: PFLogInViewControllerDelegate{
                 self.goToApp()
             }
         })
+    }
+}
+
+extension StartViewController: PFLogInViewControllerDelegate{
+    
+    func logInViewController(logInController: PFLogInViewController, didLogInUser user: PFUser) {
+        
+        checkForGraphRequestAndGoToAppWithUser(user)
     }
     
     func logInViewController(logInController: PFLogInViewController, didFailToLogInWithError error: NSError?) {

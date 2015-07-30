@@ -10,6 +10,7 @@ import UIKit
 import ABToolKit
 import SwiftyJSON
 import Parse
+import SVPullToRefresh
 
 private let kPurchaseImage = AppTools.iconAssetNamed("1007-price-tag-toolbar.png")
 private let kTransactionImage = AppTools.iconAssetNamed("922-suitcase-toolbar.png")
@@ -18,8 +19,6 @@ private let kLoaderTableFooterViewHeight = 70
 private let kAnimationDuration:NSTimeInterval = 0.5
 
 private let kBounceViewHeight:CGFloat = 146
-
-private let kDefaultNavigationBarShadowImage = UINavigationController().navigationBar.shadowImage
 
 protocol SaveItemDelegate {
     
@@ -33,18 +32,18 @@ protocol SaveItemDelegate {
 
 class TransactionsViewController: ACBaseViewController {
 
-    var tableView = UITableView(frame: CGRectZero, style: UITableViewStyle.Grouped)
+    var tableView = UITableView(frame: CGRectZero, style: UITableViewStyle.Plain)
     var friend = User()
     var transactions:Array<Transaction> = []
     var noDataView = UILabel()
     var addBarButtonItem: UIBarButtonItem?
     
-    var loadMoreView = UIView()
-    var loadMoreViewHeightConstraint: NSLayoutConstraint?
-    var hasLoadedFirstTime = false
+    //var loadMoreView = UIView()
+    //var loadMoreViewHeightConstraint: NSLayoutConstraint?
+    //var hasLoadedFirstTime = false
 
-    var isLoadingMore = false
-    var canLoadMore = true
+    //var isLoadingMore = false
+    //var canLoadMore = true
     
     var selectedRow: NSIndexPath?
     
@@ -54,11 +53,12 @@ class TransactionsViewController: ACBaseViewController {
     
     var toolbar = UIToolbar()
     
+    var headerView = BouncyHeaderView()
+    
     //var refreshQuery: PFQuery?
     //var loadMoreQuery: PFQuery?
     var query: PFQuery?
     
-    var bounceView = BounceHeaderView()
     var bounceViewHeightConstraint: NSLayoutConstraint?
     
     var popoverViewController: UIViewController?
@@ -76,7 +76,7 @@ class TransactionsViewController: ACBaseViewController {
         setupTableView(tableView, delegate: self, dataSource: self)
         //title = "Transactions with \(friend.appropriateDisplayName())"
 
-        setupLoadMoreView()
+        //setupLoadMoreView()
         setupNoDataLabel(noDataView, text: "Tap plus to add a purchase or transfer")
         
         executeActualRefreshByHiding(true, refreshControl: nil, take: nil, completion: nil)
@@ -89,6 +89,21 @@ class TransactionsViewController: ACBaseViewController {
             addBarButtonItem!,
             UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
         ]
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
+        
+        headerView.setupHeaderWithOriginView(view, originTableView: tableView)
+        headerView.setupTitle("Transactions with \(friend.appropriateDisplayName())")
+        
+        if let id = friend.facebookId{
+            
+            headerView.getHeroImage("https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)")
+        }
+        else{
+            
+            //headerView.getHeroImage("http://www.tvchoicemagazine.co.uk/sites/default/files/imagecache/interview_image/intex/michael_emerson.png")
+            headerView.getHeroImage("http://img.joke.co.uk/images/webshop/blog/gangster-silhouette.jpg")
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -100,12 +115,19 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         //getDifferenceAndRefreshIfNeccessary(nil)
+        
+        scrollViewDidScroll(tableView)
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
         popoverViewController = nil // to make sure
+    }
+    
+    func refreshFromBarButton(){
+        
+        refresh(nil)
     }
     
     override func didReceivePushNotification(notification: NSNotification) {
@@ -187,6 +209,20 @@ class TransactionsViewController: ACBaseViewController {
         super.setupTableView(tableView, delegate: delegate, dataSource: dataSource)
         
         setupTableViewRefreshControl(tableView)
+        
+        tableView.addInfiniteScrollingWithActionHandler { () -> Void in
+            
+            var y: CGFloat = tableView.contentOffset.y + tableView.contentInset.top
+            
+            if y > 0 {
+                
+                self.loadMore()
+            }
+            else{
+                
+                self.tableView.infiniteScrollingView.stopAnimating()
+            }
+        }
     }
     
     func showOrHideTableOrNoDataView() {
@@ -233,7 +269,7 @@ class TransactionsViewController: ACBaseViewController {
                 }
                 
                 self.transactions = transactions
-                self.hasLoadedFirstTime = true
+                //self.hasLoadedFirstTime = true
             }
             
         }, completion: { () -> () in
@@ -245,7 +281,7 @@ class TransactionsViewController: ACBaseViewController {
             self.showOrHideTableOrNoDataView()
             
             //just in case
-            self.loadMoreView.hideLoader()
+            //self.loadMoreView.hideLoader()
             
             self.findAndScrollToCalculatedSelectedCellAtIndexPath()
             
@@ -352,56 +388,78 @@ class TransactionsViewController: ACBaseViewController {
         executeActualRefreshByHiding(false, refreshControl: refreshControl, take: nil, completion: nil)
     }
     
-    func animateTableFooterViewHeight(height: Int, completion: (() -> ())?) {
-        
-        UIView.animateWithDuration(0.4, animations: { () -> Void in
-            
-            self.loadMoreView.frame = CGRect(x: 0, y: 0, width: 0, height: height)
-            self.tableView.tableFooterView = self.loadMoreView
-            
-        }) { (success) -> Void in
-            
-            completion?()
-        }
-    }
+//    func animateTableFooterViewHeight(height: Int, completion: (() -> ())?) {
+//        
+//        UIView.animateWithDuration(0.4, animations: { () -> Void in
+//            
+//            //self.loadMoreView.frame = CGRect(x: 0, y: 0, width: 0, height: height)
+//            //self.tableView.tableFooterView = self.loadMoreView
+//            
+//        }) { (success) -> Void in
+//            
+//            completion?()
+//        }
+//    }
     
     func loadMore() {
         
-        if !isLoadingMore && canLoadMore && hasLoadedFirstTime {
+        query?.cancel()
+        query?.skip = transactions.count + 1
+        query?.limit = 16
+        
+        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             
-            isLoadingMore = true
-            canLoadMore = false
-            
-            animateTableFooterViewHeight(kLoaderTableFooterViewHeight, completion: nil)
-            
-            loadMoreView.showLoader()
-            
-            query?.cancel()
-            query?.skip = transactions.count + 1
-            query?.limit = 16
-            
-            query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+            if let transactions = objects as? [Transaction] {
                 
-                if let transactions = objects as? [Transaction] {
+                for transaction in transactions {
                     
-                    for transaction in transactions {
-                        
-                        self.transactions.append(transaction)
-                    }
+                    self.transactions.append(transaction)
                 }
-                
-                self.tableView.reloadData()
-                self.isLoadingMore = false
-                self.loadMoreView.hideLoader()
-                
-                NSTimer.schedule(delay: 0.2, handler: { timer in
-                    
-                    self.animateTableFooterViewHeight(0, completion: { () -> () in
-                    })
-                })
-            })
-        }
+            }
+            
+            self.tableView.infiniteScrollingView.stopAnimating()
+            self.tableView.reloadData()
+        })
+
     }
+    
+//    func loadMore() {
+//
+//        if !isLoadingMore && canLoadMore && hasLoadedFirstTime {
+//            
+//            isLoadingMore = true
+//            canLoadMore = false
+//            
+//            animateTableFooterViewHeight(kLoaderTableFooterViewHeight, completion: nil)
+//            
+//            loadMoreView.showLoader()
+//            
+//            query?.cancel()
+//            query?.skip = transactions.count + 1
+//            query?.limit = 16
+//            
+//            query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+//                
+//                if let transactions = objects as? [Transaction] {
+//                    
+//                    for transaction in transactions {
+//                        
+//                        self.transactions.append(transaction)
+//                    }
+//                }
+//                
+//                self.tableView.reloadData()
+//                self.isLoadingMore = false
+//                self.loadMoreView.hideLoader()
+//                
+//                NSTimer.schedule(delay: 0.2, handler: { timer in
+//                    
+//                    self.animateTableFooterViewHeight(0, completion: { () -> () in
+//                    })
+//                })
+//            })
+//        }
+//    }
     
     func add() {
         
@@ -416,25 +474,6 @@ class TransactionsViewController: ACBaseViewController {
         v.popoverPresentationController?.delegate = self
         
         presentViewController(v, animated: true, completion: nil)
-    }
-    
-    func setupBounceView(){
-        
-        tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top + kBounceViewHeight, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
-        
-        bounceView.setTranslatesAutoresizingMaskIntoConstraints(false)
-        view.addSubview(bounceView)
-        
-        //bounceView.frame = CGRect(x: 0, y: 0, width: 100, height: kBounceViewHeight)
-        
-        bounceView.addTopConstraint(toView: view, relation: .Equal, constant: 0)
-        bounceView.addLeftConstraint(toView: view, relation: .Equal, constant: 0)
-        bounceView.addRightConstraint(toView: view, relation: .Equal, constant: 0)
-        bounceViewHeightConstraint = bounceView.addHeightConstraint(relation: .Equal, constant: kBounceViewHeight)
-        
-        //tableView.tableHeaderView = bounceView
-        
-        bounceView.backgroundColor = UIColor.blueColor()
     }
     
     override func setupTableViewConstraints(tableView: UITableView) {
@@ -454,11 +493,11 @@ class TransactionsViewController: ACBaseViewController {
         tableView.addCenterXConstraint(toView: view)
     }
     
-    func setupLoadMoreView() {
-        
-        loadMoreView.frame = CGRect(x: 0, y: 0, width: 50, height: kLoaderTableFooterViewHeight)
-        tableView.tableFooterView = loadMoreView
-    }
+//    func setupLoadMoreView() {
+//        
+//        loadMoreView.frame = CGRect(x: 0, y: 0, width: 50, height: kLoaderTableFooterViewHeight)
+//        tableView.tableFooterView = loadMoreView
+//    }
     
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
@@ -619,54 +658,23 @@ extension TransactionsViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
         
-        // UITableView only moves in one direction, y axis
-        let currentOffset = scrollView.contentOffset.y;
-        let maximumOffset = scrollView.contentSize.height - scrollView.frame.size.height;
+        var y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
         
-        //NSInteger result = maximumOffset - currentOffset;
+        println(y)
         
-        //if not at top
-        let isAboveTop = scrollView.contentOffset.y + 64 <= 0 // - kBounceViewHeight
-        
-        // Change 10.0 to adjust the distance from bottom
-        if (maximumOffset - currentOffset <= 00.0 && !isAboveTop) {
-            
-            loadMore()
+        if y < 86 {
+
+            navigationController?.navigationBar.tintColor = UIColor.whiteColor()
+            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
+            navigationController?.navigationBar.shadowImage = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
+            UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
+        }
+        else{
+
+            setNavigationControllerToDefault()
         }
         
-        
-        // bounce view
-        
-//        var amountToMove: CGFloat = 0
-//        
-//        if let navHeight: CGFloat = navigationController?.navigationBar.frame.height {
-//            
-//            amountToMove = -(currentOffset + kBounceViewHeight + UIApplication.sharedApplication().statusBarFrame.height + navHeight)
-//        }
-//        
-//        bounceViewHeightConstraint?.constant = kBounceViewHeight + amountToMove
-//        
-//        // navigation bar
-//        
-//        if amountToMove > -146 {
-//            
-//            navigationController?.navigationBar.tintColor = UIColor.whiteColor()
-//            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
-//            navigationController?.navigationBar.shadowImage = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
-//        }
-//        else{
-//            
-//            navigationController?.navigationBar.tintColor = kNavigationBarTintColor
-//            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
-//            navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
-//        }
-//        
-//        bounceView.scrollViewDidScroll(scrollView, headerOffset: bounceView.frame.height)
-    }
-
-    func scrollViewWillBeginDragging(scrollView: UIScrollView) {
-        
-        self.canLoadMore = true
+        headerView.scrollViewDidScroll(scrollView)
     }
 }
 

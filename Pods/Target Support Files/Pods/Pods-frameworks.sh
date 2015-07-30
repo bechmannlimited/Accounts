@@ -57,6 +57,7 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework 'Parse.framework'
   install_framework 'ParseFacebookUtilsV4.framework'
   install_framework 'ParseUI.framework'
+  install_framework 'SVPullToRefresh.framework'
   install_framework 'SwiftyJSON.framework'
   install_framework 'SwiftyUserDefaults.framework'
 fi
@@ -70,6 +71,7 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework 'Parse.framework'
   install_framework 'ParseFacebookUtilsV4.framework'
   install_framework 'ParseUI.framework'
+  install_framework 'SVPullToRefresh.framework'
   install_framework 'SwiftyJSON.framework'
   install_framework 'SwiftyUserDefaults.framework'
 fi
