@@ -35,7 +35,12 @@ class StartViewController: ACBaseViewController {
         else{
             
             view.showLoader()
-            checkForGraphRequestAndGoToAppWithUser(User.currentUser()!)
+            //checkForGraphRequestAndGoToAppWithUser(User.currentUser()!)
+            goToApp()
+            
+            NSTimer.schedule(delay: 5) { timer in
+             
+            }
         }
     }
     

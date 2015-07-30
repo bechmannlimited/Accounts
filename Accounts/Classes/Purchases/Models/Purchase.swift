@@ -135,7 +135,7 @@ class Purchase: PFObject {
     func sendPushNotificationsToAllUniqueUsersInTransactionsAsNewPurchase(isNewPurchase: Bool){
         
         let noun: String = isNewPurchase ? "added" : "updated"
-        let message = "Purchase: \(self.title) \(noun) by \(User.currentUser()!.appropriateDisplayName())!"
+        let message = "Purchase: \(self.title!) \(noun) by \(User.currentUser()!.appropriateDisplayName())!"
         
         ParseUtilities.sendPushNotificationsInBackgroundToUsers(pushNotificationTargets(), message: message, data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
     }

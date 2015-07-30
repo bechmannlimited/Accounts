@@ -100,7 +100,7 @@ extension SaveUserViewController: FormViewDelegate {
         
         var sections = Array<Array<FormViewConfiguration>>()
         
-        if user.facebookId != nil {
+        if User.currentUser()?.facebookId != nil {
             
             sections.append([
                 FormViewConfiguration.textField("Display name", value: String.emptyIfNull(user.displayName), identifier: "DisplayName")

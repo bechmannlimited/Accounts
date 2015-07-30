@@ -39,6 +39,11 @@ class FriendsViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if kDevice == .Pad {
+            
+            tableView = UITableView(frame: CGRectZero, style: .Grouped)
+        }
+        
         setupTableView(tableView, delegate: self, dataSource: self)
         setBarButtonItems()
         
@@ -47,7 +52,7 @@ class FriendsViewController: ACBaseViewController {
         
         if kDevice == .Pad {
             
-            //tableView.separatorStyle = UITableViewCellSeparatorStyle.None
+            tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
         setupNoDataLabel(noDataView, text: "To get started, click invites to add some friends!")
@@ -82,7 +87,7 @@ class FriendsViewController: ACBaseViewController {
             }
             else if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestSent || PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestDeleted {
                     
-                getInvites()
+                //getInvites()
             }
         }
     }
@@ -123,7 +128,7 @@ class FriendsViewController: ACBaseViewController {
         var emptyBarButtonItem = UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: nil, action: nil)
         emptyBarButtonItem.width = 0
         
-        addBarButtonItem = User.currentUser()!.friends.count > 0 ? UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add") : emptyBarButtonItem
+        addBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
         
         
         let invitesText = invitesCount > 0 ? "Invites (\(invitesCount))" : "Invites"
@@ -131,7 +136,7 @@ class FriendsViewController: ACBaseViewController {
         friendInvitesBarButtonItem = UIBarButtonItem(title: invitesText, style: .Plain, target: self, action: "friendInvites")
         openMenuBarButtonItem = UIBarButtonItem(image: kMenuIcon, style: .Plain, target: self, action: "openMenu")
         
-        let editBarButtonItem = data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
+        let editBarButtonItem = editButtonItem() //data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
         
         navigationItem.leftBarButtonItems = [
             openMenuBarButtonItem!,
@@ -140,6 +145,9 @@ class FriendsViewController: ACBaseViewController {
         navigationItem.rightBarButtonItems = [
             friendInvitesBarButtonItem!
         ]
+    }
+    
+    func showOrHideAddButton() {
         
         if let addBtn = addBarButtonItem{
             
@@ -217,6 +225,7 @@ class FriendsViewController: ACBaseViewController {
         
         view.showLoader()
         tableView.layer.opacity = 0
+        toolbar.items = []
         
         User.currentUser()?.getFriends({ () -> () in
             
@@ -230,22 +239,23 @@ class FriendsViewController: ACBaseViewController {
                 self.tableView.layer.opacity = 1
             })
             
-            self.setBarButtonItems()
+            //self.setBarButtonItems()
+            self.showOrHideAddButton()
             self.showOrHideTableOrNoDataView()
         })
         
-        getInvites()
+        //getInvites()
     }
     
-    func getInvites(){
-        
-        User.currentUser()?.getInvites({ (invites) -> () in
-            
-            self.hasCheckedForInvites = true
-            self.invitesCount = invites[0].count
-            self.setBarButtonItems()
-        })
-    }
+//    func getInvites(){
+//        
+//        User.currentUser()?.getInvites({ (invites) -> () in
+//            
+//            self.hasCheckedForInvites = true
+//            self.invitesCount = invites[0].count
+//            //self.setBarButtonItems()
+//        })
+//    }
     
     func openMenu() {
         
@@ -259,16 +269,26 @@ class FriendsViewController: ACBaseViewController {
     
     func add() {
         
-        let view = SelectPurchaseOrTransactionViewController()
-        let v = UINavigationController(rootViewController: view)
-        view.saveItemDelegate = self
-
-        v.modalPresentationStyle = .Popover
-        v.preferredContentSize = kPopoverContentSize
-        v.popoverPresentationController?.barButtonItem = addBarButtonItem
-        v.popoverPresentationController?.delegate = self
-        
-        presentViewController(v, animated: true, completion: nil)
+        if User.currentUser()?.friends.count > 0 {
+            
+            let view = SelectPurchaseOrTransactionViewController()
+            let v = UINavigationController(rootViewController: view)
+            view.saveItemDelegate = self
+            
+            v.modalPresentationStyle = .Popover
+            v.preferredContentSize = kPopoverContentSize
+            v.popoverPresentationController?.barButtonItem = addBarButtonItem
+            v.popoverPresentationController?.delegate = self
+            
+            presentViewController(v, animated: true, completion: nil)
+        }
+        else{
+            
+            UIAlertController.showAlertControllerWithButtonTitle("Ok", confirmBtnStyle: .Default, message: "You havn't added any friends yet!", completion: { (response) -> () in
+                
+                
+            })
+        }
     }
     
     func showOrHideTableOrNoDataView() {
@@ -276,8 +296,9 @@ class FriendsViewController: ACBaseViewController {
         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
             
             self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
-            self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 1
+            self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 0
             self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kDefaultSeperatorColor : kDefaultSeperatorColor //.clearColor()
+            //self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? .whiteColor() : UIColor.groupTableViewBackgroundColor()
         })
     }
 }

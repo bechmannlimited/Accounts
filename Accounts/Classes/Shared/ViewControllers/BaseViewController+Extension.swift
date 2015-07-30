@@ -9,7 +9,7 @@
 import UIKit
 import ABToolKit
 
-let kDefaultNavigationBarShadowImage = UINavigationController().navigationBar.shadowImage
+
 
 extension BaseViewController {
     

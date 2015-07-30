@@ -18,7 +18,7 @@ import ParseFacebookUtilsV4
 //var kActiveUser:User = User.object()
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
 
-let kViewBackgroundColor = UIColor.groupTableViewBackgroundColor()
+let kViewBackgroundColor = UIColor.whiteColor()
 let kViewBackgroundGradientTop =  AccountColor.blueColor()
 let kViewBackgroundGradientBottom =  AccountColor.greenColor()
 
@@ -48,6 +48,7 @@ let kDefaultSeperatorColor = UITableView().separatorColor
 let kParseInstallationUserKey = "user"
 let kNotificationCenterPushNotificationKey = "pushNotificationUserInfoReceived"
 
+let kDefaultNavigationBarShadowImage = UINavigationBar().shadowImage // UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -123,6 +124,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         UINavigationBar.appearance().tintColor = kNavigationBarTintColor
         UINavigationBar.appearance().setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
+        UINavigationBar.appearance().shadowImage = kDefaultNavigationBarShadowImage
         UINavigationBar.appearance().barStyle = kNavigationBarStyle
         
         UIToolbar.appearance().tintColor = kNavigationBarTintColor

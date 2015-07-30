@@ -2,7 +2,7 @@
 import UIKit
 import ABToolKit
 
-private let kTitlePadding: CGFloat = 15
+private let kTitlePadding: CGFloat = 12
 
 class BouncyHeaderView: UIView{
     
@@ -152,8 +152,8 @@ class BouncyHeaderView: UIView{
         self.addSubview(titleLabel)
         
         let font = UIFont(name: "AppleSDGothicNeo-Bold", size: 25)!
-        titleLabelHeight = UILabel.heightForLabel("asd", font: font, width: self.frame.width - (kTitlePadding * 2))
-        
+        titleLabelHeight = UILabel.heightForLabel(title, font: font, width: originView.frame.width - (kTitlePadding * 2))
+        //println("\(titleLabelHeight) - \(self.bounds.width - (kTitlePadding * 2))")
         titleLabel.addHeightConstraint(relation: .Equal, constant: titleLabelHeight)
         titleLabel.addLeftConstraint(toView: self, relation: .Equal, constant: kTitlePadding)
         titleLabel.addRightConstraint(toView: self, relation: .Equal, constant: -kTitlePadding)
@@ -165,5 +165,7 @@ class BouncyHeaderView: UIView{
         titleLabel.lineBreakMode = NSLineBreakMode.ByWordWrapping
         titleLabel.textColor = UIColor.whiteColor()
         titleLabel.textAlignment = NSTextAlignment.Left
+        
+        titleLabel.userInteractionEnabled = false
     }
 }

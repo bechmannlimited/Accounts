@@ -53,7 +53,7 @@ class TransactionsViewController: ACBaseViewController {
     
     var toolbar = UIToolbar()
     
-    var headerView = BouncyHeaderView()
+    var headerView: BouncyHeaderView?
     
     //var refreshQuery: PFQuery?
     //var loadMoreQuery: PFQuery?
@@ -70,7 +70,7 @@ class TransactionsViewController: ACBaseViewController {
         
         if kDevice == .Pad {
         
-            //tableView.separatorStyle = UITableViewCellSeparatorStyle.None
+            tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
         setupTableView(tableView, delegate: self, dataSource: self)
@@ -92,17 +92,9 @@ class TransactionsViewController: ACBaseViewController {
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
         
-        headerView.setupHeaderWithOriginView(view, originTableView: tableView)
-        headerView.setupTitle("Transactions with \(friend.appropriateDisplayName())")
-        
-        if let id = friend.facebookId{
+        if kDevice == .Pad {
             
-            headerView.getHeroImage("https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)")
-        }
-        else{
-            
-            //headerView.getHeroImage("http://www.tvchoicemagazine.co.uk/sites/default/files/imagecache/interview_image/intex/michael_emerson.png")
-            headerView.getHeroImage("http://img.joke.co.uk/images/webshop/blog/gangster-silhouette.jpg")
+            tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top + 40, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
         }
     }
     
@@ -117,6 +109,28 @@ class TransactionsViewController: ACBaseViewController {
         //getDifferenceAndRefreshIfNeccessary(nil)
         
         scrollViewDidScroll(tableView)
+        
+        if headerView == nil {
+            
+            setupBouncyHeaderView()
+        }
+    }
+    
+    func setupBouncyHeaderView(){
+        
+        headerView = BouncyHeaderView()
+        headerView?.setupHeaderWithOriginView(view, originTableView: tableView)
+        headerView?.setupTitle("Transactions with \(friend.appropriateDisplayName())")
+        
+        if let id = friend.facebookId{
+            
+            headerView?.getHeroImage("https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)")
+        }
+        else{
+            
+            //headerView.getHeroImage("http://www.tvchoicemagazine.co.uk/sites/default/files/imagecache/interview_image/intex/michael_emerson.png")
+            //headerView.getHeroImage("http://img.joke.co.uk/images/webshop/blog/gangster-silhouette.jpg")
+        }
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -231,6 +245,8 @@ class TransactionsViewController: ACBaseViewController {
             
             self.noDataView.layer.opacity = self.transactions.count > 0 ? 0 : 1
             self.tableView.layer.opacity = self.transactions.count > 0 ? 1 : 1
+            self.tableView.separatorColor = self.transactions.count > 0 ? kDefaultSeperatorColor : .clearColor()
+            //self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? .whiteColor() : UIColor.groupTableViewBackgroundColor()
         })
     }
     
@@ -617,7 +633,7 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
     
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         
-        return CGFloat.min + (kDevice == .Pad ? 40 : 0)
+        return 0 // CGFloat.min + (kDevice == .Pad ? 40 : 0)
     }
     
     override func setupTableViewRefreshControl(tableView: UITableView) {
@@ -632,6 +648,7 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
         
         popoverViewController = nil
         deselectSelectedCell(tableView)
+        scrollViewDidScroll(tableView)
         //getDifferenceAndRefreshIfNeccessary(nil)
     }
     
@@ -674,7 +691,7 @@ extension TransactionsViewController: UIScrollViewDelegate {
             setNavigationControllerToDefault()
         }
         
-        headerView.scrollViewDidScroll(scrollView)
+        headerView?.scrollViewDidScroll(scrollView)
     }
 }
 
