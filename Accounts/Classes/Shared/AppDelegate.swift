@@ -18,7 +18,7 @@ import ParseFacebookUtilsV4
 //var kActiveUser:User = User.object()
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
 
-let kViewBackgroundColor = UIColor.whiteColor()
+let kViewBackgroundColor = kDevice == .Pad ? UIColor.groupTableViewBackgroundColor() : UIColor.whiteColor()
 let kViewBackgroundGradientTop =  AccountColor.blueColor()
 let kViewBackgroundGradientBottom =  AccountColor.greenColor()
 

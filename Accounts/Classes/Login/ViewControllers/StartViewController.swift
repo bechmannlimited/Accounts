@@ -60,7 +60,11 @@ class StartViewController: ACBaseViewController {
                 let result = JSON(json)
                 println(result)
                 user["facebookId"] = result["id"].stringValue
-                user["displayName"] = result["name"].stringValue
+                
+                if user["displayName"] == nil {
+                    
+                    user["displayName"] = result["name"].stringValue
+                }
                 
                 Task.executeTaskInBackground({ () -> () in
                     

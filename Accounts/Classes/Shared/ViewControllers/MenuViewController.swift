@@ -142,8 +142,19 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         else if indexPath == kProfileIndexPath {
             
-            let v = SaveUserViewController()
-            navigationController?.pushViewController(v, animated: true)
+            if User.currentUser()?.facebookId == nil {
+                
+                let v = SaveUserViewController()
+                navigationController?.pushViewController(v, animated: true)
+            }
+            else{
+                
+                UIAlertView(title: "Not ready yet!", message: "You cant view your profile if you are logged in via facebook for the moment.", delegate: nil, cancelButtonTitle: "Ok").show()
+                
+                tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            }
+            
+            
         }
     }
     

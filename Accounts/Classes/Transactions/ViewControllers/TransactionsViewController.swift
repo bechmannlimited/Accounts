@@ -92,6 +92,11 @@ class TransactionsViewController: ACBaseViewController {
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
         
+        if headerView == nil {
+            
+            setupBouncyHeaderView()
+        }
+        
         if kDevice == .Pad {
             
             tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top + 40, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
@@ -108,12 +113,8 @@ class TransactionsViewController: ACBaseViewController {
         
         //getDifferenceAndRefreshIfNeccessary(nil)
         
+        tableView.delegate = self // incase it wwasnt set from viewwilldissapear method
         scrollViewDidScroll(tableView)
-        
-        if headerView == nil {
-            
-            setupBouncyHeaderView()
-        }
     }
     
     func setupBouncyHeaderView(){
@@ -519,6 +520,7 @@ class TransactionsViewController: ACBaseViewController {
         super.viewWillDisappear(animated)
         
         query?.cancel()
+        tableView.delegate = nil
     }
 }
 
