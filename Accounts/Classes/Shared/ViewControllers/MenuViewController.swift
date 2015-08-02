@@ -127,7 +127,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                             
                             ParseUtilities.showAlertWithErrorIfExists(error)
                         }
-                        else{
+                        else {
 
                             let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Login")
                             self.presentViewController(v, animated: true, completion: nil)

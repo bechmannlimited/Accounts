@@ -78,6 +78,7 @@ class TransactionsViewController: ACBaseViewController {
 
         //setupLoadMoreView()
         setupNoDataLabel(noDataView, text: "Tap plus to add a purchase or transfer")
+        view.sendSubviewToBack(noDataView)
         
         executeActualRefreshByHiding(true, refreshControl: nil, take: nil, completion: nil)
         
@@ -402,7 +403,7 @@ class TransactionsViewController: ACBaseViewController {
         
         //getDifferenceAndRefreshIfNeccessary(refreshControl)
         
-        executeActualRefreshByHiding(false, refreshControl: refreshControl, take: nil, completion: nil)
+        executeActualRefreshByHiding(true, refreshControl: refreshControl, take: nil, completion: nil)
     }
     
 //    func animateTableFooterViewHeight(height: Int, completion: (() -> ())?) {
@@ -421,7 +422,7 @@ class TransactionsViewController: ACBaseViewController {
     func loadMore() {
         
         query?.cancel()
-        query?.skip = transactions.count + 1
+        query?.skip = transactions.count 
         query?.limit = 16
         
         query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in

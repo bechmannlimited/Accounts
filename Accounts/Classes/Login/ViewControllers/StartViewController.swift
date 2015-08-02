@@ -21,7 +21,7 @@ class StartViewController: ACBaseViewController {
             
             var loginViewController = PFLogInViewController()
             
-            loginViewController.fields = PFLogInFields.UsernameAndPassword | PFLogInFields.LogInButton | PFLogInFields.SignUpButton | PFLogInFields.PasswordForgotten | PFLogInFields.Facebook
+            loginViewController.fields =  PFLogInFields.LogInButton | PFLogInFields.PasswordForgotten | PFLogInFields.Facebook | PFLogInFields.UsernameAndPassword |  PFLogInFields.SignUpButton
             loginViewController.facebookPermissions = ["email", "public_profile", "user_friends"]
             
             var signUpViewController = PFSignUpViewController()

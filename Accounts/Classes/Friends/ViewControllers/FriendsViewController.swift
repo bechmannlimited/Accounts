@@ -56,7 +56,6 @@ class FriendsViewController: ACBaseViewController {
         }
         
         setupNoDataLabel(noDataView, text: "To get started, click invites to add some friends!")
-        
         setupToolbar()
     }
     
@@ -317,58 +316,13 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueOrCreateReusableCellWithIdentifier("Cell", requireNewCell: { (identifier) -> (UITableViewCell) in
+        let cell: UITableViewCell = tableView.dequeueOrCreateReusableCellWithIdentifier("Cell", requireNewCell: { (identifier) -> (UITableViewCell) in
             
-            return UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: identifier)
+            return FriendTableViewCell(reuseIdentifier: identifier)
         })
         
-        cell.backgroundColor = UIColor.whiteColor()
-        //setTableViewCellAppearanceForBackgroundGradient(cell)
-        
         let friend = data[indexPath.section][indexPath.row]
-        
-        cell.textLabel?.text = friend.appropriateDisplayName()
-        let amount = friend.localeDifferenceBetweenActiveUser //abs()
-        
-        var tintColor = UIColor.lightGrayColor()
-        
-        if friend.localeDifferenceBetweenActiveUser < 0 {
-            
-            tintColor = AccountColor.negativeColor()
-        }
-        else if friend.localeDifferenceBetweenActiveUser > 0 {
-            
-            tintColor = AccountColor.positiveColor()
-        }
-        
-        cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
-        cell.detailTextLabel?.textColor = tintColor
-        //cell.editingAccessoryType = UITableViewCellAccessoryType.DisclosureIndicator;
-        cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-        
-        if let id = friend.facebookId {
-            
-            cell.imageView?.image = UIImage.imageWithColor(UIColor.clearColor(), size: CGSize(width: 50, height: 50))
-            cell.imageView?.showLoader()
-            
-            let url = "https://graph.facebook.com/\(id)/picture?width=\(50)&height=\(50)"
-            
-            ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
-                
-                cell.imageView?.hideLoader()
-                cell.imageView?.image = image
-                cell.layoutSubviews()
-                cell.imageView?.layer.cornerRadius = cell.imageView!.image!.size.width / 2
-            })
-        }
-        else{
-            
-            cell.imageView?.image = AppTools.iconAssetNamed("769-male-selected.png")
-            cell.imageView?.layer.cornerRadius = cell.imageView!.image!.size.width / 2
-            cell.imageView?.tintWithColor(tintColor)
-        }
-        
-        cell.imageView?.clipsToBounds = true
+        (cell as! FriendTableViewCell).setup(friend)
         
         return cell
     }
@@ -410,7 +364,9 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         
-        return indexPath.section == 2
+        let friend = data[indexPath.section][indexPath.row]
+        
+        return indexPath.section == 2 && friend.facebookId == nil
     }
     
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {

@@ -78,7 +78,7 @@ class BouncyHeaderView: UIView{
         //blur view
         if y < 0 {
             
-            let threshhold: CGFloat = 350
+            let threshhold: CGFloat = 300
             let opacity:CGFloat = -y / threshhold
             blurView.layer.opacity = 1 - Float(opacity)
         }

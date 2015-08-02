@@ -15,7 +15,6 @@ import Bolts
 import ParseFacebookUtilsV4
 
 
-//var kActiveUser:User = User.object()
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
 
 let kViewBackgroundColor = kDevice == .Pad ? UIColor.groupTableViewBackgroundColor() : UIColor.whiteColor()

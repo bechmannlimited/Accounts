@@ -54,6 +54,13 @@ class SaveTransactionViewController: SaveItemViewController {
             
             Task.executeTaskInBackground({ () -> () in
                 
+//                var error = NSErrorPointer()
+//                self.transaction.fetch(error)
+//                
+//                if error != nil {
+//                    
+//                    self.pop()
+//                }
                 self.transaction.fetchIfNeeded()
                 self.transaction.toUser?.fetchIfNeeded()
                 self.transaction.fromUser?.fetchIfNeeded()

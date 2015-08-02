@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B62BCCC28F4EFF1A03B754E2 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FE940505535F01C5055CC8A /* Pods.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		E411FE211B6E784F00C29D1F /* FriendTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411FE201B6E784F00C29D1F /* FriendTableViewCell.swift */; };
 		E44119C71B66DBA0006811AF /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = E44119C51B66DA3B006811AF /* libstdc++.6.dylib */; };
 		E442C2D51B510E610061CAE6 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E442C2D41B510E610061CAE6 /* Images.xcassets */; };
 		E442C2D81B510E610061CAE6 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = E442C2D61B510E610061CAE6 /* LaunchScreen.xib */; };
@@ -62,7 +63,7 @@
 		E47FD8141B5D7EDE004B4C56 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FD8131B5D7EDE004B4C56 /* LocationManager.swift */; };
 		E47FD8161B5EDFBF004B4C56 /* SaveItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FD8151B5EDFBF004B4C56 /* SaveItemViewController.swift */; };
 		E47FD8191B5FF042004B4C56 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FD8181B5FF042004B4C56 /* Task.swift */; };
-		E48C52381B6970860056A7E3 /* BounceHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48C52371B6970860056A7E3 /* BounceHeaderView.swift */; };
+		E48C52381B6970860056A7E3 /* BouncyHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */; };
 		E48C52681B6978CC0056A7E3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48C52671B6978CC0056A7E3 /* ViewController.swift */; };
 		E4E7CAD91B66D24E0027833E /* StartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E7CAD81B66D24E0027833E /* StartViewController.swift */; };
 /* End PBXBuildFile section */
@@ -81,6 +82,7 @@
 		0B90F6D66B71607A5F641724 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		2FE940505535F01C5055CC8A /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A5AB94CFB6E6C418E393CB0 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		E411FE201B6E784F00C29D1F /* FriendTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendTableViewCell.swift; sourceTree = "<group>"; };
 		E44119C51B66DA3B006811AF /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
 		E442C2C81B510E610061CAE6 /* Accounts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Accounts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E442C2CC1B510E610061CAE6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -140,7 +142,7 @@
 		E47FD8131B5D7EDE004B4C56 /* LocationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		E47FD8151B5EDFBF004B4C56 /* SaveItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SaveItemViewController.swift; sourceTree = "<group>"; };
 		E47FD8181B5FF042004B4C56 /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
-		E48C52371B6970860056A7E3 /* BounceHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BounceHeaderView.swift; sourceTree = "<group>"; };
+		E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BouncyHeaderView.swift; sourceTree = "<group>"; };
 		E48C52671B6978CC0056A7E3 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		E4C2A43B1B68052000730BAB /* ABToolKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ABToolKit.framework; path = "Pods/../build/Debug-iphoneos/Pods/ABToolKit.framework"; sourceTree = "<group>"; };
 		E4E7CAD81B66D24E0027833E /* StartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartViewController.swift; sourceTree = "<group>"; };
@@ -314,6 +316,7 @@
 		E442C2F51B510E940061CAE6 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E411FE201B6E784F00C29D1F /* FriendTableViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -483,7 +486,7 @@
 		E442C31E1B510E940061CAE6 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				E48C52371B6970860056A7E3 /* BounceHeaderView.swift */,
+				E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -692,7 +695,7 @@
 				E442C3281B510E940061CAE6 /* FindFriendsViewController.swift in Sources */,
 				E47FD80E1B533B2E004B4C56 /* ParseUtilities.swift in Sources */,
 				E442C3441B510E940061CAE6 /* SaveUserViewController.swift in Sources */,
-				E48C52381B6970860056A7E3 /* BounceHeaderView.swift in Sources */,
+				E48C52381B6970860056A7E3 /* BouncyHeaderView.swift in Sources */,
 				E442C32A1B510E940061CAE6 /* FriendsViewController.swift in Sources */,
 				E442C33A1B510E940061CAE6 /* ACFormViewController.swift in Sources */,
 				E442C3341B510E940061CAE6 /* AppTools.swift in Sources */,
@@ -717,6 +720,7 @@
 				E442C3291B510E940061CAE6 /* FriendInvitesViewController.swift in Sources */,
 				E442C3351B510E940061CAE6 /* Formatter.swift in Sources */,
 				E442C32E1B510E940061CAE6 /* SavePurchaseViewController.swift in Sources */,
+				E411FE211B6E784F00C29D1F /* FriendTableViewCell.swift in Sources */,
 				E442C33F1B510E940061CAE6 /* VerifyUserViewController.swift in Sources */,
 				E442C3521B52C3150061CAE6 /* FriendRequest.swift in Sources */,
 				E442C3361B510E940061CAE6 /* Friend.swift in Sources */,
@@ -869,6 +873,7 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "586a5097-1f12-472f-81a5-eca7c059743f";
 				SWIFT_OBJC_BRIDGING_HEADER = "Accounts/Accounts-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -906,6 +911,7 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "586a5097-1f12-472f-81a5-eca7c059743f";
 				SWIFT_OBJC_BRIDGING_HEADER = "Accounts/Accounts-Bridging-Header.h";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
