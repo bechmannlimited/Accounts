@@ -29,6 +29,17 @@ class FriendTableViewCell: UITableViewCell {
         self.init(style: UITableViewCellStyle.Value1, reuseIdentifier: reuseIdentifier)
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        friendNameLabel.removeConstraints(friendNameLabel.constraints())
+        friendImageView.removeConstraints(friendNameLabel.constraints())
+        amountOwedLabel.removeConstraints(friendNameLabel.constraints())
+        
+        setupImageView()
+        setupFriendNameLabel()
+    }
+    
     override func drawRect(rect: CGRect){
         super.drawRect(rect)
         
@@ -40,10 +51,6 @@ class FriendTableViewCell: UITableViewCell {
         
         amountOwedLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
         contentView.addSubview(amountOwedLabel)
-        
-        setupImageView()
-        setupFriendNameLabel()
-        //setupAmountOwedLabel()
         
         accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
     }

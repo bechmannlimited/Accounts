@@ -316,13 +316,10 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell: UITableViewCell = tableView.dequeueOrCreateReusableCellWithIdentifier("Cell", requireNewCell: { (identifier) -> (UITableViewCell) in
-            
-            return FriendTableViewCell(reuseIdentifier: identifier)
-        })
+        let cell = FriendTableViewCell(reuseIdentifier: "Cell");
         
         let friend = data[indexPath.section][indexPath.row]
-        (cell as! FriendTableViewCell).setup(friend)
+        (cell as FriendTableViewCell).setup(friend)
         
         return cell
     }
