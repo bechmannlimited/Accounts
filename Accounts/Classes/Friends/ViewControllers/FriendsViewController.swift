@@ -55,8 +55,11 @@ class FriendsViewController: ACBaseViewController {
             tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
-        setupNoDataLabel(noDataView, text: "To get started, click invites to add some friends!")
+        setupNoDataLabel(noDataView, text: "Your Facebook friends who have this app, will appear here!") //To get started, invite some friends!
         setupToolbar()
+        
+        tableView.layer.opacity = 0
+        view.showLoader()
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -138,11 +141,11 @@ class FriendsViewController: ACBaseViewController {
         let editBarButtonItem = editButtonItem() //data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
         
         navigationItem.leftBarButtonItems = [
-            openMenuBarButtonItem!,
-            editBarButtonItem
+            openMenuBarButtonItem!
+            //editBarButtonItem
         ]
         navigationItem.rightBarButtonItems = [
-            friendInvitesBarButtonItem!
+            //friendInvitesBarButtonItem!
         ]
     }
     
@@ -222,9 +225,7 @@ class FriendsViewController: ACBaseViewController {
     
     override func refresh(refreshControl: UIRefreshControl?) {
         
-        view.showLoader()
-        tableView.layer.opacity = 0
-        toolbar.items = []
+        //toolbar.items = []
         
         User.currentUser()?.getFriends({ () -> () in
             
@@ -235,10 +236,9 @@ class FriendsViewController: ACBaseViewController {
             
             UIView.animateWithDuration(0.5, animations: { () -> Void in
                 
-                self.tableView.layer.opacity = 1
+                //self.tableView.layer.opacity = 1
             })
             
-            //self.setBarButtonItems()
             self.showOrHideAddButton()
             self.showOrHideTableOrNoDataView()
         })

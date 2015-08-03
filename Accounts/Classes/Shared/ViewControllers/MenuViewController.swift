@@ -16,8 +16,8 @@ private let kProfileSection = 0
 private let kCurrencySection = 1
 //private let kLogoutSection = 2
 
-private let kProfileIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
-private let kLogoutIndexPath = NSIndexPath(forRow: 1, inSection: kProfileSection)
+private let kProfileIndexPath = NSIndexPath(forRow: 09999, inSection: kProfileSection)
+private let kLogoutIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
 
 private let kCurrencyIndexPath = NSIndexPath(forRow: 0, inSection: kCurrencySection)
 
@@ -30,7 +30,7 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
-        [kProfileIndexPath, kLogoutIndexPath]
+        [kLogoutIndexPath]
     ]
     
     //var delegate: MenuDelegate?

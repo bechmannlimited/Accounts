@@ -45,6 +45,8 @@ class TransactionsViewController: ACBaseViewController {
     //var isLoadingMore = false
     //var canLoadMore = true
     
+    var refreshBarButtonItem: UIBarButtonItem?
+    
     var selectedRow: NSIndexPath?
     
     var selectedPurchaseID: String?
@@ -78,7 +80,7 @@ class TransactionsViewController: ACBaseViewController {
 
         //setupLoadMoreView()
         setupNoDataLabel(noDataView, text: "Tap plus to add a purchase or transfer")
-        view.sendSubviewToBack(noDataView)
+        tableView.addSubview(noDataView)
         
         executeActualRefreshByHiding(true, refreshControl: nil, take: nil, completion: nil)
         
@@ -91,7 +93,8 @@ class TransactionsViewController: ACBaseViewController {
             UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
         ]
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
+        refreshBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
+        navigationItem.rightBarButtonItem = refreshBarButtonItem
         
         if headerView == nil {
             
@@ -102,6 +105,9 @@ class TransactionsViewController: ACBaseViewController {
             
             tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top + 40, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
         }
+        
+        view.showLoader()
+        self.tableView.separatorColor = UIColor.clearColor()
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -254,56 +260,109 @@ class TransactionsViewController: ACBaseViewController {
     
     func executeActualRefreshByHiding(hiding: Bool, refreshControl: UIRefreshControl?, take:Int?, completion: ( ()-> ())?) {
         
+        refreshBarButtonItem?.enabled = false
+        
         if hiding {
             
-            view.showLoader()
-            tableView.layer.opacity = 0
+            
             noDataView.layer.opacity = 0
         }
-    
+        
         query?.cancel()
         query?.skip = 0
         query?.limit = 16
         
-        Task.executeTaskInBackground({ () -> () in
+        var tasksCompleted = 0
+        
+        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             
-            if var transactions = self.query?.findObjects() as? [Transaction] {
+            if var transactions = objects as? [Transaction] {
+            
+                Task.executeTaskInBackground({ () -> () in
                 
-                for transaction in transactions {
+                    var newIds = [String]()
                     
-                    if transaction.fromUser?.objectId == transaction.toUser?.objectId {
+                    if let arr = Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction] { //.whereKey("objectId", notContainedIn: newIds)
                         
-                        let index = find(transactions, transaction)!
-                        transactions.removeAtIndex(index)
+                        for transaction in arr{
+                            
+                            transaction.unpinInBackground()
+                            transaction.purchase?.unpinInBackground()
+                        }
                     }
-                }
-                
-                for transaction in transactions {
                     
-                    if let id = transaction.purchaseObjectId {
+                    for transaction in transactions {
                         
-                        transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
+                        newIds.append(transaction.objectId!)
+                        
+                        if let id = transaction.purchaseObjectId {
+                            
+                            transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
+                        }
+                        
+                        transaction.pinInBackground()
+                        transaction.purchase?.pinInBackground()
                     }
-                }
-                
-                self.transactions = transactions
-                //self.hasLoadedFirstTime = true
+
+                    self.transactions = transactions
+                    
+                }, completion: { () -> () in
+                    
+                    refreshControl?.endRefreshing()
+                    self.tableView.reloadData()
+                    
+                    self.view.hideLoader()
+                    self.showOrHideTableOrNoDataView()
+                    
+                    self.refreshBarButtonItem?.enabled = true
+
+                    completion?()
+                    
+                })
             }
+        })
+        
+        let localQuery: PFQuery? = query?.copy() as? PFQuery
+        
+        localQuery?.fromLocalDatastore()
+        
+        localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             
-        }, completion: { () -> () in
-            
-            refreshControl?.endRefreshing()
-            self.tableView.reloadData()
-            
-            self.view.hideLoader()
-            self.showOrHideTableOrNoDataView()
-            
-            //just in case
-            //self.loadMoreView.hideLoader()
-            
-            self.findAndScrollToCalculatedSelectedCellAtIndexPath()
-            
-            completion?()
+            Task.executeTaskInBackground({ () -> () in
+                
+                if var transactions = objects as? [Transaction] {
+                    
+                    for transaction in transactions {
+                        
+                        if let id = transaction.purchaseObjectId {
+                            
+                            let localPurchaseQuery = Purchase.query()
+                            localPurchaseQuery?.fromLocalDatastore()
+                            transaction.purchase = localPurchaseQuery?.getObjectWithId(id) as? Purchase
+                            
+                            if transaction.purchase == nil {
+                                
+                                transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
+                                transaction.purchase?.pinInBackground()
+                            }
+                        }
+                    }
+                    
+                    self.transactions = transactions
+                }
+                
+            }, completion: { () -> () in
+                
+                refreshControl?.endRefreshing()
+                self.tableView.reloadData()
+                
+                self.view.hideLoader()
+                self.showOrHideTableOrNoDataView()
+                
+                self.findAndScrollToCalculatedSelectedCellAtIndexPath()
+                
+                completion?()
+            })
         })
     }
     
@@ -708,7 +767,7 @@ extension TransactionsViewController: SaveItemDelegate {
     
     func itemDidChange() {
         
-        executeActualRefreshByHiding(true, refreshControl: nil, take: transactions.count, completion: nil)
+        executeActualRefreshByHiding(false, refreshControl: nil, take: transactions.count, completion: nil)
     }
     
     func transactionDidChange(transaction: Transaction) {

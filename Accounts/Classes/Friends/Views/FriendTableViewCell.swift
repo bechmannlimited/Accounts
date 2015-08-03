@@ -135,7 +135,6 @@ class FriendTableViewCell: UITableViewCell {
         friendImageView.addBottomConstraint(toView: contentView, attribute: NSLayoutAttribute.Bottom, relation: NSLayoutRelation.GreaterThanOrEqual, constant: kContentViewVerticalPadding)
 
         friendImageView.clipsToBounds = true
-        
     }
     
     func setupFriendNameLabel() {

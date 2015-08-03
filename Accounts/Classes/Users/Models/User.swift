@@ -68,6 +68,11 @@ class User: PFUser {
 
         friends = [User]()
         
+        for friend in friends {
+            
+            friend.unpinInBackground()
+        }
+        
         let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
         graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
             
@@ -94,11 +99,12 @@ class User: PFUser {
                 queries.append(query1!)
                 
                 self.friends = PFQuery.orQueryWithSubqueries(queries).findObjects() as! [User]
-
+                
                 for friend in self.friends{
                     
                     let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
                     friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+                    friend.pinInBackground()
                 }
                 
             }, completion: { () -> () in
@@ -159,29 +165,6 @@ class User: PFUser {
             
             ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.fromUser!], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
         })
-        
-//        Task.executeTaskInBackground({ () -> () in
-//            
-//            let query = FriendRequest.query()
-//            query?.whereKey("fromUser", equalTo: friendRequest.toUser!)
-//            query?.whereKey("toUser", equalTo: friendRequest.fromUser!)
-//            
-//            if let match = query?.findObjects()?.first as? FriendRequest {
-//                
-//                friendRequest.friendRequestStatus = FriendRequestStatus.Confirmed.rawValue
-//                PFObject.saveAll([friendRequest, User.currentUser()!])
-//            }
-//            else{
-//                
-//                UIAlertView(title: "Friend request not sent!", message: "The friend request has expired", delegate: nil, cancelButtonTitle: "Ok").show()
-//                
-//                completion(success: false)
-//            }
-//            
-//        }, completion: { () -> () in
-//            
-//            completion(success: true)
-//        })
     }
     
     func getInvites(completion:(invites:Array<Array<FriendRequest>>) -> ()) {

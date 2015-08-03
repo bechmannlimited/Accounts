@@ -80,10 +80,13 @@ class SaveTransactionViewController: SaveItemViewController {
 
         updateUIForSavingOrDeleting()
         
+        transaction.unpinInBackground()
+        
         transaction.saveInBackgroundWithBlock { (success, error) -> Void in
 
             if success {
 
+                self.transaction.pinInBackground()
                 self.delegate?.transactionDidChange(self.transaction)
                 self.self.popAll()
                 self.delegate?.itemDidChange()
@@ -210,6 +213,8 @@ extension SaveTransactionViewController: FormViewDelegate {
                 if response == AlertResponse.Confirm {
                     
                     self.updateUIForSavingOrDeleting()
+                    
+                    self.transaction.unpinInBackground()
                     
                     self.transaction.deleteInBackgroundWithBlock({ (success, error) -> Void in
                         
