@@ -12,14 +12,17 @@ import SwiftyUserDefaults
 import SwiftyJSON
 import Parse
 
-private let kProfileSection = 0
+private let kProfileSection = 1
 private let kCurrencySection = 1
+private let kFeedbackSection = 0
 //private let kLogoutSection = 2
 
 private let kProfileIndexPath = NSIndexPath(forRow: 09999, inSection: kProfileSection)
 private let kLogoutIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
 
-private let kCurrencyIndexPath = NSIndexPath(forRow: 0, inSection: kCurrencySection)
+private let kCurrencyIndexPath = NSIndexPath(forRow: 999, inSection: 9999)
+
+private let kFeedbackIndexPath = NSIndexPath(forRow: 0, inSection: kFeedbackSection)
 
 //protocol MenuDelegate {
 //    
@@ -30,7 +33,8 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
-        [kLogoutIndexPath]
+        [kLogoutIndexPath],
+        [kFeedbackIndexPath]
     ]
     
     //var delegate: MenuDelegate?
@@ -99,6 +103,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             
             cell.textLabel?.text = "Edit profile"
         }
+        else if indexPath == kFeedbackIndexPath {
+         
+            cell.textLabel?.text = "Contact support team"
+            cell.detailTextLabel?.text = "feedback/questions"
+        }
         
         return cell
     }
@@ -153,8 +162,10 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 
                 tableView.deselectRowAtIndexPath(indexPath, animated: true)
             }
+        }
+        else if indexPath == kFeedbackIndexPath{
             
-            
+            SupportKit.show()
         }
     }
     

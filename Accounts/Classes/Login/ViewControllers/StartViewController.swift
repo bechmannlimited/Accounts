@@ -46,6 +46,9 @@ class StartViewController: ACBaseViewController {
     
     func goToApp(){
         
+        SKTUser.currentUser().firstName = User.currentUser()?.displayName
+        SKTUser.currentUser().addProperties([ "objectId" : User.currentUser()!.objectId! ])
+        
         var v = UIStoryboard.initialViewControllerFromStoryboardNamed("Main")
         UIViewController.topMostController().presentViewController(v, animated: false, completion: nil)
     }

@@ -14,3 +14,5 @@
 #import <FBSDKLoginKit/FBSDKLoginKit.h>
 
 #import <Bolts/BFTask.h>
+
+#import <SupportKit/SupportKit.h>

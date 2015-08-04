@@ -91,19 +91,46 @@ class SaveTransactionViewController: SaveItemViewController {
                     self.transaction.pinInBackground()
                 }
                 
-                self.delegate?.transactionDidChange(self.transaction)
-                self.self.popAll()
+                self.popAll()
                 self.delegate?.itemDidChange()
-                
+                self.delegate?.transactionDidChange(self.transaction)
                 self.transaction.sendPushNotifications(self.isNew)
             }
-            else {
-            
+            else{
+                
                 ParseUtilities.showAlertWithErrorIfExists(error)
             }
-
+            
             self.updateUIForEditing()
         }
+        
+//        updateUIForSavingOrDeleting()
+//        
+//        var isNew = transaction.objectId == nil
+//        
+//        transaction.saveInBackgroundWithBlock { (success, error) -> Void in
+//            
+//            if success {
+//                
+//                if isNew {
+//                    
+//                    self.transaction.pinInBackground()
+//                }
+//                
+//                self.transaction.sendPushNotifications(self.isNew)
+//            }
+//            else{
+//                
+//                self.transaction.saveEventually()
+//                UIAlertView(title: "No internet connection!", message: "We will save this as soon as the internet connection returns!", delegate: nil, cancelButtonTitle: "Ok").show()
+//            }
+//            
+//            self.popAll()
+//            self.delegate?.itemDidChange()
+//            self.delegate?.transactionDidChange(self.transaction)
+//            
+//            self.updateUIForEditing()
+//        }
     }
     
     override func saveButtonEnabled() -> Bool {
@@ -218,16 +245,19 @@ extension SaveTransactionViewController: FormViewDelegate {
                     
                     self.updateUIForSavingOrDeleting()
                     
-                    self.transaction.unpinInBackground()
-                    
                     self.transaction.deleteInBackgroundWithBlock({ (success, error) -> Void in
                         
-                        ParseUtilities.showAlertWithErrorIfExists(error)
-                        
-                        self.popAll()
-                        self.delegate?.itemDidGetDeleted()
-                        
-                        ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                        if success{
+                            
+                            self.popAll()
+                            self.delegate?.itemDidGetDeleted()
+                            
+                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                        }
+                        else{
+                            
+                            ParseUtilities.showAlertWithErrorIfExists(error)
+                        }
                     })
                 }
             })

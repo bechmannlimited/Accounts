@@ -245,18 +245,6 @@ class Purchase: PFObject {
             }
         }
     }
-    
-    func deletePurchaseAndTransactions(completion:() -> ()) {
-        
-        unpinInBackground()
-        
-        deleteInBackgroundWithBlock { (success, error) -> Void in
-            
-            ParseUtilities.showAlertWithErrorIfExists(error)
-            
-            completion()
-        }
-    }
 }
 
 extension Purchase: PFSubclassing {

@@ -273,7 +273,9 @@ class TransactionsViewController: ACBaseViewController {
         
         let executeRemoteQuery: () -> () = {
             
-            query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+            self.refreshBarButtonItem?.enabled = false
+            
+            self.query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
                 if var transactions = objects as? [Transaction] {
                     
@@ -303,18 +305,18 @@ class TransactionsViewController: ACBaseViewController {
                         
                         self.transactions = transactions
                         
-                        }, completion: { () -> () in
-                            
-                            refreshControl?.endRefreshing()
-                            self.tableView.reloadData()
-                            
-                            self.view.hideLoader()
-                            self.showOrHideTableOrNoDataView()
-                            
-                            self.refreshBarButtonItem?.enabled = true
-                            self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
-                            
-                            completion?()
+                    }, completion: { () -> () in
+                        
+                        refreshControl?.endRefreshing()
+                        self.tableView.reloadData()
+                        
+                        self.view.hideLoader()
+                        self.showOrHideTableOrNoDataView()
+                        
+                        self.refreshBarButtonItem?.enabled = true
+                        self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
+                        
+                        completion?()
                             
                     })
                 }
@@ -360,8 +362,10 @@ class TransactionsViewController: ACBaseViewController {
                     
                    //self.findAndScrollToCalculatedSelectedCellAtIndexPath(false)
                     
-                    completion?()
+                    self.refreshBarButtonItem?.enabled = true
                     
+                    completion?()
+
                     executeRemoteQuery()
             })
         })

@@ -23,6 +23,10 @@ class User: PFUser {
     @NSManaged var facebookId: String?
     @NSManaged var displayName: String?
     
+    @NSManaged var friendsIdsWithDifference: Dictionary<String, NSNumber>?
+    
+    
+    
     func modelIsValid() -> Bool {
         
         return username?.length() > 0 && password?.length() > 0 && email?.length() > 0 && password == passwordForVerification
@@ -72,63 +76,99 @@ class User: PFUser {
             
             for friend in self.friends {
                 
-                friend.unpinInBackground()
+                //friend.unpinInBackground()
             }
             
             let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
             graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
                 
-                Task.executeTaskInBackground({ () -> () in
+                println("error: \(error?.code)")
+                
+                if error == nil{
                     
-                    var queries = [PFQuery]()
-                    var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
-                    
-                    if self.facebookId != nil {
+                    Task.executeTaskInBackground({ () -> () in
                         
-                        let friendsJson = JSON(result)["data"]
+                        var friendInfo = Dictionary<String, NSNumber>()
                         
-                        for (index: String, friendJson: JSON) in friendsJson {
+                        //self.friendsArray = []
+                        //self.pin()
+                        
+                        var queries = [PFQuery]()
+                        var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
+                        
+                        if self.facebookId != nil {
                             
-                            let friendQuery = User.query()
-                            friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
-                            queries.append(friendQuery!)
+                            let friendsJson = JSON(result)["data"]
+                            
+                            for (index: String, friendJson: JSON) in friendsJson {
+                                
+                                let friendQuery = User.query()
+                                friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
+                                queries.append(friendQuery!)
+                            }
                         }
-                    }
-                    
-                    queries.append(query1!)
-                    
-                    self.friends = PFQuery.orQueryWithSubqueries(queries).findObjects() as! [User]
-                    
-                    for friend in self.friends{
                         
-                        let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
-                        friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                        friend.pinInBackground()
-                    }
-                    
-                    self.pinInBackground()
-                    
-                }, completion: { () -> () in
+                        queries.append(query1!)
                         
-                    completion()
-                })
+                        self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
+                        
+                        for friend in self.friends {
+                            
+                            let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
+                            friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+                            //friend.differenceBetweenActiveUser = NSNumber(double: responseJson.doubleValue)
+                            
+                            friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                            
+                        }
+                        
+                        self.friendsIdsWithDifference = friendInfo
+                        
+                        }, completion: { () -> () in
+                            
+                            completion()
+                    })
+                }
+                else{
+                    
+                    connection.cancel()
+                }
             })
         }
         
-        execRemoteQuery()
+        //
         
-//        let localQuery = relationForKey(kParse_User_Friends_Key).query()?.fromLocalDatastore()
-//        
-//        localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-//            
-//            if let friends = objects as? [User] {
-//                println(friends);println("hi")
-//                self.friends = friends
-//                completion()
-//                
-//                execRemoteQuery()
-//            }
-//        })
+        var ids = [String]()
+        
+        if let friendInfos = friendsIdsWithDifference{
+            
+            for friend in friendInfos{
+                
+                ids.append(friend.0)
+            }
+            
+            let localQuery = User.query()?.whereKey("objectId", containedIn: ids).orderByAscending("objectId").fromLocalDatastore()
+            
+            localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+                
+                if let friends = objects as? [User] {
+                    println(friends);println("hi")
+                    self.friends = friends
+                    
+                    for friend in self.friends {
+                        
+                        friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
+                    }
+                    
+                    completion()
+                    execRemoteQuery()
+                }
+            })
+        }
+        else {
+            
+            execRemoteQuery()
+        }
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {

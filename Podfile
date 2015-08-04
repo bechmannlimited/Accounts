@@ -12,5 +12,6 @@ pod 'ParseUI', '~> 1.1.3'
 pod 'Parse', '~> 1.7.2'
 pod 'ParseFacebookUtilsV4', '~>1.7.2'
 pod 'SVPullToRefresh'
+pod 'SupportKit'
 
 use_frameworks!
