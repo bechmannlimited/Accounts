@@ -315,6 +315,7 @@ class TransactionsViewController: ACBaseViewController {
                     self.showOrHideTableOrNoDataView()
                     
                     self.refreshBarButtonItem?.enabled = true
+                    self.findAndScrollToCalculatedSelectedCellAtIndexPath()
 
                     completion?()
                     
@@ -358,9 +359,7 @@ class TransactionsViewController: ACBaseViewController {
                 
                 self.view.hideLoader()
                 self.showOrHideTableOrNoDataView()
-                
-                self.findAndScrollToCalculatedSelectedCellAtIndexPath()
-                
+
                 completion?()
             })
         })

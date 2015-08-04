@@ -80,13 +80,17 @@ class SaveTransactionViewController: SaveItemViewController {
 
         updateUIForSavingOrDeleting()
         
-        transaction.unpinInBackground()
+        var isNew = transaction.objectId == nil
         
         transaction.saveInBackgroundWithBlock { (success, error) -> Void in
 
             if success {
 
-                self.transaction.pinInBackground()
+                if isNew {
+                    
+                    self.transaction.pinInBackground()
+                }
+                
                 self.delegate?.transactionDidChange(self.transaction)
                 self.self.popAll()
                 self.delegate?.itemDidChange()

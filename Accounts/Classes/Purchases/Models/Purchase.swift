@@ -85,7 +85,7 @@ class Purchase: PFObject {
             transaction.unpinInBackground()
         }
         
-        unpinInBackground()
+        //unpin()
         
         self.saveInBackgroundWithBlock { (success, error) -> Void in
             
@@ -93,7 +93,10 @@ class Purchase: PFObject {
             
             if success {
                 
-                self.pinInBackground()
+                if isNewPurchase {
+                    
+                    self.pinInBackground()
+                }
                 
                 for transaction in self.transactions {
                     
