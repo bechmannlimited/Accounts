@@ -66,23 +66,26 @@ class FriendTableViewCell: UITableViewCell {
         
         calculateTintColor()
         
-        friendImageView.image = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
-        friendImageView.tintWithColor(tintColor)
-        friendImageView.clipsToBounds = true
-        
-        if let id = friend.facebookId {
+        if friendImageView.image == nil { // for now as each cell is separetely initialized
             
-            friendImageView.showLoader()
+            friendImageView.image = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
+            friendImageView.tintWithColor(tintColor)
+            friendImageView.clipsToBounds = true
             
-            let url = "https://graph.facebook.com/\(id)/picture?width=\(150)&height=\(150)"
-            
-            ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
+            if let id = friend.facebookId {
                 
-                self.friendImageView.hideLoader()
-                self.friendImageView.contentMode = UIViewContentMode.ScaleAspectFill
-                self.friendImageView.image = image
-                self.friendImageView.layer.cornerRadius = self.friendImageViewWidth() / 2
-            })
+                friendImageView.showLoader()
+                
+                let url = "https://graph.facebook.com/\(id)/picture?width=\(150)&height=\(150)"
+                
+                ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
+                    
+                    self.friendImageView.hideLoader()
+                    self.friendImageView.contentMode = UIViewContentMode.ScaleAspectFill
+                    self.friendImageView.image = image
+                    self.friendImageView.layer.cornerRadius = self.friendImageViewWidth() / 2
+                })
+            }
         }
     }
     

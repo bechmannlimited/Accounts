@@ -85,14 +85,11 @@ class User: PFUser {
                     
                     let friendsJson = JSON(result)["data"]
                     
-                    println(friendsJson)
-                    
                     for (index: String, friendJson: JSON) in friendsJson {
                         
                         let friendQuery = User.query()
                         friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
                         queries.append(friendQuery!)
-                        
                     }
                 }
 

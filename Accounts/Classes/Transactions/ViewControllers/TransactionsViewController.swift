@@ -115,7 +115,7 @@ class TransactionsViewController: ACBaseViewController {
         
         if selectedPurchaseID == nil && selectedTransactionID == nil && !didJustDelete {
             
-            findAndScrollToCalculatedSelectedCellAtIndexPath()
+            findAndScrollToCalculatedSelectedCellAtIndexPath(true)
         }
         
         //getDifferenceAndRefreshIfNeccessary(nil)
@@ -264,64 +264,62 @@ class TransactionsViewController: ACBaseViewController {
         
         if hiding {
             
-            
-            noDataView.layer.opacity = 0
+            noDataView.layer.opacity = 0 // need to re-check this bit
         }
         
         query?.cancel()
         query?.skip = 0
         query?.limit = 16
         
-        var tasksCompleted = 0
-        
-        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+        let executeRemoteQuery: () -> () = {
             
-            if var transactions = objects as? [Transaction] {
-            
-                Task.executeTaskInBackground({ () -> () in
+            query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
-                    var newIds = [String]()
+                if var transactions = objects as? [Transaction] {
                     
-                    if let arr = Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction] { //.whereKey("objectId", notContainedIn: newIds)
+                    Task.executeTaskInBackground({ () -> () in
                         
-                        for transaction in arr{
+                        let unpinQuery = self.query?.copy() as? PFQuery
+                        
+                        if let arr = unpinQuery?.fromLocalDatastore().findObjects() as? [Transaction] { //.whereKey("objectId", notContainedIn: newIds)
                             
-                            transaction.unpinInBackground()
-                            transaction.purchase?.unpinInBackground()
-                        }
-                    }
-                    
-                    for transaction in transactions {
-                        
-                        newIds.append(transaction.objectId!)
-                        
-                        if let id = transaction.purchaseObjectId {
-                            
-                            transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
+                            for transaction in arr{
+                                
+                                transaction.unpinInBackground()
+                                transaction.purchase?.unpinInBackground()
+                            }
                         }
                         
-                        transaction.pinInBackground()
-                        transaction.purchase?.pinInBackground()
-                    }
-
-                    self.transactions = transactions
-                    
-                }, completion: { () -> () in
-                    
-                    refreshControl?.endRefreshing()
-                    self.tableView.reloadData()
-                    
-                    self.view.hideLoader()
-                    self.showOrHideTableOrNoDataView()
-                    
-                    self.refreshBarButtonItem?.enabled = true
-                    self.findAndScrollToCalculatedSelectedCellAtIndexPath()
-
-                    completion?()
-                    
-                })
-            }
-        })
+                        for transaction in transactions {
+                            
+                            if let id = transaction.purchaseObjectId {
+                                
+                                transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
+                            }
+                            
+                            transaction.pinInBackground()
+                            transaction.purchase?.pinInBackground()
+                        }
+                        
+                        self.transactions = transactions
+                        
+                        }, completion: { () -> () in
+                            
+                            refreshControl?.endRefreshing()
+                            self.tableView.reloadData()
+                            
+                            self.view.hideLoader()
+                            self.showOrHideTableOrNoDataView()
+                            
+                            self.refreshBarButtonItem?.enabled = true
+                            self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
+                            
+                            completion?()
+                            
+                    })
+                }
+            })
+        }
         
         let localQuery: PFQuery? = query?.copy() as? PFQuery
         
@@ -352,20 +350,26 @@ class TransactionsViewController: ACBaseViewController {
                     self.transactions = transactions
                 }
                 
-            }, completion: { () -> () in
-                
-                refreshControl?.endRefreshing()
-                self.tableView.reloadData()
-                
-                self.view.hideLoader()
-                self.showOrHideTableOrNoDataView()
-
-                completion?()
+                }, completion: { () -> () in
+                    
+                    refreshControl?.endRefreshing()
+                    self.tableView.reloadData()
+                    
+                    self.view.hideLoader()
+                    self.showOrHideTableOrNoDataView()
+                    
+                   //self.findAndScrollToCalculatedSelectedCellAtIndexPath(false)
+                    
+                    completion?()
+                    
+                    executeRemoteQuery()
             })
         })
+        
+        
     }
     
-    func findAndScrollToCalculatedSelectedCellAtIndexPath() {
+    func findAndScrollToCalculatedSelectedCellAtIndexPath(shouldDeselect: Bool) {
         
         if !didJustDelete {
             
@@ -416,33 +420,36 @@ class TransactionsViewController: ACBaseViewController {
                 
                 tableView.selectRowAtIndexPath(indexPath, animated: false, scrollPosition: UITableViewScrollPosition.None)
                 
-                NSTimer.schedule(delay: kAnimationDuration, handler: { timer in
-
-                    var cellRect = self.tableView.rectForRowAtIndexPath(indexPath)
+                if shouldDeselect {
                     
-                    let rectToCheck = CGRect(x: self.tableView.bounds.origin.x, y: self.tableView.bounds.origin.y + 64, width: self.tableView.bounds.width, height: self.tableView.bounds.height - 64)
-                    
-                    var completelyVisible = CGRectContainsRect(rectToCheck, cellRect)
-                    
-                    if !completelyVisible {
+                    NSTimer.schedule(delay: kAnimationDuration, handler: { timer in
                         
-                        CATransaction.begin()
-                        CATransaction.setCompletionBlock({ () -> Void in
+                        var cellRect = self.tableView.rectForRowAtIndexPath(indexPath)
+                        
+                        let rectToCheck = CGRect(x: self.tableView.bounds.origin.x, y: self.tableView.bounds.origin.y + 64, width: self.tableView.bounds.width, height: self.tableView.bounds.height - 64)
+                        
+                        var completelyVisible = CGRectContainsRect(rectToCheck, cellRect)
+                        
+                        if !completelyVisible {
+                            
+                            CATransaction.begin()
+                            CATransaction.setCompletionBlock({ () -> Void in
+                                
+                                self.deselectSelectedCell(self.tableView)
+                            })
+                            
+                            self.tableView.beginUpdates()
+                            self.tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: UITableViewScrollPosition.Middle, animated: true)
+                            self.tableView.endUpdates()
+                            
+                            CATransaction.commit()
+                        }
+                        else {
                             
                             self.deselectSelectedCell(self.tableView)
-                        })
-                        
-                        self.tableView.beginUpdates()
-                        self.tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: UITableViewScrollPosition.Middle, animated: true)
-                        self.tableView.endUpdates()
-                        
-                        CATransaction.commit()
-                    }
-                    else {
-                        
-                        self.deselectSelectedCell(self.tableView)
-                    }
-                })
+                        }
+                    })
+                }
             }
         }
         
@@ -463,19 +470,6 @@ class TransactionsViewController: ACBaseViewController {
         
         executeActualRefreshByHiding(true, refreshControl: refreshControl, take: nil, completion: nil)
     }
-    
-//    func animateTableFooterViewHeight(height: Int, completion: (() -> ())?) {
-//        
-//        UIView.animateWithDuration(0.4, animations: { () -> Void in
-//            
-//            //self.loadMoreView.frame = CGRect(x: 0, y: 0, width: 0, height: height)
-//            //self.tableView.tableFooterView = self.loadMoreView
-//            
-//        }) { (success) -> Void in
-//            
-//            completion?()
-//        }
-//    }
     
     func loadMore() {
         
@@ -498,44 +492,6 @@ class TransactionsViewController: ACBaseViewController {
         })
 
     }
-    
-//    func loadMore() {
-//
-//        if !isLoadingMore && canLoadMore && hasLoadedFirstTime {
-//            
-//            isLoadingMore = true
-//            canLoadMore = false
-//            
-//            animateTableFooterViewHeight(kLoaderTableFooterViewHeight, completion: nil)
-//            
-//            loadMoreView.showLoader()
-//            
-//            query?.cancel()
-//            query?.skip = transactions.count + 1
-//            query?.limit = 16
-//            
-//            query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-//                
-//                if let transactions = objects as? [Transaction] {
-//                    
-//                    for transaction in transactions {
-//                        
-//                        self.transactions.append(transaction)
-//                    }
-//                }
-//                
-//                self.tableView.reloadData()
-//                self.isLoadingMore = false
-//                self.loadMoreView.hideLoader()
-//                
-//                NSTimer.schedule(delay: 0.2, handler: { timer in
-//                    
-//                    self.animateTableFooterViewHeight(0, completion: { () -> () in
-//                    })
-//                })
-//            })
-//        }
-//    }
     
     func add() {
         
@@ -568,12 +524,6 @@ class TransactionsViewController: ACBaseViewController {
         
         tableView.addCenterXConstraint(toView: view)
     }
-    
-//    func setupLoadMoreView() {
-//        
-//        loadMoreView.frame = CGRect(x: 0, y: 0, width: 50, height: kLoaderTableFooterViewHeight)
-//        tableView.tableFooterView = loadMoreView
-//    }
     
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
