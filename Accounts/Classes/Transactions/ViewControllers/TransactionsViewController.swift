@@ -275,6 +275,11 @@ class TransactionsViewController: ACBaseViewController {
         query?.skip = 0
         query?.limit = 16
         
+        if transactions.count > 16 && transactions.count < 35 {
+            
+            query?.limit = transactions.count
+        }
+        
         let executeRemoteQuery: () -> () = {
             
             self.refreshBarButtonItem?.enabled = false
@@ -313,10 +318,8 @@ class TransactionsViewController: ACBaseViewController {
                         
                         refreshControl?.endRefreshing()
                         self.tableView.reloadData()
-                        
                         self.view.hideLoader()
                         self.showOrHideTableOrNoDataView()
-                        
                         self.refreshBarButtonItem?.enabled = true
                         
                         completion?()
@@ -327,6 +330,7 @@ class TransactionsViewController: ACBaseViewController {
         
         let localQuery: PFQuery? = query?.copy() as? PFQuery
         localQuery?.fromLocalDatastore()
+        localQuery?.limit = 35
         activeQueries.append(localQuery)
         
         localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
@@ -358,17 +362,12 @@ class TransactionsViewController: ACBaseViewController {
                 
                 refreshControl?.endRefreshing()
                 self.tableView.reloadData()
-                
                 self.view.hideLoader()
                 self.showOrHideTableOrNoDataView()
-                
-               //self.findAndScrollToCalculatedSelectedCellAtIndexPath(false)
                 self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
-                
                 self.refreshBarButtonItem?.enabled = true
                 
                 completion?()
-
                 executeRemoteQuery()
             })
         })
@@ -491,6 +490,7 @@ class TransactionsViewController: ACBaseViewController {
                 for transaction in transactions {
                     
                     self.transactions.append(transaction)
+                    transaction.pinInBackground()
                 }
             }
             
