@@ -14,7 +14,6 @@ import SwiftyJSON
 private let kPlusImage = AppTools.iconAssetNamed("746-plus-circle-selected.png")
 private let kMinusImage = AppTools.iconAssetNamed("34-circle.minus.png")
 private let kMenuIcon = AppTools.iconAssetNamed("740-gear-toolbar-selected.png")
-//private let kFriendInvitesIcon = AppTools.iconAssetNamed("779-users-selected.png")
 private let kAnimationDuration:NSTimeInterval = 0.5
 
 private let kPopoverContentSize = CGSize(width: 320, height: 360)
@@ -40,13 +39,12 @@ class FriendsViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if kDevice == .Phone {
-            
-            tableView = UITableView(frame: CGRectZero, style: .Grouped)
-        }
+//        if kDevice == .Pad {
+//            
+//            tableView = UITableView(frame: CGRectZero, style: .Grouped)
+//        }
         
         setupTableView(tableView, delegate: self, dataSource: self)
-        //tableView.separatorColor = UIColor.clearColor()
         setBarButtonItems()
         
         title = "Friends"
@@ -57,9 +55,11 @@ class FriendsViewController: ACBaseViewController {
             tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
-        setupNoDataLabel(noDataView, text: "To get started, click invites to add some friends!")
-        
+        setupNoDataLabel(noDataView, text: "Your Facebook friends who have this app, will appear here!") //To get started, invite some friends!
         setupToolbar()
+        
+        tableView.layer.opacity = 0
+        view.showLoader()
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -89,7 +89,7 @@ class FriendsViewController: ACBaseViewController {
             }
             else if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestSent || PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestDeleted {
                     
-                getInvites()
+                //getInvites()
             }
         }
     }
@@ -130,7 +130,7 @@ class FriendsViewController: ACBaseViewController {
         var emptyBarButtonItem = UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: nil, action: nil)
         emptyBarButtonItem.width = 0
         
-        addBarButtonItem = User.currentUser()!.friends.count > 0 ? UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add") : emptyBarButtonItem
+        addBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
         
         
         let invitesText = invitesCount > 0 ? "Invites (\(invitesCount))" : "Invites"
@@ -138,15 +138,18 @@ class FriendsViewController: ACBaseViewController {
         friendInvitesBarButtonItem = UIBarButtonItem(title: invitesText, style: .Plain, target: self, action: "friendInvites")
         openMenuBarButtonItem = UIBarButtonItem(image: kMenuIcon, style: .Plain, target: self, action: "openMenu")
         
-        let editBarButtonItem = data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
+        let editBarButtonItem = editButtonItem() //data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
         
         navigationItem.leftBarButtonItems = [
-            openMenuBarButtonItem!,
-            editBarButtonItem
+            openMenuBarButtonItem!
+            //editBarButtonItem
         ]
         navigationItem.rightBarButtonItems = [
-            friendInvitesBarButtonItem!
+            //friendInvitesBarButtonItem!
         ]
+    }
+    
+    func showOrHideAddButton() {
         
         if let addBtn = addBarButtonItem{
             
@@ -222,8 +225,7 @@ class FriendsViewController: ACBaseViewController {
     
     override func refresh(refreshControl: UIRefreshControl?) {
         
-        view.showLoader()
-        tableView.layer.opacity = 0
+        //toolbar.items = []
         
         User.currentUser()?.getFriends({ () -> () in
             
@@ -234,25 +236,25 @@ class FriendsViewController: ACBaseViewController {
             
             UIView.animateWithDuration(0.5, animations: { () -> Void in
                 
-                self.tableView.layer.opacity = 1
+                //self.tableView.layer.opacity = 1
             })
             
-            self.setBarButtonItems()
+            self.showOrHideAddButton()
             self.showOrHideTableOrNoDataView()
         })
         
-        getInvites()
+        //getInvites()
     }
     
-    func getInvites(){
-        
-        User.currentUser()?.getInvites({ (invites) -> () in
-            
-            self.hasCheckedForInvites = true
-            self.invitesCount = invites[0].count
-            self.setBarButtonItems()
-        })
-    }
+//    func getInvites(){
+//        
+//        User.currentUser()?.getInvites({ (invites) -> () in
+//            
+//            self.hasCheckedForInvites = true
+//            self.invitesCount = invites[0].count
+//            //self.setBarButtonItems()
+//        })
+//    }
     
     func openMenu() {
         
@@ -266,16 +268,26 @@ class FriendsViewController: ACBaseViewController {
     
     func add() {
         
-        let view = SelectPurchaseOrTransactionViewController()
-        let v = UINavigationController(rootViewController: view)
-        view.saveItemDelegate = self
-
-        v.modalPresentationStyle = .Popover
-        v.preferredContentSize = kPopoverContentSize
-        v.popoverPresentationController?.barButtonItem = addBarButtonItem
-        v.popoverPresentationController?.delegate = self
-        
-        presentViewController(v, animated: true, completion: nil)
+        if User.currentUser()?.friends.count > 0 {
+            
+            let view = SelectPurchaseOrTransactionViewController()
+            let v = UINavigationController(rootViewController: view)
+            view.saveItemDelegate = self
+            
+            v.modalPresentationStyle = .Popover
+            v.preferredContentSize = kPopoverContentSize
+            v.popoverPresentationController?.barButtonItem = addBarButtonItem
+            v.popoverPresentationController?.delegate = self
+            
+            presentViewController(v, animated: true, completion: nil)
+        }
+        else{
+            
+            UIAlertController.showAlertControllerWithButtonTitle("Ok", confirmBtnStyle: .Default, message: "You havn't added any friends yet!", completion: { (response) -> () in
+                
+                
+            })
+        }
     }
     
     func showOrHideTableOrNoDataView() {
@@ -283,8 +295,9 @@ class FriendsViewController: ACBaseViewController {
         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
             
             self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
-            self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 1
-            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kDefaultSeperatorColor : .clearColor()
+            self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 0
+            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : kTableViewSeparatorColor //.clearColor()
+            //self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? .whiteColor() : UIColor.groupTableViewBackgroundColor()
         })
     }
 }
@@ -303,45 +316,12 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueOrCreateReusableCellWithIdentifier("Cell", requireNewCell: { (identifier) -> (UITableViewCell) in
-            
-            return UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: identifier)
-        })
-        
-        cell.backgroundColor = UIColor.whiteColor()
-        //setTableViewCellAppearanceForBackgroundGradient(cell)
+        let cell = FriendTableViewCell(reuseIdentifier: "Cell");
         
         let friend = data[indexPath.section][indexPath.row]
+        (cell as FriendTableViewCell).setup(friend)
         
-        cell.textLabel?.text = friend.appropriateDisplayName()
-        let amount = friend.localeDifferenceBetweenActiveUser //abs()
-        
-        var tintColor = UIColor.lightGrayColor()
-        
-        if friend.localeDifferenceBetweenActiveUser < 0 {
-            
-            tintColor = AccountColor.negativeColor()
-        }
-        else if friend.localeDifferenceBetweenActiveUser > 0 {
-            
-            tintColor = AccountColor.positiveColor()
-        }
-        
-        //cell.imageView?.image = friend.localeDifferenceBetweenActiveUser < 0 ? kMinusImage : kPlusImage
-        //cell.imageView?.tintWithColor(tintColor)
-        
-        cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
-        cell.detailTextLabel?.textColor = tintColor
-        //cell.editingAccessoryType = UITableViewCellAccessoryType.DisclosureIndicator;
-        cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-        
-        //images
-        let imageWidth = 50
-        cell.imageView?.image = AppTools.iconAssetNamed("769-male-selected.png")
-        cell.imageView?.layer.cornerRadius = cell.imageView!.image!.size.width / 2
-        cell.imageView?.tintWithColor(tintColor)
-        cell.imageView?.clipsToBounds = true
-        
+        setTableViewCellAppearanceForBackgroundGradient(cell)
         return cell
     }
 
@@ -382,7 +362,9 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         
-        return indexPath.section == 2
+        let friend = data[indexPath.section][indexPath.row]
+        
+        return indexPath.section == 2 && friend.facebookId == nil
     }
     
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
@@ -419,39 +401,7 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
 
-        return data[section].count > 0 ? UITableViewAutomaticDimension : CGFloat.min
-    }
-    
-    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        
-        let numberOfRowsInSections:Int = tableView.numberOfRowsInSection(indexPath.section)
-        
-        cell.layer.mask = nil
-        
-        var shouldRoundCorners = view.bounds.width > kTableViewMaxWidth
-        
-        if tableView.editing && shouldRoundCorners {
-            
-            shouldRoundCorners = indexPath.section != 2
-        }
-        
-        if shouldRoundCorners {
-            
-            if indexPath.row == 0 {
-                
-                cell.roundCorners(UIRectCorner.TopLeft | UIRectCorner.TopRight, cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
-            }
-            
-            if indexPath.row == numberOfRowsInSections - 1 {
-                
-                cell.roundCorners(UIRectCorner.BottomLeft | UIRectCorner.BottomRight, cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
-            }
-            
-            if indexPath.row == 0 && indexPath.row == numberOfRowsInSections - 1 {
-                
-                cell.roundCorners(UIRectCorner.AllCorners, cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
-            }
-        }
+        return data[section].count > 0 ? 35 : 0
     }
 }
 

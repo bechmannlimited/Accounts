@@ -60,22 +60,37 @@ class SavePurchaseViewController: SaveItemViewController {
             view.showLoader()
             tableView.hidden = true
             
+            var canContinue = false
+            
             Task.executeTaskInBackground({ () -> () in
                 
-                self.purchase = Purchase.query()!.getObjectWithId(self.purchaseObjectId!) as! Purchase
-                self.purchase.user.fetchIfNeeded()
-                
-                for transaction in self.purchase.transactions {
+                if let purchase = Purchase.query()?.getObjectWithId(self.purchaseObjectId!) as? Purchase {
                     
-                    transaction.fetchIfNeeded()
-                    transaction.fromUser?.fetchIfNeeded()
-                    transaction.toUser?.fetchIfNeeded()
+                    self.purchase = purchase
+                    
+                    self.purchase.user.fetchIfNeeded()
+                    
+                    for transaction in self.purchase.transactions {
+                        
+                        transaction.fetchIfNeeded()
+                        transaction.fromUser?.fetchIfNeeded()
+                        transaction.toUser?.fetchIfNeeded()
+                    }
+                    
+                    canContinue = true
+                }
+                else{
+                    
+                    self.popAll()
                 }
                 
             }, completion: { () -> () in
                 
-                self.updateUIForEditing()
-                self.reloadForm()
+                if canContinue {
+            
+                    self.updateUIForEditing()
+                    self.reloadForm()
+                }
             })
         }
         else{
@@ -240,13 +255,20 @@ extension SavePurchaseViewController: FormViewDelegate {
                     
                     self.updateUIForSavingOrDeleting()
                     
-                    self.purchase.deletePurchaseAndTransactions({ () -> () in
+                    self.purchase.deleteInBackgroundWithBlock { (success, error) -> Void in
                         
-                        self.popAll()
-                        self.delegate?.itemDidGetDeleted()
-                        
-                        ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
-                    })
+                        if success {
+                            
+                            self.popAll()
+                            self.delegate?.itemDidGetDeleted()
+                            
+                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                        }
+                        else{
+                            
+                            ParseUtilities.showAlertWithErrorIfExists(error)
+                        }
+                    }
                 }
             })
         }

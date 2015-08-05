@@ -12,27 +12,30 @@ import SwiftyUserDefaults
 import Alamofire
 import Parse
 import Bolts
+import ParseFacebookUtilsV4
 
-//var kActiveUser:User = User.object()
+
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
 
-let kViewBackgroundColor = UIColor.groupTableViewBackgroundColor()
+let kViewBackgroundColor = kNavigationBarBarTintColor
 let kViewBackgroundGradientTop =  AccountColor.blueColor()
 let kViewBackgroundGradientBottom =  AccountColor.greenColor()
 
-let kTableViewBackgroundColor = UIColor.clearColor()
+let kDarkColor = UIColor(hex: "252525")
 
 let kTableViewCellBackgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.55)
 let kTableViewCellTextColor = UIColor.whiteColor()
 let kTableViewCellDetailTextColor = UIColor.whiteColor()
 let kTableViewCellSeperatorStyle = UITableViewCellSeparatorStyle.SingleLine
-let kTableViewCellSeperatorColor = UIColor.clearColor()
 let kTableViewCellHeight: CGFloat = 50
 let kTableViewCellTintColor = UIColor.whiteColor()
 
+let kTableViewBackgroundColor = UIColor.clearColor()
+let kTableViewSeparatorColor = UIColor.clearColor()
+
 let kNavigationBarPositiveActionColor = kNavigationBarTintColor
-let kNavigationBarTintColor = UIColor(hex: "00AEE5")
-let kNavigationBarBarTintColor:UIColor = UIColor.whiteColor().colorWithAlphaComponent(0.95)
+let kNavigationBarTintColor = UIColor.yellowColor() // UIColor.whiteColor() // UIColor.yellowColor() // UIColor(hex: "00AEE5")
+let kNavigationBarBarTintColor:UIColor = UIColor(hex: "161616")
 let kNavigationBarTitleColor = UIColor.blackColor()
 let kNavigationBarStyle = UIBarStyle.Default
 
@@ -41,11 +44,12 @@ let kFormDeleteButtonTextColor = AccountColor.negativeColor()
 let kTableViewMaxWidth:CGFloat = 570
 let kTableViewCellIpadCornerRadiusSize = CGSize(width: 5, height: 5)
 
-let kDefaultSeperatorColor = UITableView().separatorColor
+//let kDefaultSeperatorColor = UITableView().separatorColor
 
 let kParseInstallationUserKey = "user"
 let kNotificationCenterPushNotificationKey = "pushNotificationUserInfoReceived"
 
+let kDefaultNavigationBarShadowImage = UINavigationBar().shadowImage // UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -56,39 +60,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
         setupAppearances()
-        
+
         //parse
         User.registerSubclass()
         FriendRequest.registerSubclass()
         Transaction.registerSubclass()
         Purchase.registerSubclass()
         
-        //Parse.enableLocalDatastore()
+        Parse.enableLocalDatastore()
         
         Parse.setApplicationId("d24X8b7STLrPskMNRBVgs30iI1G6cG1lGqsPqeMN",
             clientKey: "fR5DJfzy5x9qlYLiD4xfLd46GmAH1QCWhV1Q8SKc")
         
-        // Register for Push Notitications
-        if application.applicationState != UIApplicationState.Background {
-            // Track an app open here if we launch with a push, unless
-            // "content_available" was used to trigger a background push (introduced in iOS 7).
-            // In that case, we skip tracking here to avoid double counting the app-open.
-            
-            let preBackgroundPush = !application.respondsToSelector("backgroundRefreshStatus")
-            let oldPushHandlerOnly = !self.respondsToSelector("application:didReceiveRemoteNotification:fetchCompletionHandler:")
-            var pushPayload = false
-            if let options = launchOptions {
-                pushPayload = options[UIApplicationLaunchOptionsRemoteNotificationKey] != nil
-            }
-            if (preBackgroundPush || oldPushHandlerOnly || pushPayload) {
-                //PFAnalytics.trackAppOpenedWithLaunchOptions(launchOptions)
-            }
-        }
+        setWindowToLogin()
         
-        if User.currentUser() == nil {
-            
-            setWindowToLogin()
-        }
+        PFFacebookUtils.initializeFacebookWithApplicationLaunchOptions(launchOptions)
+        FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
+        
+        SupportKit.initWithSettings(SKTSettings(appToken: "amtp9h7tc5dq2sby4q6yc5ke6"))
+        SupportKit.settings().conversationStatusBarStyle = UIStatusBarStyle.LightContent
         
         return true
     }
@@ -101,16 +91,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let settings = UIUserNotificationSettings(forTypes: userNotificationTypes, categories: nil)
         application.registerUserNotificationSettings(settings)
         application.registerForRemoteNotifications()
-    }
-    
-    func setupGoogleMapApi(){
-        
-        //GMSServices.provideAPIKey("AIzaSyCwDKp9Ev7BLRdf_Y4iymmDz4-PsmVISiw")
-    }
-    
-    func application(application: UIApplication, didRegisterUserNotificationSettings notificationSettings: UIUserNotificationSettings) {
-        
-        //UIApplication.sharedApplication().registerForRemoteNotifications()
     }
     
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
@@ -136,28 +116,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-        //PFPush.handlePush(userInfo)
-        if application.applicationState == UIApplicationState.Inactive {
-            //PFAnalytics.trackAppOpenedWithRemoteNotificationPayload(userInfo)
-        }
         
         println(userInfo)
-        NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterPushNotificationKey, object: userInfo, userInfo: userInfo)
+        //NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterPushNotificationKey, object: userInfo, userInfo: userInfo)
     }
     
     func setupAppearances() {
         
         UINavigationBar.appearance().tintColor = kNavigationBarTintColor
-        //UINavigationBar.appearance().barTintColor = kNavigationBarBarTintColor
-        //UINavigationBar.appearance().shadowImage = UIImage()
         UINavigationBar.appearance().setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
+        UINavigationBar.appearance().shadowImage = kDefaultNavigationBarShadowImage
         UINavigationBar.appearance().barStyle = kNavigationBarStyle
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor()]
         
         UIToolbar.appearance().tintColor = kNavigationBarTintColor
+        UIToolbar.appearance().barStyle = UIBarStyle.Black
         
         UITableViewCell.appearance().tintColor = kNavigationBarTintColor
+        UITableViewCell.appearance().backgroundColor = kDarkColor
+        UITableViewCell.appearance().textLabel?.textColor = .whiteColor()
         
         UITabBar.appearance().tintColor = kNavigationBarTintColor
+        
+        UITableView.appearance().backgroundColor = kNavigationBarBarTintColor
+        UITableView.appearance().separatorColor = kTableViewSeparatorColor
+        
+        UILabel.appearance().textColor = .whiteColor()
+        
+        UITextField.appearance().keyboardAppearance = UIKeyboardAppearance.Dark
     }
     
     private func setWindowToLogin() {
@@ -187,13 +173,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
         
-        
+        FBSDKAppEvents.activateApp()
     }
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+        
+        return FBSDKApplicationDelegate.sharedInstance().application(application, openURL: url, sourceApplication: sourceApplication, annotation: annotation)
+    }
+    
+//    func application(application: UIApplication, handleOpenURL url: NSURL) -> Bool {
+//    
+//        FBSDKAppEvents.
+//        return true
+//    }
 
 }
 

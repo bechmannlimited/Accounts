@@ -77,49 +77,35 @@ class Purchase: PFObject {
             completion(success: false)
         }
         
-        Task.executeTaskInBackground({ () -> () in
+        for transaction in transactions {
             
-            self.previousTransactions = self.transactions
-            self.transactions = []
+            transaction.transactionDate = purchasedDate!
+            transaction.fromUser = user
+            transaction.title = title
+            transaction.unpinInBackground()
+        }
+        
+        //unpin()
+        
+        self.saveInBackgroundWithBlock { (success, error) -> Void in
             
-            self.save()
+            ParseUtilities.showAlertWithErrorIfExists(error)
             
-            if let Oid = self.objectId {
+            if success {
                 
-                let query = Transaction.query()
-                query?.whereKey("purchaseObjectId", equalTo: Oid)
-                var objects = query?.findObjects()
-                
-                for object in objects! {
+                if isNewPurchase {
                     
-                    object.delete()
+                    self.pinInBackground()
+                }
+                
+                for transaction in self.transactions {
+                    
+                    transaction.pinInBackground()
                 }
             }
-
-            for transaction in self.previousTransactions {
-
-                let newTransaction = Transaction()
-                
-                newTransaction.purchaseObjectId = self.objectId
-                newTransaction.transactionDate = self.purchasedDate!
-                newTransaction.title = self.title
-                newTransaction.fromUser = self.user
-                newTransaction.toUser = transaction.toUser
-                newTransaction.amount = transaction.amount
-                
-                newTransaction.save()
-                self.transactions.append(newTransaction)
-            }
             
-            self.save()
-            
-            //PFObject.saveAll(self.transactions)
-
-        }, completion: { () -> () in
-            
-            self.sendPushNotificationsToAllUniqueUsersInTransactionsAsNewPurchase(isNewPurchase)
-            completion(success:true)
-        })
+            completion(success:success)
+        }
     }
     
     func splitTheBill() {
@@ -135,7 +121,7 @@ class Purchase: PFObject {
     func sendPushNotificationsToAllUniqueUsersInTransactionsAsNewPurchase(isNewPurchase: Bool){
         
         let noun: String = isNewPurchase ? "added" : "updated"
-        let message = "Purchase: \(self.title) \(noun) by \(User.currentUser()!.appropriateDisplayName())!"
+        let message = "Purchase: \(self.title!) \(noun) by \(User.currentUser()!.appropriateDisplayName())!"
         
         ParseUtilities.sendPushNotificationsInBackgroundToUsers(pushNotificationTargets(), message: message, data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
     }
@@ -258,23 +244,6 @@ class Purchase: PFObject {
                 transactions.removeAtIndex(index)
             }
         }
-    }
-    
-    func deletePurchaseAndTransactions(completion:() -> ()) {
-        
-        Task.executeTaskInBackground({ () -> () in
-            
-            for transaction in self.transactions {
-                
-                transaction.delete()
-            }
-            
-            self.delete()
-            
-        }, completion: { () -> () in
-            
-            completion()
-        })
     }
 }
 

@@ -30,10 +30,12 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        if isInsidePopover() {
+        if kDevice == .Pad { // isInsidePopover() {
 
-            navigationController?.view.backgroundColor = UIColor.clearColor()
+            navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
+            navigationController?.view.backgroundColor = UIColor.darkGrayColor()
             view.backgroundColor = UIColor.clearColor()
+            println(isInsidePopover())
             tableView.backgroundColor = UIColor.clearColor()
         }
     }

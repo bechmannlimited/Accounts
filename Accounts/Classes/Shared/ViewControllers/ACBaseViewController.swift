@@ -14,10 +14,14 @@ class ACBaseViewController: BaseViewController {
     var blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))
     var gradient: CAGradientLayer = CAGradientLayer()
     
+    var activeQueries = [PFQuery?]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
+        view.backgroundColor = kViewBackgroundColor
+        
+        //NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -28,7 +32,7 @@ class ACBaseViewController: BaseViewController {
     
     func didReceivePushNotification(notification: NSNotification) {
         
-        println("hi")
+        //println("hi")
     }
     
     func setupNavigationBarAppearance() {
@@ -65,6 +69,15 @@ class ACBaseViewController: BaseViewController {
         
         gradient.frame = view.frame
     }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        for query in activeQueries {
+            
+            query?.cancel()
+        }
+    }
 }
 
 extension ACBaseViewController: UITableViewDelegate {
@@ -72,5 +85,11 @@ extension ACBaseViewController: UITableViewDelegate {
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         
         return kTableViewCellHeight
+    }
+    
+    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
+        
+        setTableViewCellAppearanceForBackgroundGradient(cell)
     }
 }

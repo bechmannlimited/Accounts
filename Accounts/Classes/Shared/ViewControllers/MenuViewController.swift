@@ -12,14 +12,17 @@ import SwiftyUserDefaults
 import SwiftyJSON
 import Parse
 
-private let kProfileSection = 0
+private let kProfileSection = 1
 private let kCurrencySection = 1
+private let kFeedbackSection = 0
 //private let kLogoutSection = 2
 
-private let kProfileIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
-private let kLogoutIndexPath = NSIndexPath(forRow: 1, inSection: kProfileSection)
+private let kProfileIndexPath = NSIndexPath(forRow: 09999, inSection: kProfileSection)
+private let kLogoutIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
 
-private let kCurrencyIndexPath = NSIndexPath(forRow: 0, inSection: kCurrencySection)
+private let kCurrencyIndexPath = NSIndexPath(forRow: 999, inSection: 9999)
+
+private let kFeedbackIndexPath = NSIndexPath(forRow: 0, inSection: kFeedbackSection)
 
 //protocol MenuDelegate {
 //    
@@ -30,21 +33,19 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
-        //[kProfileIndexPath],
-        //[kCurrencyIndexPath],
-        [kProfileIndexPath, kLogoutIndexPath]
+        [kLogoutIndexPath],
+        [kFeedbackIndexPath]
     ]
     
     //var delegate: MenuDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-//        if kActiveUser.UserID == 6 {
+        
+//        if User.currentUser()?.facebookId == nil {
 //            
 //            data = [
-//                [kProfileIndexPath, kLogoutIndexPath],
-//                [kCurrencyIndexPath]
+//                [kProfileIndexPath, kLogoutIndexPath]
 //            ]
 //        }
         
@@ -102,6 +103,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             
             cell.textLabel?.text = "Edit profile"
         }
+        else if indexPath == kFeedbackIndexPath {
+         
+            cell.textLabel?.text = "Contact support team"
+            cell.detailTextLabel?.text = "feedback/questions"
+        }
         
         return cell
     }
@@ -130,7 +136,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                             
                             ParseUtilities.showAlertWithErrorIfExists(error)
                         }
-                        else{
+                        else {
 
                             let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Login")
                             self.presentViewController(v, animated: true, completion: nil)
@@ -145,9 +151,22 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         else if indexPath == kProfileIndexPath {
             
-            let v = SaveUserViewController()
-            v.isExistingUser = true
-            navigationController?.pushViewController(v, animated: true)
+            if User.currentUser()?.facebookId == nil {
+                
+                let v = SaveUserViewController()
+                navigationController?.pushViewController(v, animated: true)
+            }
+            else{
+                
+                UIAlertView(title: "Not ready yet!", message: "You cant view your profile if you are logged in via facebook for the moment.", delegate: nil, cancelButtonTitle: "Ok").show()
+                
+                tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            }
+        }
+        else if indexPath == kFeedbackIndexPath{
+            
+            SupportKit.show()
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
         }
     }
     

@@ -11,6 +11,7 @@ import ABToolKit
 import SwiftyJSON
 import Alamofire
 import Parse
+import FBSDKCoreKit
 
 class User: PFUser {
     
@@ -19,7 +20,12 @@ class User: PFUser {
     var allInvites = [[FriendRequest]]()
     var passwordForVerification = ""
     
+    @NSManaged var facebookId: String?
     @NSManaged var displayName: String?
+    
+    @NSManaged var friendsIdsWithDifference: Dictionary<String, NSNumber>?
+    
+    
     
     func modelIsValid() -> Bool {
         
@@ -66,40 +72,94 @@ class User: PFUser {
 
         friends = [User]()
         
-        Task.executeTaskInBackground({ () -> () in
+        let execRemoteQuery: () -> () = {
             
-            self.friends = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()?.findObjects() as! [User]
-            
-            for friend in self.friends{
+            let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
+            graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
                 
-                let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
-                friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+                println("error: \(error?.code)")
+                
+                if error == nil{
+                    
+                    Task.executeTaskInBackground({ () -> () in
+                        
+                        var friendInfo = Dictionary<String, NSNumber>()
+                        
+                        var queries = [PFQuery]()
+                        var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
+                        
+                        if self.facebookId != nil {
+                            
+                            let friendsJson = JSON(result)["data"]
+                            
+                            for (index: String, friendJson: JSON) in friendsJson {
+                                
+                                let friendQuery = User.query()
+                                friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
+                                queries.append(friendQuery!)
+                            }
+                        }
+                        
+                        queries.append(query1!)
+                        
+                        self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
+                        
+                        for friend in self.friends {
+                            
+                            let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
+                            friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+                            
+                            friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                            
+                        }
+                        
+                        self.friendsIdsWithDifference = friendInfo
+                        
+                    }, completion: { () -> () in
+                        
+                        completion()
+                    })
+                }
+                else{
+                    
+                    connection.cancel()
+                }
+            })
+        }
+        
+        //
+        
+        var ids = [String]()
+        
+        if let friendInfos = friendsIdsWithDifference{
+            
+            for friend in friendInfos{
+                
+                ids.append(friend.0)
             }
             
-            }, completion: { () -> () in
+            let localQuery = User.query()?.whereKey("objectId", containedIn: ids).orderByAscending("objectId").fromLocalDatastore()
+            
+            localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
-                completion()
-        })
-        
-//        let query = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
-//        query?.cachePolicy = PFCachePolicy.CacheThenNetwork
-//        
-//        
-//        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-//            
-//            if let friends = objects as? [User] {
-//                
-//                self.friends = friends
-//                
-//                for friend in self.friends{
-//                    
-//                    let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
-//                    friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-//                }
-//            }
-//            
-//            completion()
-//        })
+                if let friends = objects as? [User] {
+                    
+                    self.friends = friends
+                    
+                    for friend in self.friends {
+                        
+                        friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
+                    }
+                    
+                    completion()
+                    execRemoteQuery()
+                }
+            })
+        }
+        else {
+            
+            execRemoteQuery()
+        }
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {
@@ -153,29 +213,6 @@ class User: PFUser {
             
             ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.fromUser!], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
         })
-        
-//        Task.executeTaskInBackground({ () -> () in
-//            
-//            let query = FriendRequest.query()
-//            query?.whereKey("fromUser", equalTo: friendRequest.toUser!)
-//            query?.whereKey("toUser", equalTo: friendRequest.fromUser!)
-//            
-//            if let match = query?.findObjects()?.first as? FriendRequest {
-//                
-//                friendRequest.friendRequestStatus = FriendRequestStatus.Confirmed.rawValue
-//                PFObject.saveAll([friendRequest, User.currentUser()!])
-//            }
-//            else{
-//                
-//                UIAlertView(title: "Friend request not sent!", message: "The friend request has expired", delegate: nil, cancelButtonTitle: "Ok").show()
-//                
-//                completion(success: false)
-//            }
-//            
-//        }, completion: { () -> () in
-//            
-//            completion(success: true)
-//        })
     }
     
     func getInvites(completion:(invites:Array<Array<FriendRequest>>) -> ()) {
@@ -184,12 +221,18 @@ class User: PFUser {
         var unconfirmedInvites = Array<FriendRequest>()
         var unconfirmedSentInvites = Array<FriendRequest>()
         
-        let query = FriendRequest.query()
-        query?.includeKey(kParse_FriendRequest_fromUser_Key)
-        query?.includeKey(kParse_FriendRequest_toUser_Key)
-        query?.whereKey(kParse_FriendRequest_friendRequestStatus_Key, notEqualTo: FriendRequestStatus.Confirmed.rawValue)
+        let query1 = FriendRequest.query()
+        query1?.whereKey("fromUser", equalTo: User.currentUser()!)
         
-        query?.findObjectsInBackgroundWithBlock({ (friendRequests, error) -> Void in
+        let query2 = FriendRequest.query()
+        query2?.whereKey("toUser", equalTo: User.currentUser()!)
+        
+        let query = PFQuery.orQueryWithSubqueries([query1!, query2!])
+        query.includeKey(kParse_FriendRequest_fromUser_Key)
+        query.includeKey(kParse_FriendRequest_toUser_Key)
+        query.whereKey(kParse_FriendRequest_friendRequestStatus_Key, notEqualTo: FriendRequestStatus.Confirmed.rawValue)
+        
+        query.findObjectsInBackgroundWithBlock({ (friendRequests, error) -> Void in
             
             if let requests = friendRequests as? [FriendRequest] {
                 
@@ -242,416 +285,3 @@ class User: PFUser {
         return usersToChooseFrom
     }
 }
-
-//extension User: PFSubclassing {
-//    
-//    override class func parseClassName() -> String {
-//        
-//        return "User"
-//    }
-//}
-
-//
-//private let kActiveUserDefaultsKey = "activeUser"
-//
-//class User: JSONObject {
-//    
-//    var UserID = 0
-//    var Username = ""
-//    var Email = ""
-//    var Password = ""
-//    var friends: Array<User> = []
-//    
-//    //friend
-//    //var relationStatusToActiveUser: RelationStatus = RelationStatus.Undefined
-//    var DifferenceBetweenActiveUser: Double = 0
-//    
-//    var localeDifferenceBetweenActiveUser: Double {
-//        
-//        get {
-//            
-//            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
-//            
-//            if currencyIdentifier == "DKK" {
-//                
-//                return self.DifferenceBetweenActiveUser * 10
-//            }
-//            else {
-//                
-//                return self.DifferenceBetweenActiveUser
-//            }
-//        }
-//        
-//        set(newValue) {
-//            
-//            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
-//            
-//            if currencyIdentifier == "DKK" {
-//                
-//                self.DifferenceBetweenActiveUser = newValue / 10
-//            }
-//            else {
-//                
-//                self.DifferenceBetweenActiveUser = newValue
-//            }
-//        }
-//    }
-//    
-//    //var transactions: Array<Transaction> = []
-//    
-////    override func setExtraPropertiesFromJSON(json:JSON)  {
-////        
-////        self.relationStatusToActiveUser = RelationStatus(rawValue: json["relationStatus"].intValue)!
-////    }
-//    
-//    override func registerClassesForJsonMapping() {
-//    
-//        registerProperty("DifferenceBetweenActiveUser", withJsonKey: "Difference")
-//        registerClass(User.self, forKey: "friends")
-//    }
-//    
-//    
-//    class func login(username: String, password: String) -> JsonRequest {
-//        
-//        return JsonRequest.create("http://alex.bechmann.co.uk/iou/api/Users/Login/?Username=\(username)&Password=\(password)", parameters: nil, method: .POST).onDownloadSuccessWithRequestInfo { (json, request, httpRequest, httpResponse) -> () in
-//            
-//            if httpResponse?.statusCode == 200 {
-//                
-//                var user: User = User.createObjectFromJson(json)
-//                User.saveUserOnDevice(user as User?)
-//                kActiveUser = user
-//                
-//                request.succeedContext()
-//            }
-//            else {
-//                
-//                request.failContext()
-//            }
-//        }
-//    }
-//    
-//    func register() -> JsonRequest? {
-//        
-//        return webApiInsert()?.onDownloadSuccessWithRequestInfo({ (json, request, httpUrlRequest, httpUrlResponse) -> () in
-//            
-//            let statusCode = httpUrlResponse?.statusCode
-//            
-//            if statusCode == 201 {
-//                
-//                var user: User = User.createObjectFromJson(json)
-//                User.saveUserOnDevice(user as User?)
-//                kActiveUser = user
-//                
-//                request.succeedContext()
-//            }
-//            else{
-//                
-//                let errorsJson = json["ModelState"]["Error"]
-//
-//                let errors = NSMutableArray()
-//
-//                for (index: String, errorJson: JSON) in errorsJson {
-//                    
-//                    errors.addObject(errorJson.stringValue)
-//                    println(errorJson)
-//                }
-//                
-//                let errorMsg = errors.componentsJoinedByString(",\n")
-//                
-//                UIAlertView(title: "Error", message: errorMsg, delegate: nil, cancelButtonTitle: "OK").show()
-//                
-//                request.failContext()
-//            }
-//        })
-//    }
-//    
-//    func logout() {
-//        
-//        User.saveUserOnDevice(nil)
-//    }
-//
-//    
-////    func getTransactionsLog(completion: (transactions: Array<Transaction>) -> ()) -> JsonRequest? {
-////        
-////        let url = "\(User.webApiUrls().getUrl(UserID))/Transactions"
-////        
-////        return JsonRequest.create(url, parameters: ["userID" : UserID], method: .GET).onDownloadSuccess({ (json, request) -> () in
-////            
-////            completion(transactions: Transaction.convertJsonToMultipleObjects(Transaction.self, json: json))
-////        })
-////    }
-//    
-//    func getFriends() -> JsonRequest {
-//        
-//        let s: String = User.webApiUrls().getUrl(UserID)!
-//        
-//        let url = "\(s)/Friends"
-//
-//        return JsonRequest.create(url, parameters: nil, method: .GET).onDownloadSuccess({ (json, request) -> () in
-//            
-//            self.friends = User.convertJsonToMultipleObjects(User.self, json: json)
-//        })
-//    }
-//    
-//    func getTransactionsBetweenFriend(friend: User, skip: Int, take: Int?, completion: (transactions: Array<Transaction>) -> ()) -> JsonRequest {
-// 
-//        var itemsToTake = 20
-//        
-//        if let take = take {
-//            
-//            itemsToTake = take
-//        }
-//        
-//        let url = "\(WebApiDefaults.sharedInstance().baseUrl!)/Users/TransactionsBetween/\(UserID)/and/\(friend.UserID)?$skip=\(skip)&$top=\(itemsToTake)&$orderby=TransactionDate desc"
-//
-//        let request = JsonRequest.create(url, parameters: nil, method: .GET).onDownloadSuccess({ (json, request) -> () in
-//
-//            let transactions:Array<Transaction> = Transaction.convertJsonToMultipleObjects(Transaction.self, json: json)
-//            completion(transactions: transactions)
-//        })
-//        
-//        return request
-//    }
-//    
-//    func getDifferenceBetweenFriend(friend: User, completion: (difference: Double, transactionsCount: Int) -> ()) -> JsonRequest {
-//        
-//        let url = "\(WebApiDefaults.sharedInstance().baseUrl!)/Users/DifferenceBetween/\(UserID)/and/\(friend.UserID)"
-//
-//        return JsonRequest.create(url, parameters: nil, method: .GET).onDownloadSuccess { (json, request) -> () in
-//            
-//            let difference = json["Difference"].doubleValue
-//            let transactionsCount = json["TransactionsCount"].intValue
-//            
-//            completion(difference: difference, transactionsCount: transactionsCount)
-//        }
-//    }
-//    
-//    func getInvites(completion:(invites:Array<Array<User>>) -> ()) -> JsonRequest {
-//        
-//        var urlString = "\(User.webApiUrls().getUrl(UserID)!)/FriendInvitations"
-//
-//        return JsonRequest.create(urlString, parameters: nil, method: .GET).onDownloadSuccess { (json, request) -> () in
-//
-//            var allInvites = Array<Array<User>>()
-//            
-//            // UNCONFIRMED INVITES
-//            var unconfirmedInvites = Array<User>()
-//            
-//            let unconfirmedInvitesJSON = json["UnconfirmedInvitations"]
-//            
-//            for (index: String, subJson: JSON) in unconfirmedInvitesJSON {
-//                
-//                let user:User = User.createObjectFromJson(subJson["User"])
-//                unconfirmedInvites.append(user)
-//            }
-//            
-//            // UNCONFIRMED SENT INVITES
-//            
-//            var unconfirmedSentInvites = Array<User>()
-//            
-//            let unconfirmedSentInvitesJSON = json["UnconfirmedSentInvitations"]
-//            
-//            for (index: String, subJson: JSON) in unconfirmedSentInvitesJSON {
-//                
-//                let user:User = User.createObjectFromJson(subJson["User"])
-//                unconfirmedSentInvites.append(user)
-//            }
-//            
-//            
-//            allInvites.append(unconfirmedInvites)
-//            allInvites.append(unconfirmedSentInvites)
-//            
-//            completion(invites: allInvites)
-//        }
-//    }
-//    
-//    func addFriend(relationUserID:Int, completion: (success: Bool) -> ()) {
-//        
-//        let urlString = "\(User.webApiUrls().getUrl(UserID)!)/AddFriend/\(relationUserID)"
-//        
-//        JsonRequest.create(urlString, parameters: nil, method: .POST).onDownloadSuccessWithRequestInfo { (json, request, httpUrlRequest, httpUrlResponse) -> () in
-//            
-//            completion(success: httpUrlResponse?.statusCode == 200)
-//        }
-//    }
-//    
-//    func removeFriend(relationUserID:Int, completion: (success: Bool) -> ()) {
-//        
-//        let urlString = "\(User.webApiUrls().getUrl(UserID)!)/RemoveFriend/\(relationUserID)"
-//        
-//        JsonRequest.create(urlString, parameters: nil, method: .DELETE).onDownloadSuccessWithRequestInfo { (json, request, httpUrlRequest, httpUrlResponse) -> () in
-//            
-//            completion(success: httpUrlResponse?.statusCode == 204)
-//        }
-//    }
-//
-//    func saveUserOnDevice() {
-//
-//        User.saveUserOnDevice(self as User?)
-//    }
-//    
-//    class func saveUserOnDevice(user: User?) {
-//        
-//        if let u = user {
-//            
-//            var objectData: NSData = NSKeyedArchiver.archivedDataWithRootObject(u)
-//            NSUserDefaults.standardUserDefaults().setObject(objectData, forKey: kActiveUserDefaultsKey)
-//        }
-//        else {
-//            
-//            NSUserDefaults.standardUserDefaults().removeObjectForKey(kActiveUserDefaultsKey)
-//        }
-//        
-//        User.activeUserDidChange()
-//        
-//    }
-//    
-//    class func userSavedOnDevice() -> User? {
-//        
-//        if let objectData:NSData = NSUserDefaults.standardUserDefaults().objectForKey(kActiveUserDefaultsKey) as? NSData {
-//            
-//            let user: User = (NSKeyedUnarchiver.unarchiveObjectWithData(objectData) as? User)!
-//            User.activeUserDidChange()
-//            return user
-//        }  
-//        
-//        return nil
-//    }
-//    
-//    
-//    class func activeUserDidChange() {
-//        
-//        //Alamofire.Manager.sharedInstance.session.configuration.HTTPAdditionalHeaders?.updateValue(kActiveUser.UserID, forKey: "ActiveUserID")
-//        
-//        Alamofire.Manager.sharedInstance.session.configuration.HTTPAdditionalHeaders = [
-//            "Accept-Encoding1": "deflate",
-//            "Accept-Encoding": "deflate",
-//            "ActiveUserID": kActiveUser.UserID
-//        ]
-//        
-//        AppDelegate.registerForNotifications()
-//    }
-//    
-//    required convenience init(coder decoder: NSCoder) {
-//        self.init()
-//        
-//        if let userID = decoder.decodeObjectForKey("UserID") as? Int {
-//            
-//            self.UserID = userID
-//        }
-//        
-//        if let username = decoder.decodeObjectForKey("Username") as? String {
-//            
-//            self.Username = username
-//        }
-//        
-//        if let email = decoder.decodeObjectForKey("Email") as? String {
-//            
-//            self.Email = email
-//        }
-//    }
-//    
-//    func encodeWithCoder(coder: NSCoder) {
-//        
-//        coder.encodeObject(UserID, forKey: "UserID")
-//        coder.encodeObject(Username, forKey: "Username")
-//        coder.encodeObject(Email, forKey: "Email")
-//    }
-//    
-////    func refreshFriendsList() -> JsonRequest {
-////        
-//////        var urlString = AppTools.WebMvcController(kMVCControllerName, action: "GetFriends")
-//////        var data = [ "UserID" : self.UserID ]
-//////        
-//////        return JsonRequest.create(urlString, parameters: data, method: .POST).onDownloadSuccess({ (json, request) -> () in
-//////            
-//////            self.Friends = User.convertJsonToMultipleObjects(json)
-//////            request.succeedContext()
-//////        })
-////    }
-//    
-////    func confirmedFriends() -> Array<User> {
-////        
-////        var rc = Array<User>()
-////        
-////        for friend in self.Friends {
-////            
-////            if friend.relationStatusToActiveUser == .Confirmed {
-////                rc.append(friend)
-////            }
-////        }
-////        
-////        return rc
-////    }
-////    
-////    func pendingFriends() -> Array<User> {
-////        
-////        var rc = Array<User>()
-////        
-////        for friend in self.Friends {
-////            
-////            if friend.relationStatusToActiveUser == .Pending {
-////                rc.append(friend)
-////            }
-////        }
-////        
-////        return rc
-////    }
-//
-//    
-//    
-//    class func activeUsersContaining(string: String, completion:(users:Array<User>) -> ()) -> JsonRequest {
-//        
-//        var urlString = "\(User.webApiUrls().getUrl(kActiveUser.UserID))/ActiveUsersMatching/\(string)"
-//
-//        return JsonRequest.create(urlString, parameters: nil, method: .POST).onDownloadSuccess { (json, request) -> () in
-//            
-//            let matches: Array<User> = User.convertJsonToMultipleObjects(User.self, json: json)
-//            completion(users: matches)
-//        }
-//    }
-//    
-//    override func webApiRestObjectID() -> Int? {
-//        
-//        return UserID
-//    }
-//    
-//    class func userListExcludingID(id: Int?) -> Array<User> {
-//        
-//        var usersToChooseFrom = [User]()
-//        var allUsersInContext = [User]()
-//        
-//        for friend in kActiveUser.friends {
-//            
-//            allUsersInContext.append(friend)
-//        }
-//        allUsersInContext.append(kActiveUser)
-//        
-//        for user in allUsersInContext {
-//            
-//            if let excludeID = id {
-//                
-//                if user.UserID != excludeID{
-//                    
-//                    usersToChooseFrom.append(user)
-//                }
-//            }
-//            else {
-//                
-//                usersToChooseFrom.append(user)
-//            }
-//        }
-//        
-//        return usersToChooseFrom
-//    }
-//    
-//    override func modelIsValid() -> Bool {
-//        
-//        return Username.length() > 0 && Password.length() > 0 && Email.length() > 0
-//    }
-//    
-//    func modelIsValidForLogin() -> Bool {
-//        
-//        return Username.length() > 0 && Password.length() > 0
-//    }
-//}

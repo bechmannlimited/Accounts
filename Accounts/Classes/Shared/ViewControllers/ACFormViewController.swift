@@ -17,7 +17,8 @@ class ACFormViewController: FormViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-         NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
+        view.backgroundColor = kViewBackgroundColor
+        //NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -29,7 +30,7 @@ class ACFormViewController: FormViewController {
     
     func didReceivePushNotification(notification: NSNotification) {
         
-        println("hi")
+        
     }
 
     func setupNavigationBarAppearance() {
@@ -92,6 +93,7 @@ extension ACFormViewController: UITableViewDelegate {
         if let cell = c as? FormViewTextFieldCell {
             
             let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
+            toolbar.tintColor = kNavigationBarTintColor
             
             var items = [UIBarButtonItem]()
             
@@ -103,10 +105,18 @@ extension ACFormViewController: UITableViewDelegate {
             items.append(UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil))
             items.append(UIBarButtonItem(barButtonSystemItem: .Done, target: self, action: "done"))
             
+            cell.datePicker?.backgroundColor = kNavigationBarBarTintColor
+            
             toolbar.items = items
             cell.textField.inputAccessoryView = toolbar
         }
         
         return c
+    }
+    
+    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
+        
+        setTableViewCellAppearanceForBackgroundGradient(cell)
     }
 }
