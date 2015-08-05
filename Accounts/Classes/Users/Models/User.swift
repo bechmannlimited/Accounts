@@ -74,11 +74,6 @@ class User: PFUser {
         
         let execRemoteQuery: () -> () = {
             
-            for friend in self.friends {
-                
-                //friend.unpinInBackground()
-            }
-            
             let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
             graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
                 
@@ -89,9 +84,6 @@ class User: PFUser {
                     Task.executeTaskInBackground({ () -> () in
                         
                         var friendInfo = Dictionary<String, NSNumber>()
-                        
-                        //self.friendsArray = []
-                        //self.pin()
                         
                         var queries = [PFQuery]()
                         var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
@@ -116,7 +108,6 @@ class User: PFUser {
                             
                             let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
                             friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                            //friend.differenceBetweenActiveUser = NSNumber(double: responseJson.doubleValue)
                             
                             friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
                             
@@ -124,9 +115,9 @@ class User: PFUser {
                         
                         self.friendsIdsWithDifference = friendInfo
                         
-                        }, completion: { () -> () in
-                            
-                            completion()
+                    }, completion: { () -> () in
+                        
+                        completion()
                     })
                 }
                 else{
@@ -152,7 +143,7 @@ class User: PFUser {
             localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
                 if let friends = objects as? [User] {
-                    println(friends);println("hi")
+                    
                     self.friends = friends
                     
                     for friend in self.friends {

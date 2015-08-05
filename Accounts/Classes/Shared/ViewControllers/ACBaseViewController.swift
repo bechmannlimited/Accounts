@@ -14,10 +14,12 @@ class ACBaseViewController: BaseViewController {
     var blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))
     var gradient: CAGradientLayer = CAGradientLayer()
     
+    var activeQueries = [PFQuery?]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
+        //NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -28,7 +30,7 @@ class ACBaseViewController: BaseViewController {
     
     func didReceivePushNotification(notification: NSNotification) {
         
-        println("hi")
+        //println("hi")
     }
     
     func setupNavigationBarAppearance() {
@@ -64,6 +66,15 @@ class ACBaseViewController: BaseViewController {
         super.viewDidLayoutSubviews()
         
         gradient.frame = view.frame
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        for query in activeQueries {
+            
+            query?.cancel()
+        }
     }
 }
 

@@ -184,6 +184,8 @@ class TransactionsViewController: ACBaseViewController {
         query = PFQuery.orQueryWithSubqueries([queryForFromUser!, queryForToUser!])
         query?.includeKey("purchase")
         query?.orderByDescending("transactionDate")
+        
+        activeQueries.append(query)
     }
     
     func getDifferenceAndRefreshIfNeccessary(refreshControl: UIRefreshControl?) {
@@ -324,8 +326,8 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         let localQuery: PFQuery? = query?.copy() as? PFQuery
-        
         localQuery?.fromLocalDatastore()
+        activeQueries.append(localQuery)
         
         localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             

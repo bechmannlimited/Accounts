@@ -115,7 +115,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
         
         println(userInfo)
-        NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterPushNotificationKey, object: userInfo, userInfo: userInfo)
+        //NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterPushNotificationKey, object: userInfo, userInfo: userInfo)
     }
     
     func setupAppearances() {
