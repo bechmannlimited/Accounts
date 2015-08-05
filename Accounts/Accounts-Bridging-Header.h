@@ -16,3 +16,5 @@
 #import <Bolts/BFTask.h>
 
 #import <SupportKit/SupportKit.h>
+
+#import "UIAppearance+Swift.h"

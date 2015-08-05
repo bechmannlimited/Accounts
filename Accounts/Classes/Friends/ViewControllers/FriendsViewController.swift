@@ -107,6 +107,8 @@ class FriendsViewController: ACBaseViewController {
         
         var previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
+        
+        toolbar.tintColor = kNavigationBarTintColor
     }
     
     override func setEditing(editing: Bool, animated: Bool) {
@@ -155,8 +157,8 @@ class FriendsViewController: ACBaseViewController {
             
             toolbar.items = [
                 UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
-                addBarButtonItem!,
-                UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
+                addBarButtonItem!
+                //UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
             ]
         }
         else{
@@ -430,6 +432,11 @@ extension FriendsViewController: UIPopoverPresentationControllerDelegate {
             return true
         }
     }
+    
+//    func popoverPresentationController(popoverPresentationController: UIPopoverPresentationController, willRepositionPopoverToRect rect: UnsafeMutablePointer<CGRect>, inView view: AutoreleasingUnsafeMutablePointer<UIView?>) {
+//        
+//        popoverPresentationController.backgroundColor = UIColor.clearColor()
+//    }
 }
 
 extension FriendsViewController: FriendInvitesDelegate {

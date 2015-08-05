@@ -164,7 +164,7 @@ class BouncyHeaderView: UIView{
         titleLabel.numberOfLines = 2
         titleLabel.lineBreakMode = NSLineBreakMode.ByWordWrapping
         titleLabel.textColor = UIColor.whiteColor()
-        titleLabel.textAlignment = NSTextAlignment.Left
+        titleLabel.textAlignment = kDevice == .Pad ? .Center : NSTextAlignment.Left
         
         titleLabel.userInteractionEnabled = false
     }

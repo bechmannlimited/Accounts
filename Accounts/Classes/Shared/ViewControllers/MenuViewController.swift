@@ -61,6 +61,14 @@ class MenuViewController: ACBaseViewController {
         
         tableView.reloadData()
         //deselectSelectedCell(tableView)
+        
+        if kDevice == .Pad { // isInsidePopover() {
+            
+            navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
+            navigationController?.view.backgroundColor = UIColor.darkGrayColor()
+            view.backgroundColor = UIColor.clearColor()
+            tableView.backgroundColor = UIColor.clearColor()
+        }
     }
     
     override func viewWillDisappear(animated: Bool) {

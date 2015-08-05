@@ -34,8 +34,8 @@ let kTableViewBackgroundColor = UIColor.clearColor()
 let kTableViewSeparatorColor = UIColor.clearColor()
 
 let kNavigationBarPositiveActionColor = kNavigationBarTintColor
-let kNavigationBarTintColor = UIColor.yellowColor() // UIColor.whiteColor() // UIColor.yellowColor() // UIColor(hex: "00AEE5")
-let kNavigationBarBarTintColor:UIColor = UIColor(hex: "161616")
+let kNavigationBarTintColor = UIColor(hex: "E8DA8A") // AccountColor.greenColor() // UIColor(hex: "9043FF")  // UIColor.whiteColor() // UIColor.yellowColor() // UIColor(hex: "00AEE5")
+let kNavigationBarBarTintColor:UIColor =  UIColor(hex: "161616")
 let kNavigationBarTitleColor = UIColor.blackColor()
 let kNavigationBarStyle = UIBarStyle.Default
 
@@ -132,9 +132,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UIToolbar.appearance().tintColor = kNavigationBarTintColor
         UIToolbar.appearance().barStyle = UIBarStyle.Black
         
-        UITableViewCell.appearance().tintColor = kNavigationBarTintColor
-        UITableViewCell.appearance().backgroundColor = kDarkColor
-        UITableViewCell.appearance().textLabel?.textColor = .whiteColor()
+        UITableViewCell.appearanceWhenContainedWithin([BaseViewController.self]).tintColor = kNavigationBarTintColor
+        UITableViewCell.appearanceWhenContainedWithin([BaseViewController.self]).backgroundColor = kDarkColor
+        UITableViewCell.appearanceWhenContainedWithin([BaseViewController.self]).textLabel?.textColor = .whiteColor()
         
         UITabBar.appearance().tintColor = kNavigationBarTintColor
         

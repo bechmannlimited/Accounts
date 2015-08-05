@@ -89,8 +89,8 @@ class TransactionsViewController: ACBaseViewController {
         
         toolbar.items = [
             UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
-            addBarButtonItem!,
-            UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
+            addBarButtonItem!
+            //UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
         ]
         
         refreshBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
@@ -128,7 +128,7 @@ class TransactionsViewController: ACBaseViewController {
         
         headerView = BouncyHeaderView()
         headerView?.setupHeaderWithOriginView(view, originTableView: tableView)
-        headerView?.setupTitle("Transactions with \(friend.appropriateDisplayName())")
+        headerView?.setupTitle("\(friend.appropriateDisplayName())")
         
         if let id = friend.facebookId{
             
@@ -318,10 +318,8 @@ class TransactionsViewController: ACBaseViewController {
                         self.showOrHideTableOrNoDataView()
                         
                         self.refreshBarButtonItem?.enabled = true
-                        self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
                         
                         completion?()
-                            
                     })
                 }
             })
@@ -356,21 +354,22 @@ class TransactionsViewController: ACBaseViewController {
                     self.transactions = transactions
                 }
                 
-                }, completion: { () -> () in
-                    
-                    refreshControl?.endRefreshing()
-                    self.tableView.reloadData()
-                    
-                    self.view.hideLoader()
-                    self.showOrHideTableOrNoDataView()
-                    
-                   //self.findAndScrollToCalculatedSelectedCellAtIndexPath(false)
-                    
-                    self.refreshBarButtonItem?.enabled = true
-                    
-                    completion?()
+            }, completion: { () -> () in
+                
+                refreshControl?.endRefreshing()
+                self.tableView.reloadData()
+                
+                self.view.hideLoader()
+                self.showOrHideTableOrNoDataView()
+                
+               //self.findAndScrollToCalculatedSelectedCellAtIndexPath(false)
+                self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
+                
+                self.refreshBarButtonItem?.enabled = true
+                
+                completion?()
 
-                    executeRemoteQuery()
+                executeRemoteQuery()
             })
         })
         
@@ -512,6 +511,8 @@ class TransactionsViewController: ACBaseViewController {
         v.preferredContentSize = kPopoverContentSize
         v.popoverPresentationController?.barButtonItem = addBarButtonItem
         v.popoverPresentationController?.delegate = self
+        
+        popoverViewController = view // needed? added this not sure why its here lol
         
         presentViewController(v, animated: true, completion: nil)
     }
@@ -686,6 +687,11 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
             return true
         }
     }
+    
+//    func popoverPresentationController(popoverPresentationController: UIPopoverPresentationController, willRepositionPopoverToRect rect: UnsafeMutablePointer<CGRect>, inView view: AutoreleasingUnsafeMutablePointer<UIView?>) {
+//        
+//        popoverPresentationController.backgroundColor = UIColor.clearColor()
+//    }
 }
 
 extension TransactionsViewController: UIScrollViewDelegate {
