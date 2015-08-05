@@ -166,6 +166,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         else if indexPath == kFeedbackIndexPath{
             
             SupportKit.show()
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
         }
     }
     

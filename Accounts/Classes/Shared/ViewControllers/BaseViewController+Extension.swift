@@ -51,11 +51,23 @@ extension BaseViewController {
         navigationController?.navigationBar.tintColor = kNavigationBarTintColor
         navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
         navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
-        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.Default, animated: true)
+        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
     }
     
     func setTableViewCellAppearanceForBackgroundGradient(cell:UITableViewCell) {
     
+        cell.textLabel?.textColor = .whiteColor()
+        
+        if let cell = cell as? FormViewTextFieldCell {
+            
+            cell.label.textColor = .whiteColor()
+        }
+        else if let cell = cell as? FriendTableViewCell {
+            
+            cell.friendNameLabel.textColor = .whiteColor()
+        }
+        
+        
 //        cell.backgroundColor = kTableViewCellBackgroundColor
 //        cell.textLabel?.textColor = kTableViewCellTextColor
 //        cell.tintColor = kTableViewCellTintColor
@@ -85,6 +97,8 @@ extension BaseViewController {
 extension BaseViewController: UITableViewDelegate {
     
     public func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        
+        // Warning: - no super
         
         let numberOfRowsInSections:Int = tableView.numberOfRowsInSection(indexPath.section)
     

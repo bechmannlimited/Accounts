@@ -17,23 +17,25 @@ import ParseFacebookUtilsV4
 
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
 
-let kViewBackgroundColor = kDevice == .Pad ? UIColor.groupTableViewBackgroundColor() : UIColor.whiteColor()
+let kViewBackgroundColor = kNavigationBarBarTintColor
 let kViewBackgroundGradientTop =  AccountColor.blueColor()
 let kViewBackgroundGradientBottom =  AccountColor.greenColor()
 
-let kTableViewBackgroundColor = UIColor.clearColor()
+let kDarkColor = UIColor(hex: "252525")
 
 let kTableViewCellBackgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.55)
 let kTableViewCellTextColor = UIColor.whiteColor()
 let kTableViewCellDetailTextColor = UIColor.whiteColor()
 let kTableViewCellSeperatorStyle = UITableViewCellSeparatorStyle.SingleLine
-let kTableViewCellSeperatorColor = UIColor.clearColor()
 let kTableViewCellHeight: CGFloat = 50
 let kTableViewCellTintColor = UIColor.whiteColor()
 
+let kTableViewBackgroundColor = UIColor.clearColor()
+let kTableViewSeparatorColor = UIColor.clearColor()
+
 let kNavigationBarPositiveActionColor = kNavigationBarTintColor
-let kNavigationBarTintColor = UIColor(hex: "00AEE5")
-let kNavigationBarBarTintColor:UIColor = UIColor.whiteColor().colorWithAlphaComponent(0.95)
+let kNavigationBarTintColor = UIColor.yellowColor() // UIColor.whiteColor() // UIColor.yellowColor() // UIColor(hex: "00AEE5")
+let kNavigationBarBarTintColor:UIColor = UIColor(hex: "161616")
 let kNavigationBarTitleColor = UIColor.blackColor()
 let kNavigationBarStyle = UIBarStyle.Default
 
@@ -42,7 +44,7 @@ let kFormDeleteButtonTextColor = AccountColor.negativeColor()
 let kTableViewMaxWidth:CGFloat = 570
 let kTableViewCellIpadCornerRadiusSize = CGSize(width: 5, height: 5)
 
-let kDefaultSeperatorColor = UITableView().separatorColor
+//let kDefaultSeperatorColor = UITableView().separatorColor
 
 let kParseInstallationUserKey = "user"
 let kNotificationCenterPushNotificationKey = "pushNotificationUserInfoReceived"
@@ -76,6 +78,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
         SupportKit.initWithSettings(SKTSettings(appToken: "amtp9h7tc5dq2sby4q6yc5ke6"))
+        SupportKit.settings().conversationStatusBarStyle = UIStatusBarStyle.LightContent
         
         return true
     }
@@ -124,12 +127,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
         UINavigationBar.appearance().shadowImage = kDefaultNavigationBarShadowImage
         UINavigationBar.appearance().barStyle = kNavigationBarStyle
+        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor()]
         
         UIToolbar.appearance().tintColor = kNavigationBarTintColor
+        UIToolbar.appearance().barStyle = UIBarStyle.Black
         
         UITableViewCell.appearance().tintColor = kNavigationBarTintColor
+        UITableViewCell.appearance().backgroundColor = kDarkColor
+        UITableViewCell.appearance().textLabel?.textColor = .whiteColor()
         
         UITabBar.appearance().tintColor = kNavigationBarTintColor
+        
+        UITableView.appearance().backgroundColor = kNavigationBarBarTintColor
+        UITableView.appearance().separatorColor = kTableViewSeparatorColor
+        
+        UILabel.appearance().textColor = .whiteColor()
+        
+        UITextField.appearance().keyboardAppearance = UIKeyboardAppearance.Dark
     }
     
     private func setWindowToLogin() {

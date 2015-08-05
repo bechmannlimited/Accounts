@@ -160,5 +160,4 @@ class FriendTableViewCell: UITableViewCell {
         
         return contentView.frame.height - (kContentViewVerticalPadding * 2)
     }
-
 }

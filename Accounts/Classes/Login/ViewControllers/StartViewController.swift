@@ -23,6 +23,7 @@ class StartViewController: ACBaseViewController {
             
             loginViewController.fields =  PFLogInFields.Facebook // | PFLogInFields.UsernameAndPassword |  PFLogInFields.SignUpButton PFLogInFields.LogInButton | PFLogInFields.PasswordForgotten |
             loginViewController.facebookPermissions = ["email", "public_profile", "user_friends"]
+            loginViewController.logInView?.logo = titleView()
             
             var signUpViewController = PFSignUpViewController()
             loginViewController.signUpController = signUpViewController
@@ -42,6 +43,42 @@ class StartViewController: ACBaseViewController {
              
             }
         }
+    }
+    
+    func titleView() -> UIView {
+        
+        var titleView = UIView()
+        titleView.frame = CGRect(x: 0, y: 0, width: 200, height: 400)
+        
+        var logo = UIImageView()
+        logo.setTranslatesAutoresizingMaskIntoConstraints(false)
+        titleView.addSubview(logo)
+        
+        logo.image = AppTools.iconAssetNamed("iTunesArtwork")
+        logo.layer.cornerRadius = 20
+        logo.clipsToBounds = true
+        logo.addTopConstraint(toView: titleView, relation: .Equal, constant: -200)
+        logo.addLeftConstraint(toView: titleView, relation: .Equal, constant: 0)
+        logo.addRightConstraint(toView: titleView, relation: .Equal, constant: 0)
+        logo.addHeightConstraint(relation: .Equal, constant: 200)
+        
+        var subTitleLabel = UILabel()
+        subTitleLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        titleView.addSubview(subTitleLabel)
+        
+        subTitleLabel.textAlignment = NSTextAlignment.Center
+        subTitleLabel.text = "Please login with Facebook. Don't worry, we won't post anything!"
+        subTitleLabel.numberOfLines = 0
+        subTitleLabel.font = UIFont.systemFontOfSize(22)
+        subTitleLabel.textColor = UIColor.lightGrayColor()
+        subTitleLabel.addTopConstraint(toView: logo, attribute: NSLayoutAttribute.Bottom, relation: .Equal, constant: 10)
+        subTitleLabel.addLeftConstraint(toView: titleView, relation: .Equal, constant: -30)
+        subTitleLabel.addRightConstraint(toView: titleView, relation: .Equal, constant: 30)
+        subTitleLabel.addHeightConstraint(relation: .Equal, constant: 120)
+//
+//        println(subTitleLabel.frame)
+        
+        return titleView
     }
     
     func goToApp(){

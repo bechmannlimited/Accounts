@@ -227,6 +227,8 @@ class TransactionsViewController: ACBaseViewController {
         
         var previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
+        
+        toolbar.tintColor = kNavigationBarTintColor
     }
     
     override func setupTableView(tableView: UITableView, delegate: UITableViewDelegate, dataSource: UITableViewDataSource) {
@@ -255,7 +257,7 @@ class TransactionsViewController: ACBaseViewController {
             
             self.noDataView.layer.opacity = self.transactions.count > 0 ? 0 : 1
             self.tableView.layer.opacity = self.transactions.count > 0 ? 1 : 1
-            self.tableView.separatorColor = self.transactions.count > 0 ? kDefaultSeperatorColor : .clearColor()
+            self.tableView.separatorColor = self.transactions.count > 0 ? kTableViewSeparatorColor : .clearColor()
             //self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? .whiteColor() : UIColor.groupTableViewBackgroundColor()
         })
     }
@@ -558,8 +560,6 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
             return UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: identifier)
         })
         
-        setTableViewCellAppearanceForBackgroundGradient(cell)
-        
         let transaction = transactions[indexPath.row]
         
         var amount = transaction.localeAmount
@@ -693,9 +693,7 @@ extension TransactionsViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(scrollView: UIScrollView) {
         
         var y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
-        
-        println(y)
-        
+
         if y < 86 {
 
             navigationController?.navigationBar.tintColor = UIColor.whiteColor()

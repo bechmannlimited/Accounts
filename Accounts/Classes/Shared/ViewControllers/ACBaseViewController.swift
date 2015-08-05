@@ -19,6 +19,8 @@ class ACBaseViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = kViewBackgroundColor
+        
         //NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
     }
     
@@ -83,5 +85,11 @@ extension ACBaseViewController: UITableViewDelegate {
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         
         return kTableViewCellHeight
+    }
+    
+    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
+        
+        setTableViewCellAppearanceForBackgroundGradient(cell)
     }
 }

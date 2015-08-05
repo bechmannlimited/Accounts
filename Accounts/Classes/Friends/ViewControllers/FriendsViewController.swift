@@ -20,7 +20,7 @@ private let kPopoverContentSize = CGSize(width: 320, height: 360)
 
 class FriendsViewController: ACBaseViewController {
     
-    var tableView = UITableView(frame: CGRectZero, style: UITableViewStyle.Plain)
+    var tableView = UITableView(frame: CGRectZero, style: UITableViewStyle.Grouped)
     
     var addBarButtonItem: UIBarButtonItem?
     var friendInvitesBarButtonItem: UIBarButtonItem?
@@ -39,10 +39,10 @@ class FriendsViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if kDevice == .Pad {
-            
-            tableView = UITableView(frame: CGRectZero, style: .Grouped)
-        }
+//        if kDevice == .Pad {
+//            
+//            tableView = UITableView(frame: CGRectZero, style: .Grouped)
+//        }
         
         setupTableView(tableView, delegate: self, dataSource: self)
         setBarButtonItems()
@@ -296,7 +296,7 @@ class FriendsViewController: ACBaseViewController {
             
             self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
             self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 0
-            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kDefaultSeperatorColor : kDefaultSeperatorColor //.clearColor()
+            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : kTableViewSeparatorColor //.clearColor()
             //self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? .whiteColor() : UIColor.groupTableViewBackgroundColor()
         })
     }
@@ -321,6 +321,7 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         let friend = data[indexPath.section][indexPath.row]
         (cell as FriendTableViewCell).setup(friend)
         
+        setTableViewCellAppearanceForBackgroundGradient(cell)
         return cell
     }
 

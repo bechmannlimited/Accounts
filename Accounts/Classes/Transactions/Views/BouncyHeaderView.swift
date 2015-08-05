@@ -39,7 +39,7 @@ class BouncyHeaderView: UIView{
         
         originTableView.backgroundColor = UIColor.clearColor()
         
-        backgroundColor = UIColor.darkGrayColor()
+        backgroundColor = kNavigationBarBarTintColor
     }
     
     func setupConstraints() {

@@ -90,6 +90,10 @@ class SelectUsersViewController: ACBaseViewController {
         }
     }
     
+    override func setupTableViewRefreshControl(tableView: UITableView) {
+        
+    }
+    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -107,6 +111,8 @@ class SelectUsersViewController: ACBaseViewController {
 //            
 //            alert.show()
 //        })
+        
+        //refreshControl?.endRefreshing()
     }
     
     func done() {

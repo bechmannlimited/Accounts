@@ -18,6 +18,19 @@ class SaveItemViewController: ACFormViewController {
     
     var delegate: SaveItemDelegate?
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if kDevice == .Pad { // isInsidePopover() {
+            
+            navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
+            navigationController?.view.backgroundColor = UIColor.darkGrayColor()
+            view.backgroundColor = UIColor.clearColor()
+            println(isInsidePopover())
+            tableView.backgroundColor = UIColor.clearColor()
+        }
+    }
+    
     func pop() {
         
         self.dismissViewControllerFromCurrentContextAnimated(true)
