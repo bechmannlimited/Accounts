@@ -10,6 +10,7 @@
 import UIKit
 import ABToolKit
 import SwiftyUserDefaults
+import SwiftyJSON
 
 class SaveTransactionViewController: SaveItemViewController {
 
@@ -70,6 +71,8 @@ class SaveTransactionViewController: SaveItemViewController {
                 
                 self.updateUIForEditing()
                 self.reloadForm()
+                
+                self.copyOfItem = ParseUtilities.convertPFObjectToDictionary(self.transaction)
             })
         }
         
@@ -138,7 +141,19 @@ class SaveTransactionViewController: SaveItemViewController {
         return allowEditing && transaction.modelIsValid() && !isSaving
     }
     
-    
+    override func onDiscard() {
+        
+        if let copyDictionary = copyOfItem as? Dictionary<String, AnyObject> {
+            
+            let copy = JSON(copyDictionary)
+            
+            transaction.title = copy["title"].stringValue
+            transaction.amount = copy["amount"].doubleValue
+            println(copy["amount"].doubleValue)
+        }
+        
+        //transaction.hardUnpin()
+    }
 }
 
 extension SaveTransactionViewController: FormViewDelegate {

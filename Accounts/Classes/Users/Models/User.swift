@@ -83,6 +83,9 @@ class User: PFUser {
                     
                     Task.executeTaskInBackground({ () -> () in
                         
+                        PFObject.unpinAll(self.friends)
+                        self.unpin()
+                        
                         var friendInfo = Dictionary<String, NSNumber>()
                         
                         var queries = [PFQuery]()
@@ -111,13 +114,15 @@ class User: PFUser {
                             
                             friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
                             
+                            friend.pinInBackground()
+                            
                         }
                         
                         self.friendsIdsWithDifference = friendInfo
                         self.pinInBackground()
                         
                     }, completion: { () -> () in
-                        
+                            
                         completion()
                     })
                 }
@@ -161,6 +166,7 @@ class User: PFUser {
             
             execRemoteQuery()
         }
+
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {

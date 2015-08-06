@@ -118,6 +118,25 @@ class Transaction: PFObject {
         
         return targets
     }
+    
+    func hardUnpin() {
+        
+        Task.executeTaskInBackground({ () -> () in
+            
+            self.unpinInBackground()
+            self.purchase?.unpin()
+            self.fromUser?.unpin()
+            self.toUser?.unpin()
+            PFObject.unpinAll(self.purchase?.transactions)
+            self.purchase?.user.unpin()
+            
+        }, completion: { () -> () in
+            
+            
+        })
+        
+        
+    }
 }
 
 extension Transaction: PFSubclassing {

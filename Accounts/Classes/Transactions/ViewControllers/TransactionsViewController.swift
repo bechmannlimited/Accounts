@@ -59,7 +59,7 @@ class TransactionsViewController: ACBaseViewController {
     
     //var refreshQuery: PFQuery?
     //var loadMoreQuery: PFQuery?
-    var query: PFQuery?
+    //var query: PFQuery?
     
     var bounceViewHeightConstraint: NSLayoutConstraint?
     
@@ -68,7 +68,7 @@ class TransactionsViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupQuery()
+        //setupQuery()
         
         if kDevice == .Pad {
         
@@ -171,7 +171,9 @@ class TransactionsViewController: ACBaseViewController {
         }
     }
     
-    func setupQuery() {
+    func query() -> PFQuery? {
+        
+        var query: PFQuery?
         
         let queryForFromUser = Transaction.query()
         queryForFromUser?.whereKey("fromUser", equalTo: User.currentUser()!)
@@ -186,6 +188,8 @@ class TransactionsViewController: ACBaseViewController {
         query?.orderByDescending("transactionDate")
         
         activeQueries.append(query)
+        
+        return query
     }
     
     func getDifferenceAndRefreshIfNeccessary(refreshControl: UIRefreshControl?) {
@@ -271,33 +275,36 @@ class TransactionsViewController: ACBaseViewController {
             noDataView.layer.opacity = 0 // need to re-check this bit
         }
         
-        query?.cancel()
-        query?.skip = 0
-        query?.limit = 16
+        cancelQueries()
+        let remoteQuery = query()
+        
+        remoteQuery?.skip = 0
+        remoteQuery?.limit = 16
         
         if transactions.count > 16 && transactions.count < 35 {
             
-            query?.limit = transactions.count
+            remoteQuery?.limit = transactions.count
         }
+        
+        //var objectsReturnedFromLocalQuery = [PFObject]()
         
         let executeRemoteQuery: () -> () = {
             
             self.refreshBarButtonItem?.enabled = false
             
-            self.query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+            remoteQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
                 if var transactions = objects as? [Transaction] {
                     
                     Task.executeTaskInBackground({ () -> () in
                         
-                        let unpinQuery = self.query?.copy() as? PFQuery
+                        let unpinQuery = self.query()
                         
                         if let arr = unpinQuery?.fromLocalDatastore().findObjects() as? [Transaction] { //.whereKey("objectId", notContainedIn: newIds)
                             
                             for transaction in arr{
-                                
-                                transaction.unpin()
-                                transaction.purchase?.unpin()
+
+                                transaction.hardUnpin()
                             }
                         }
                         
@@ -309,13 +316,13 @@ class TransactionsViewController: ACBaseViewController {
                             }
                             
                             transaction.pinInBackground()
-                            transaction.purchase?.pinInBackground()
+                            //transaction.purchase?.pinInBackground()
                         }
                         
                         self.transactions = transactions
                         
                     }, completion: { () -> () in
-                        
+                            
                         refreshControl?.endRefreshing()
                         self.tableView.reloadData()
                         self.view.hideLoader()
@@ -328,10 +335,10 @@ class TransactionsViewController: ACBaseViewController {
             })
         }
         
-        let localQuery: PFQuery? = query?.copy() as? PFQuery
+        let localQuery: PFQuery? = query()
         localQuery?.fromLocalDatastore()
         localQuery?.limit = 35
-        activeQueries.append(localQuery)
+        
         
         localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             
@@ -341,21 +348,20 @@ class TransactionsViewController: ACBaseViewController {
                     
                     for transaction in transactions {
                         
-                        if let id = transaction.purchaseObjectId {
+                        if let id = transaction.purchaseObjectId { // i think this is pinned automatically
                             
-                            let localPurchaseQuery = Purchase.query()
-                            localPurchaseQuery?.fromLocalDatastore()
-                            transaction.purchase = localPurchaseQuery?.getObjectWithId(id) as? Purchase
-                            
-                            if transaction.purchase == nil {
-                                
-                                transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
-                                transaction.purchase?.pinInBackground()
-                            }
+//                            let localPurchaseQuery = Purchase.query()
+//                            localPurchaseQuery?.fromLocalDatastore()
+//                            transaction.purchase = localPurchaseQuery?.getObjectWithId(id) as? Purchase
+//
+//                            if transaction.purchase == nil {
+//                                
+//                                successful = false
+//                            }
                         }
                     }
                     
-                    self.transactions = transactions
+                     self.transactions = transactions
                 }
                 
             }, completion: { () -> () in
@@ -477,13 +483,24 @@ class TransactionsViewController: ACBaseViewController {
         executeActualRefreshByHiding(true, refreshControl: refreshControl, take: nil, completion: nil)
     }
     
+    func cancelQueries(){
+        
+        for query in activeQueries {
+            
+            query?.cancel()
+        }
+    }
+    
     func loadMore() {
         
-        query?.cancel()
-        query?.skip = transactions.count 
-        query?.limit = 16
+        //cancelQueries()
         
-        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+        let loadMoreQuery = query()
+        
+        loadMoreQuery?.skip = transactions.count
+        loadMoreQuery?.limit = 16
+        
+        loadMoreQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             
             if let transactions = objects as? [Transaction] {
                 
@@ -537,7 +554,7 @@ class TransactionsViewController: ACBaseViewController {
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         
-        query?.cancel()
+        
         tableView.delegate = nil
     }
 }

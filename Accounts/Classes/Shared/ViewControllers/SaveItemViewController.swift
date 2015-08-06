@@ -15,6 +15,7 @@ class SaveItemViewController: ACFormViewController {
     var isSaving = false
     var allowEditing = false
     var askToPopMessage = ""
+    var copyOfItem = Dictionary<String, AnyObject?>()
     
     var delegate: SaveItemDelegate?
     
@@ -51,6 +52,7 @@ class SaveItemViewController: ACFormViewController {
                 
                 if response == AlertResponse.Confirm {
                     
+                    self.onDiscard()
                     self.pop()
                 }
             }
@@ -102,6 +104,11 @@ class SaveItemViewController: ACFormViewController {
     func saveButtonEnabled() -> Bool {
         
         return false
+    }
+    
+    func onDiscard() {
+        
+        
     }
 
 }

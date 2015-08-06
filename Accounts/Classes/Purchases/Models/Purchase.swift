@@ -100,6 +100,8 @@ class Purchase: PFObject {
                 
                 for transaction in self.transactions {
                     
+                    transaction.purchase = self
+                    transaction.purchaseObjectId = self.objectId
                     transaction.pinInBackground()
                 }
             }
@@ -244,6 +246,19 @@ class Purchase: PFObject {
                 transactions.removeAtIndex(index)
             }
         }
+    }
+    
+    func hardUnpin() {
+        
+        Task.executeTaskInBackground({ () -> () in
+            
+            PFObject.unpinAll(self.transactions)
+            self.unpin()
+            
+        }, completion: { () -> () in
+            
+            
+        })
     }
 }
 

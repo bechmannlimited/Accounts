@@ -41,7 +41,7 @@ DEPENDENCIES:
   - FBSDKCoreKit (= 4.1.0)
   - FBSDKLoginKit (= 4.1.0)
   - FBSDKShareKit (= 4.1.0)
-  - Parse (~> 1.7.2)
+  - Parse
   - ParseFacebookUtilsV4 (~> 1.7.2)
   - ParseUI (~> 1.1.3)
   - SupportKit
@@ -56,7 +56,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   ABToolKit:
-    :commit: 50d556099cac985cd0b0d489de1704e5f23d2236
+    :commit: 4b2f6d8832d988a4676b67d7432581d778e46b9b
     :git: "/Users/alexbechmann/Documents/iOS/cocoapods/ABToolKit"
 
 SPEC CHECKSUMS:

@@ -10,6 +10,7 @@
 import UIKit
 import ABToolKit
 import Parse
+import SwiftyJSON
 
 class SavePurchaseViewController: SaveItemViewController {
 
@@ -77,10 +78,12 @@ class SavePurchaseViewController: SaveItemViewController {
                         transaction.toUser?.fetchIfNeeded()
                     }
                     
+                    self.copyOfItem = ParseUtilities.convertPFObjectToDictionary(self.purchase)
                     canContinue = true
                 }
                 else{
                     
+                    //PFObject.unpinAll(Purchase.query()?.whereKey("objectId", equalTo: self.purchaseObjectId!).fromLocalDatastore().findObjects())
                     self.popAll()
                 }
                 
@@ -125,6 +128,20 @@ class SavePurchaseViewController: SaveItemViewController {
     override func saveButtonEnabled() -> Bool {
         
         return allowEditing && purchase.modelIsValid() && !isSaving
+    }
+    
+    override func onDiscard() {
+        
+        if let copyDictionary = copyOfItem as? Dictionary<String, AnyObject> {
+            
+            let copy = JSON(copyDictionary)
+            
+            purchase.title = copy["title"].stringValue
+            purchase.amount = copy["amount"].doubleValue
+            println(copy["amount"].doubleValue)
+        }
+        
+        //purchase.hardUnpin()
     }
 }
 
