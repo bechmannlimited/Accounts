@@ -139,6 +139,9 @@ class SavePurchaseViewController: SaveItemViewController {
             purchase.title = copy["title"].stringValue
             purchase.amount = copy["amount"].doubleValue
             println(copy["amount"].doubleValue)
+            
+            purchase.user = (copyDictionary["user"] as? User)!
+            purchase.purchasedDate = copyDictionary["purchasedDate"] as? NSDate
         }
         
         //purchase.hardUnpin()

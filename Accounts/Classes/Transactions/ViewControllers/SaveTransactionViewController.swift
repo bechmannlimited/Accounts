@@ -150,6 +150,10 @@ class SaveTransactionViewController: SaveItemViewController {
             transaction.title = copy["title"].stringValue
             transaction.amount = copy["amount"].doubleValue
             println(copy["amount"].doubleValue)
+            
+            transaction.fromUser = copyDictionary["fromUser"] as? User
+            transaction.toUser = copyDictionary["toUser"] as? User
+            transaction.transactionDate = (copyDictionary["transactionDate"] as? NSDate)!
         }
         
         //transaction.hardUnpin()
