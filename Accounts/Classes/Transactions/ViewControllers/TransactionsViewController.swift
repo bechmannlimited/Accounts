@@ -296,8 +296,8 @@ class TransactionsViewController: ACBaseViewController {
                             
                             for transaction in arr{
                                 
-                                transaction.unpinInBackground()
-                                transaction.purchase?.unpinInBackground()
+                                transaction.unpin()
+                                transaction.purchase?.unpin()
                             }
                         }
                         

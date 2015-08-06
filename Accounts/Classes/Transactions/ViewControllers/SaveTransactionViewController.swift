@@ -34,15 +34,15 @@ class SaveTransactionViewController: SaveItemViewController {
         
         if allowEditing && transaction.objectId == nil {
             
-            title = "New transfer"
+            title = "Add payment"
         }
         else if allowEditing && transaction.objectId != nil {
             
-            title = "Edit transfer"
+            title = "Edit payment"
         }
         else {
             
-            title = "Transfer"
+            title = "Payment"
         }
         
         
@@ -73,7 +73,7 @@ class SaveTransactionViewController: SaveItemViewController {
             })
         }
         
-        askToPopMessage = "Going back delete changes to this transaction! Are you sure?"
+        askToPopMessage = "Going back will discard any changes, Are you sure?"
     }
     
     func save() {

@@ -98,7 +98,7 @@ class SavePurchaseViewController: SaveItemViewController {
             reloadForm()
         }
         
-        askToPopMessage = "Going back delete changes to this purchase! Are you sure?"
+        askToPopMessage = "Going back will discard any changes, Are you sure?"
     }
         
     func save() {

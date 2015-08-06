@@ -114,6 +114,7 @@ class User: PFUser {
                         }
                         
                         self.friendsIdsWithDifference = friendInfo
+                        self.pinInBackground()
                         
                     }, completion: { () -> () in
                         

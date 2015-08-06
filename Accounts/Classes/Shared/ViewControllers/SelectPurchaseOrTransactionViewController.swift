@@ -13,7 +13,7 @@ import ABToolKit
 class SelectPurchaseOrTransactionViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
-    var data = [(identifier: "Purchase", textLabelText: "Add purchase"), (identifier: "Transaction", textLabelText: "Add transfer")]
+    var data = [(identifier: "Purchase", textLabelText: "Add purchase"), (identifier: "Transaction", textLabelText: "Add payment")]
     var contextualFriend: User?
     var saveItemDelegate: SaveItemDelegate?
     

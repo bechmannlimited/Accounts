@@ -25,7 +25,7 @@ class ACFormViewController: FormViewController {
         super.viewWillAppear(animated)
         
         setupView()
-        shouldAdjustTableViewInsetsForKeyboard = !isInsidePopover()
+        shouldAdjustTableViewInsetsForKeyboard = kDevice != .Pad
     }
     
     func didReceivePushNotification(notification: NSNotification) {

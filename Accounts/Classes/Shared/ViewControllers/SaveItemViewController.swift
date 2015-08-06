@@ -47,7 +47,7 @@ class SaveItemViewController: ACFormViewController {
         
         if itemDidChange {
             
-            UIAlertController.showAlertControllerWithButtonTitle("Go back", confirmBtnStyle: UIAlertActionStyle.Destructive, message: askToPopMessage) { (response) -> () in
+            UIAlertController.showAlertControllerWithButtonTitle("Discard", confirmBtnStyle: UIAlertActionStyle.Destructive, message: askToPopMessage) { (response) -> () in
                 
                 if response == AlertResponse.Confirm {
                     
