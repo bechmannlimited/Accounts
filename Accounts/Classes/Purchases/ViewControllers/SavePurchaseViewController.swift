@@ -20,6 +20,8 @@ class SavePurchaseViewController: SaveItemViewController {
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
     
+    var oldTransactions = [Dictionary<String, AnyObject?>]()
+    
     override func viewDidLoad() {
         
         shouldLoadFormOnLoad = false
@@ -59,7 +61,7 @@ class SavePurchaseViewController: SaveItemViewController {
         if purchaseObjectId != nil {
             
             view.showLoader()
-            tableView.hidden = true
+            tableView.layer.opacity = 0
             
             var canContinue = false
             
@@ -79,6 +81,13 @@ class SavePurchaseViewController: SaveItemViewController {
                     }
                     
                     self.copyOfItem = ParseUtilities.convertPFObjectToDictionary(self.purchase)
+                    
+                    for transaction in self.purchase.transactions {
+                        
+                        let t = ParseUtilities.convertPFObjectToDictionary(transaction)
+                        self.oldTransactions.append(t)
+                    }
+                    
                     canContinue = true
                 }
                 else{
@@ -93,6 +102,11 @@ class SavePurchaseViewController: SaveItemViewController {
             
                     self.updateUIForEditing()
                     self.reloadForm()
+                    
+                    UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                        
+                        self.tableView.layer.opacity = 1
+                    })
                 }
             })
         }
@@ -132,17 +146,35 @@ class SavePurchaseViewController: SaveItemViewController {
     
     override func onDiscard() {
         
-        if let copyDictionary = copyOfItem as? Dictionary<String, AnyObject> {
-            
-            let copy = JSON(copyDictionary)
-            
-            purchase.title = copy["title"].stringValue
-            purchase.amount = copy["amount"].doubleValue
-            println(copy["amount"].doubleValue)
-            
-            purchase.user = (copyDictionary["user"] as? User)!
-            purchase.purchasedDate = copyDictionary["purchasedDate"] as? NSDate
-        }
+//        if let copyDictionary = copyOfItem as? Dictionary<String, AnyObject> {
+//            
+//            let copy = JSON(copyDictionary)
+//            
+//            purchase.title = copy["title"].stringValue
+//            purchase.amount = copy["amount"].doubleValue
+//            println(copy["amount"].doubleValue)
+//            
+//            purchase.user = (copyDictionary["user"] as? User)!
+//            purchase.purchasedDate = copyDictionary["purchasedDate"] as? NSDate
+//            
+//            purchase.transactions = []
+//            
+//            for transactionDictionary in self.oldTransactions {
+//                
+//                if let transactionDictionary = transactionDictionary as? Dictionary<String, AnyObject> {
+//                    
+//                    let transactionJson = JSON(transactionDictionary)
+//                    
+//                    let t = Transaction()
+//                    t.objectId = transactionDictionary["objectId"] as? String
+//                    t.fromUser = transactionDictionary["fromUser"] as? User
+//                    t.toUser = transactionDictionary["toUser"] as? User
+//                    t.amount = transactionJson["amount"].doubleValue
+//                }
+//            }
+//            
+//            purchase.pin()
+//        }
         
         //purchase.hardUnpin()
     }

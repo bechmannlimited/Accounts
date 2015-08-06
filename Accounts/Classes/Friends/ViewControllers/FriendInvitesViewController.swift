@@ -13,7 +13,6 @@ import SwiftyJSON
 
 private let kUnconfirmedInvitesSection = 0
 private let kUnconfirmedSentInvitesSection = 1
-private let kAnimationDuration:NSTimeInterval = 0.5
 
 protocol FriendInvitesDelegate {
     

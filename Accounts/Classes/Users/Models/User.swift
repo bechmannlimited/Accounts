@@ -70,8 +70,6 @@ class User: PFUser {
     
     func getFriends(completion:() -> ()) {
 
-        friends = [User]()
-        
         let execRemoteQuery: () -> () = {
             
             let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
@@ -81,10 +79,12 @@ class User: PFUser {
                 
                 if error == nil{
                     
+                    var canContinue = false
+                    
                     Task.executeTaskInBackground({ () -> () in
                         
-                        PFObject.unpinAll(self.friends)
-                        self.unpin()
+                        //PFObject.unpinAll(self.friends)
+                        //self.unpin()
                         
                         var friendInfo = Dictionary<String, NSNumber>()
                         
@@ -114,16 +114,20 @@ class User: PFUser {
                             
                             friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
                             
-                            friend.pinInBackground()
+                            //friend.pinInBackground()
                             
                         }
                         
                         self.friendsIdsWithDifference = friendInfo
-                        self.pinInBackground()
+                        
+                        canContinue = true
                         
                     }, completion: { () -> () in
+                        
+                        if canContinue {
                             
-                        completion()
+                            completion()
+                        }
                     })
                 }
                 else{
@@ -133,39 +137,39 @@ class User: PFUser {
             })
         }
         
-        //
+        execRemoteQuery()
         
-        var ids = [String]()
-        
-        if let friendInfos = friendsIdsWithDifference{
-            
-            for friend in friendInfos{
-                
-                ids.append(friend.0)
-            }
-            
-            let localQuery = User.query()?.whereKey("objectId", containedIn: ids).orderByAscending("objectId").fromLocalDatastore()
-            
-            localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-                
-                if let friends = objects as? [User] {
-                    
-                    self.friends = friends
-                    
-                    for friend in self.friends {
-                        
-                        friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
-                    }
-                    
-                    completion()
-                    execRemoteQuery()
-                }
-            })
-        }
-        else {
-            
-            execRemoteQuery()
-        }
+//        var ids = [String]()
+//        
+//        if let friendInfos = friendsIdsWithDifference{
+//            
+//            for friend in friendInfos{
+//                
+//                ids.append(friend.0)
+//            }
+//            
+//            let localQuery = User.query()?.whereKey("objectId", containedIn: ids).orderByAscending("objectId").fromLocalDatastore()
+//            
+//            localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+//                
+//                if let friends = objects as? [User] {
+//                    
+//                    self.friends = friends
+//                    
+//                    for friend in self.friends {
+//                        
+//                        friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
+//                    }
+//                    
+//                    completion()
+//                    execRemoteQuery()
+//                }
+//            })
+//        }
+//        else {
+//            
+//            execRemoteQuery()
+//        }
 
     }
     

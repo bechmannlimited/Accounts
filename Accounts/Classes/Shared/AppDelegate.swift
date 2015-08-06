@@ -45,6 +45,7 @@ let kTableViewMaxWidth:CGFloat = 570
 let kTableViewCellIpadCornerRadiusSize = CGSize(width: 5, height: 5)
 
 //let kDefaultSeperatorColor = UITableView().separatorColor
+let kAnimationDuration:NSTimeInterval = 0.5
 
 let kParseInstallationUserKey = "user"
 let kNotificationCenterPushNotificationKey = "pushNotificationUserInfoReceived"
@@ -67,7 +68,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Transaction.registerSubclass()
         Purchase.registerSubclass()
         
-        Parse.enableLocalDatastore()
+        //Parse.enableLocalDatastore()
         
         Parse.setApplicationId("d24X8b7STLrPskMNRBVgs30iI1G6cG1lGqsPqeMN",
             clientKey: "fR5DJfzy5x9qlYLiD4xfLd46GmAH1QCWhV1Q8SKc")
@@ -144,6 +145,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UILabel.appearance().textColor = .whiteColor()
         
         UITextField.appearance().keyboardAppearance = UIKeyboardAppearance.Dark
+        
+        UIActivityIndicatorView.appearance().color = .whiteColor()
     }
     
     private func setWindowToLogin() {

@@ -82,7 +82,7 @@ class Purchase: PFObject {
             transaction.transactionDate = purchasedDate!
             transaction.fromUser = user
             transaction.title = title
-            transaction.unpinInBackground()
+            //transaction.unpinInBackground()
         }
         
         //unpin()
@@ -95,14 +95,14 @@ class Purchase: PFObject {
                 
                 if isNewPurchase {
                     
-                    self.pinInBackground()
+                    //self.pinInBackground()
                 }
                 
                 for transaction in self.transactions {
                     
                     transaction.purchase = self
                     transaction.purchaseObjectId = self.objectId
-                    transaction.pinInBackground()
+                    //transaction.pinInBackground()
                 }
             }
             

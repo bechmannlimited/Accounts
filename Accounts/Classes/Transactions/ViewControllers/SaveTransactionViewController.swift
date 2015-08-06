@@ -91,7 +91,7 @@ class SaveTransactionViewController: SaveItemViewController {
 
                 if isNew {
                     
-                    self.transaction.pinInBackground()
+                    //self.transaction.pinInBackground()
                 }
                 
                 self.popAll()
@@ -143,18 +143,18 @@ class SaveTransactionViewController: SaveItemViewController {
     
     override func onDiscard() {
         
-        if let copyDictionary = copyOfItem as? Dictionary<String, AnyObject> {
-            
-            let copy = JSON(copyDictionary)
-            
-            transaction.title = copy["title"].stringValue
-            transaction.amount = copy["amount"].doubleValue
-            println(copy["amount"].doubleValue)
-            
-            transaction.fromUser = copyDictionary["fromUser"] as? User
-            transaction.toUser = copyDictionary["toUser"] as? User
-            transaction.transactionDate = (copyDictionary["transactionDate"] as? NSDate)!
-        }
+//        if let copyDictionary = copyOfItem as? Dictionary<String, AnyObject> {
+//            
+//            let copy = JSON(copyDictionary)
+//            
+//            transaction.title = copy["title"].stringValue
+//            transaction.amount = copy["amount"].doubleValue
+//            println(copy["amount"].doubleValue)
+//            
+//            transaction.fromUser = copyDictionary["fromUser"] as? User
+//            transaction.toUser = copyDictionary["toUser"] as? User
+//            transaction.transactionDate = (copyDictionary["transactionDate"] as? NSDate)!
+//        }
         
         //transaction.hardUnpin()
     }
@@ -194,7 +194,7 @@ extension SaveTransactionViewController: FormViewDelegate {
         
         if identifier == "Friend" {
             
-            cell.textLabel?.text = "Transfer to"
+            cell.textLabel?.text = "Payment to"
             if let username = transaction.toUser?.appropriateDisplayName() {
                 
                 cell.detailTextLabel?.text = "\(username)"
@@ -210,7 +210,7 @@ extension SaveTransactionViewController: FormViewDelegate {
         
         if identifier == "User" {
             
-            cell.textLabel?.text = "Transfer from"
+            cell.textLabel?.text = "Payment from"
             if let username = transaction.fromUser?.appropriateDisplayName() {
                 
                 cell.detailTextLabel?.text = "\(username)"
