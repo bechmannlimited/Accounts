@@ -145,6 +145,8 @@ class TransactionsViewController: ACBaseViewController {
         super.viewDidAppear(animated)
         
         popoverViewController = nil // to make sure
+        
+        setupInfiniteScrolling()
     }
     
     func refreshFromBarButton(){
@@ -240,9 +242,14 @@ class TransactionsViewController: ACBaseViewController {
         
         setupTableViewRefreshControl(tableView)
         
+        setupInfiniteScrolling()
+    }
+    
+    func setupInfiniteScrolling() {
+        
         tableView.addInfiniteScrollingWithActionHandler { () -> Void in
             
-            var y: CGFloat = tableView.contentOffset.y + tableView.contentInset.top
+            var y: CGFloat = self.tableView.contentOffset.y + self.tableView.contentInset.top
             
             if y > 0 {
                 
@@ -280,7 +287,10 @@ class TransactionsViewController: ACBaseViewController {
         
         remoteQuery?.skip = 0
         remoteQuery?.limit = 16
-        remoteQuery?.cachePolicy = PFCachePolicy.CacheThenNetwork
+        //remoteQuery?.cachePolicy = PFCachePolicy.CacheThenNetwork
+        var queriesExecuted = 0
+        
+        var purchaseDictionary = Dictionary<String, Purchase?>()
         
         if transactions.count > 16 && transactions.count < 35 {
             
@@ -299,36 +309,36 @@ class TransactionsViewController: ACBaseViewController {
                     
                     Task.executeTaskInBackground({ () -> () in
                         
-                        //let unpinQuery = self.query()
-                        
-//                        if let arr = unpinQuery?.fromLocalDatastore().findObjects() as? [Transaction] { //.whereKey("objectId", notContainedIn: newIds)
-//                            
-//                            for transaction in arr{
-//
-//                                transaction.hardUnpin()
-//                            }
-//                        }
-                        
                         for transaction in transactions {
                             
-                            if let id = transaction.purchaseObjectId {
+//                            if let purchase = purchaseDictionary[transaction.objectId!] {
+//                                
+//                                transaction.purchase = purchase
+//                            }
+//                            else
+                                if let id = transaction.purchaseObjectId {
                                 
                                 transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
+                                purchaseDictionary[transaction.objectId!] = transaction.purchase
                             }
-                            
-                            //transaction.pinInBackground()
-                            //transaction.purchase?.pinInBackground()
                         }
                         
                         self.transactions = transactions
 
                     }, completion: { () -> () in
-                            
+                        
+                        queriesExecuted++
+                        
                         refreshControl?.endRefreshing()
                         self.tableView.reloadData()
                         self.view.hideLoader()
                         self.showOrHideTableOrNoDataView()
-                        self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
+                        
+                        //if queriesExecuted == 2 {
+                            
+                            self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
+                        //}
+
                         self.refreshBarButtonItem?.enabled = true
                         
                         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
@@ -752,7 +762,7 @@ extension TransactionsViewController: SaveItemDelegate {
     
     func itemDidChange() {
         
-        executeActualRefreshByHiding(false, refreshControl: nil, take: transactions.count, completion: nil)
+        executeActualRefreshByHiding(true, refreshControl: nil, take: transactions.count, completion: nil)
     }
     
     func transactionDidChange(transaction: Transaction) {

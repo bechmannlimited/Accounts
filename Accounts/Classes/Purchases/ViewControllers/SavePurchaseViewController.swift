@@ -222,7 +222,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         
         sections.append([
             FormViewConfiguration.datePicker("Date Purchased", date: purchasedDate, identifier: "DatePurchased", format: nil),
-            FormViewConfiguration.normalCell("Location")
+            //FormViewConfiguration.normalCell("Location")
         ])
         
         if purchase.objectId != nil {
