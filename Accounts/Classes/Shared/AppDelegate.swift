@@ -68,7 +68,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Transaction.registerSubclass()
         Purchase.registerSubclass()
         
-        //Parse.enableLocalDatastore()
+        Parse.enableLocalDatastore()
         
         Parse.setApplicationId("d24X8b7STLrPskMNRBVgs30iI1G6cG1lGqsPqeMN",
             clientKey: "fR5DJfzy5x9qlYLiD4xfLd46GmAH1QCWhV1Q8SKc")

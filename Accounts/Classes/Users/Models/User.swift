@@ -15,7 +15,8 @@ import FBSDKCoreKit
 
 class User: PFUser {
     
-    var friends = [User]()
+    //var friends = [User]()
+    var friends: [User] = []
     var localeDifferenceBetweenActiveUser:Double = 0
     var allInvites = [[FriendRequest]]()
     var passwordForVerification = ""
@@ -91,7 +92,7 @@ class User: PFUser {
                         var queries = [PFQuery]()
                         var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
                         
-                        if self.facebookId != nil {
+                        if let facebookId = self.facebookId {
                             
                             let friendsJson = JSON(result)["data"]
                             
@@ -111,15 +112,14 @@ class User: PFUser {
                             
                             let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
                             friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                            
                             friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
-                            
-                            //friend.pinInBackground()
-                            
                         }
                         
+                        PFObject.pinAll(self.friends)
+
                         self.friendsIdsWithDifference = friendInfo
-                        
+                        self.pinInBackground()
+                        self.saveInBackground()
                         canContinue = true
                         
                     }, completion: { () -> () in
@@ -137,39 +137,37 @@ class User: PFUser {
             })
         }
         
-        execRemoteQuery()
+        var ids = [String]()
         
-//        var ids = [String]()
-//        
-//        if let friendInfos = friendsIdsWithDifference{
-//            
-//            for friend in friendInfos{
-//                
-//                ids.append(friend.0)
-//            }
-//            
-//            let localQuery = User.query()?.whereKey("objectId", containedIn: ids).orderByAscending("objectId").fromLocalDatastore()
-//            
-//            localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-//                
-//                if let friends = objects as? [User] {
-//                    
-//                    self.friends = friends
-//                    
-//                    for friend in self.friends {
-//                        
-//                        friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
-//                    }
-//                    
-//                    completion()
-//                    execRemoteQuery()
-//                }
-//            })
-//        }
-//        else {
-//            
-//            execRemoteQuery()
-//        }
+        if let friendInfos = friendsIdsWithDifference{
+            
+            for friend in friendInfos{
+                
+                ids.append(friend.0)
+            }
+            
+            let localQuery = User.query()?.whereKey("objectId", containedIn: ids).orderByAscending("objectId").fromLocalDatastore()
+            
+            localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+                
+                if let friends = objects as? [User] {
+                    
+                    self.friends = friends
+                    
+                    for friend in self.friends {
+                        
+                        friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
+                    }
+                    
+                    completion()
+                    execRemoteQuery()
+                }
+            })
+        }
+        else {
+            
+            execRemoteQuery()
+        }
 
     }
     

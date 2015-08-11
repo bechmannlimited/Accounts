@@ -133,7 +133,7 @@ class FriendTableViewCell: UITableViewCell {
         
         friendImageView.addLeftConstraint(toView: contentView, relation: .Equal, constant: kContentViewHorizontalPadding)
         friendImageView.addCenterYConstraint(toView: contentView)
-        friendImageViewConstraints["Width"] = friendImageView.addWidthConstraint(relation: .Equal, constant: friend.facebookId == nil ? 0 : friendImageViewWidth())
+        friendImageViewConstraints["Width"] = friendImageView.addWidthConstraint(relation: .Equal, constant:friend.facebookId == nil ? 0 : friendImageViewWidth())
         friendImageView.addTopConstraint(toView: contentView, attribute: NSLayoutAttribute.Top, relation: NSLayoutRelation.GreaterThanOrEqual, constant: kContentViewVerticalPadding)
         friendImageView.addBottomConstraint(toView: contentView, attribute: NSLayoutAttribute.Bottom, relation: NSLayoutRelation.GreaterThanOrEqual, constant: -kContentViewVerticalPadding)
 
