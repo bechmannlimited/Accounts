@@ -260,6 +260,33 @@ class Purchase: PFObject {
             
         })
     }
+    
+    func copyWithUsefulValues() -> Purchase {
+        
+        var purchase = Purchase()
+        
+        purchase.user = user
+        purchase.amount = amount
+        purchase.title = title
+        purchase.purchasedDate = purchasedDate
+        purchase.transactions = []
+        
+        for transaction in transactions {
+            
+            purchase.transactions.append(transaction.copyWithUsefulValues())
+        }
+        
+        return purchase
+    }
+    
+    func setUsefulValuesFromCopy(purchase: Purchase) {
+        
+        user = purchase.user
+        amount = purchase.amount
+        title = purchase.title
+        purchasedDate = purchase.purchasedDate
+        transactions = purchase.transactions
+    }
 }
 
 extension Purchase: PFSubclassing {

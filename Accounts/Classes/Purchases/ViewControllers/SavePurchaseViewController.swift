@@ -16,11 +16,12 @@ class SavePurchaseViewController: SaveItemViewController {
 
     var purchase = Purchase.withDefaultValues()
     var purchaseObjectId: String?
+    var existingPurchase: Purchase?
     
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
     
-    var oldTransactions = [Dictionary<String, AnyObject?>]()
+    //var oldTransactions = [Dictionary<String, AnyObject?>]()
     
     override func viewDidLoad() {
         
@@ -69,24 +70,17 @@ class SavePurchaseViewController: SaveItemViewController {
                 
                 if let purchase = Purchase.query()?.getObjectWithId(self.purchaseObjectId!) as? Purchase {
                     
-                    self.purchase = purchase
+                    self.existingPurchase = purchase
+                    self.existingPurchase?.user.fetchIfNeeded()
                     
-                    self.purchase.user.fetchIfNeeded()
-                    
-                    for transaction in self.purchase.transactions {
+                    for transaction in self.existingPurchase!.transactions {
                         
                         transaction.fetchIfNeeded()
                         transaction.fromUser?.fetchIfNeeded()
                         transaction.toUser?.fetchIfNeeded()
                     }
                     
-                    self.copyOfItem = ParseUtilities.convertPFObjectToDictionary(self.purchase)
-                    
-                    for transaction in self.purchase.transactions {
-                        
-                        let t = ParseUtilities.convertPFObjectToDictionary(transaction)
-                        self.oldTransactions.append(t)
-                    }
+                    self.purchase = self.existingPurchase!.copyWithUsefulValues()
                     
                     canContinue = true
                 }
@@ -122,7 +116,15 @@ class SavePurchaseViewController: SaveItemViewController {
 
         updateUIForSavingOrDeleting()
         
-        purchase.savePurchase { (success) -> () in
+        let purchase = purchaseObjectId != nil ? existingPurchase : self.purchase
+        
+        if purchaseObjectId != nil {
+            
+            purchase?.setUsefulValuesFromCopy(self.purchase)
+            //PFObject.unpinAll(existingPurchase?.transactions)
+        }
+        
+        purchase?.savePurchase { (success) -> () in
             
             if success {
                 
@@ -225,7 +227,7 @@ extension SavePurchaseViewController: FormViewDelegate {
             //FormViewConfiguration.normalCell("Location")
         ])
         
-        if purchase.objectId != nil {
+        if purchaseObjectId != nil {
          
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
@@ -307,14 +309,16 @@ extension SavePurchaseViewController: FormViewDelegate {
                     
                     self.updateUIForSavingOrDeleting()
                     
-                    self.purchase.deleteInBackgroundWithBlock { (success, error) -> Void in
+                    let purchase = self.purchaseObjectId != nil ? self.existingPurchase : self.purchase
+                    
+                    purchase?.deleteInBackgroundWithBlock { (success, error) -> Void in
                         
                         if success {
                             
                             self.popAll()
                             self.delegate?.itemDidGetDeleted()
                             
-                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) (£\(Formatter.formatCurrencyAsString(purchase!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                         }
                         else{
                             

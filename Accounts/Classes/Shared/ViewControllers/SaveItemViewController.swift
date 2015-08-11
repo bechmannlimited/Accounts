@@ -15,7 +15,7 @@ class SaveItemViewController: ACFormViewController {
     var isSaving = false
     var allowEditing = false
     var askToPopMessage = ""
-    var copyOfItem = Dictionary<String, AnyObject?>()
+    //var copyOfItem = Dictionary<String, AnyObject?>()
     
     var delegate: SaveItemDelegate?
     

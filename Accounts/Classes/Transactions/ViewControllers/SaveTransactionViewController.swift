@@ -16,13 +16,15 @@ class SaveTransactionViewController: SaveItemViewController {
 
     var transaction = Transaction()
     var isNew = true
+    var transactionObjectId: String?
+    var existingTransaction: Transaction?
     
     override func viewDidLoad() {
 
         shouldLoadFormOnLoad = false
         super.viewDidLoad()
         
-        if transaction.objectId == nil {
+        if transactionObjectId == nil {
 
             transaction.fromUser = User.currentUser()
             transaction.transactionDate = NSDate()
@@ -49,7 +51,7 @@ class SaveTransactionViewController: SaveItemViewController {
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
         
-        if transaction.objectId != nil {
+        if transactionObjectId != nil {
             
             updateUIForServerInteraction()
             
@@ -72,7 +74,7 @@ class SaveTransactionViewController: SaveItemViewController {
                 self.updateUIForEditing()
                 self.reloadForm()
                 
-                self.copyOfItem = ParseUtilities.convertPFObjectToDictionary(self.transaction)
+                //self.copyOfItem = ParseUtilities.convertPFObjectToDictionary(self.transaction)
             })
         }
         
@@ -83,9 +85,16 @@ class SaveTransactionViewController: SaveItemViewController {
 
         updateUIForSavingOrDeleting()
         
-        var isNew = transaction.objectId == nil
+        var isNew = transactionObjectId == nil
         
-        transaction.saveInBackgroundWithBlock { (success, error) -> Void in
+        let transaction = transactionObjectId != nil ? existingTransaction : self.transaction
+        
+        if transactionObjectId != nil {
+            
+            transaction?.setUsefulValuesFromCopy(self.transaction)
+        }
+        
+        transaction?.saveInBackgroundWithBlock { (success, error) -> Void in
 
             if success {
 
@@ -178,7 +187,7 @@ extension SaveTransactionViewController: FormViewDelegate {
             FormViewConfiguration.datePicker("Transaction date", date: transaction.transactionDate, identifier: "TransactionDate", format: nil)
         ])
         
-        if transaction.objectId != nil {
+        if transactionObjectId != nil {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
@@ -264,14 +273,16 @@ extension SaveTransactionViewController: FormViewDelegate {
                     
                     self.updateUIForSavingOrDeleting()
                     
-                    self.transaction.deleteInBackgroundWithBlock({ (success, error) -> Void in
+                    let transaction = self.transactionObjectId != nil ? self.existingTransaction : self.transaction
+                    
+                    transaction?.deleteInBackgroundWithBlock({ (success, error) -> Void in
                         
                         if success{
                             
                             self.popAll()
                             self.delegate?.itemDidGetDeleted()
                             
-                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) (£\(Formatter.formatCurrencyAsString(transaction!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                         }
                         else{
                             

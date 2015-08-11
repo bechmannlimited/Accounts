@@ -137,6 +137,28 @@ class Transaction: PFObject {
         
         
     }
+    
+    func copyWithUsefulValues() -> Transaction {
+        
+        var transaction = Transaction()
+        
+        transaction.fromUser = fromUser
+        transaction.toUser = toUser
+        transaction.amount = amount
+        transaction.title = title
+        transaction.transactionDate = transactionDate
+        
+        return transaction
+    }
+    
+    func setUsefulValuesFromCopy(transaction: Transaction) {
+        
+        fromUser = transaction.fromUser
+        toUser = transaction.toUser
+        amount = transaction.amount
+        title = transaction.title
+        transactionDate = transaction.transactionDate
+    }
 }
 
 extension Transaction: PFSubclassing {
