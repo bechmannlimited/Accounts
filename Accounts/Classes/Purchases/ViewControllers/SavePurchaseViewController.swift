@@ -66,7 +66,11 @@ class SavePurchaseViewController: SaveItemViewController {
             
             var canContinue = false
             
+            let error = NSErrorPointer()
+            
             Task.executeTaskInBackground({ () -> () in
+                
+                Purchase.query()?.getObjectWithId(self.purchaseObjectId!, error: error)
                 
                 if let purchase = Purchase.query()?.getObjectWithId(self.purchaseObjectId!) as? Purchase {
                     
@@ -86,6 +90,20 @@ class SavePurchaseViewController: SaveItemViewController {
                 }
                 else{
                     
+                    if error != nil {
+                        
+                        if error.memory?.code == PFErrorCode.ErrorMissingObjectId.rawValue {
+                    
+                            let ghosts = Transaction.query()?.whereKey("purchaseObjectId", equalTo: self.purchaseObjectId!).findObjects() as! [Transaction]
+                            
+                            for transaction in ghosts {
+                                
+                                transaction.deleteEventually()
+                                println("deleting ghost transactions)")
+                            }
+                        }
+                    }
+                    
                     //PFObject.unpinAll(Purchase.query()?.whereKey("objectId", equalTo: self.purchaseObjectId!).fromLocalDatastore().findObjects())
                     self.popAll()
                 }
@@ -102,6 +120,10 @@ class SavePurchaseViewController: SaveItemViewController {
                         self.tableView.layer.opacity = 1
                     })
                 }
+                else{
+                    
+                    self.popAll()
+                }
             })
         }
         else{
@@ -116,24 +138,29 @@ class SavePurchaseViewController: SaveItemViewController {
 
         updateUIForSavingOrDeleting()
         
+        var copyOfOriginalForIfSaveFails = existingPurchase?.copyWithUsefulValues()
+        
         let purchase = purchaseObjectId != nil ? existingPurchase : self.purchase
         
         if purchaseObjectId != nil {
             
             purchase?.setUsefulValuesFromCopy(self.purchase)
-            //PFObject.unpinAll(existingPurchase?.transactions)
         }
         
         purchase?.savePurchase { (success) -> () in
             
             if success {
                 
-                self.delegate?.purchaseDidChange(self.purchase)
-                self.popAll()
-                self.delegate?.itemDidChange()
-            }
-            else{
+                //self.existingPurchase?.hardUnpin()
+                //PFObject.unpinAll(self.existingPurchase?.transactions)
                 
+                self.delegate?.itemDidChange()
+                self.delegate?.purchaseDidChange(purchase!)
+                self.popAll()
+            }
+            else{ // not fired (check savepurchase func
+                
+                //self.existingPurchase?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!)
                 println("error saving purchase")
             }
             
@@ -318,12 +345,15 @@ extension SavePurchaseViewController: FormViewDelegate {
                             self.popAll()
                             self.delegate?.itemDidGetDeleted()
                             
-                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) (£\(Formatter.formatCurrencyAsString(purchase!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) (\(Formatter.formatCurrencyAsString(purchase!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                         }
                         else{
                             
                             ParseUtilities.showAlertWithErrorIfExists(error)
                         }
+                        
+                        self.navigationItem.rightBarButtonItem?.enabled = true
+                        self.navigationItem.leftBarButtonItem?.enabled = true
                     }
                 }
             })
@@ -363,7 +393,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         
         if identifier == "Friends" {
             
-            cell.textLabel?.text = "Split with"
+            cell.textLabel?.text = "Who paid for"
             
             var friendCount = purchase.transactions.count - 1
             

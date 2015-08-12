@@ -87,6 +87,8 @@ class SaveTransactionViewController: SaveItemViewController {
         
         var isNew = transactionObjectId == nil
         
+        var copyOfOriginalForIfSaveFails = existingTransaction?.copyWithUsefulValues()
+        
         let transaction = transactionObjectId != nil ? existingTransaction : self.transaction
         
         if transactionObjectId != nil {
@@ -94,7 +96,7 @@ class SaveTransactionViewController: SaveItemViewController {
             transaction?.setUsefulValuesFromCopy(self.transaction)
         }
         
-        transaction?.saveInBackgroundWithBlock { (success, error) -> Void in
+        transaction?.saveEventually { (success, error) -> Void in
 
             if success {
 
@@ -103,18 +105,22 @@ class SaveTransactionViewController: SaveItemViewController {
                     //self.transaction.pinInBackground()
                 }
                 
-                self.popAll()
                 self.delegate?.itemDidChange()
-                self.delegate?.transactionDidChange(self.transaction)
+                self.delegate?.transactionDidChange(transaction!)
                 self.transaction.sendPushNotifications(self.isNew)
             }
             else{
                 
+                self.existingTransaction?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!) // remove this again?
                 ParseUtilities.showAlertWithErrorIfExists(error)
             }
-            
+
             self.updateUIForEditing()
         }
+        
+        self.delegate?.itemDidChange()
+        self.delegate?.transactionDidChange(transaction!)
+        self.popAll()
         
 //        updateUIForSavingOrDeleting()
 //        
@@ -203,23 +209,24 @@ extension SaveTransactionViewController: FormViewDelegate {
         
         if identifier == "Friend" {
             
-            cell.textLabel?.text = "Payment to"
+            cell.textLabel?.text = "Receiver"
             if let username = transaction.toUser?.appropriateDisplayName() {
                 
                 cell.detailTextLabel?.text = "\(username)"
-                cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             }
             else{
                 
                 cell.detailTextLabel?.text = ""
             }
+            
+            cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
 
             return cell
         }
         
         if identifier == "User" {
             
-            cell.textLabel?.text = "Payment from"
+            cell.textLabel?.text = "Payer"
             if let username = transaction.fromUser?.appropriateDisplayName() {
                 
                 cell.detailTextLabel?.text = "\(username)"
@@ -282,12 +289,15 @@ extension SaveTransactionViewController: FormViewDelegate {
                             self.popAll()
                             self.delegate?.itemDidGetDeleted()
                             
-                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) (£\(Formatter.formatCurrencyAsString(transaction!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) (\(Formatter.formatCurrencyAsString(transaction!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                         }
                         else{
                             
                             ParseUtilities.showAlertWithErrorIfExists(error)
                         }
+                        
+                        self.navigationItem.rightBarButtonItem?.enabled = true
+                        self.navigationItem.leftBarButtonItem?.enabled = true
                     })
                 }
             })

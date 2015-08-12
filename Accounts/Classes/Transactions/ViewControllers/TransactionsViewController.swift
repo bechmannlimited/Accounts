@@ -53,9 +53,17 @@ class TransactionsViewController: ACBaseViewController {
     
     var popoverViewController: UIViewController?
     
+    func clean() {
+        
+        PFObject.unpinAllInBackground(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase])
+        PFObject.unpinAllInBackground(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction])
+        PFObject.unpinAll(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase], withName: self.pinLabel())
+        PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction], withName: self.pinLabel())
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         //setupQuery()
         
         if kDevice == .Pad {
@@ -117,7 +125,7 @@ class TransactionsViewController: ACBaseViewController {
         
         headerView = BouncyHeaderView()
         headerView?.setupHeaderWithOriginView(view, originTableView: tableView)
-        headerView?.setupTitle("\(friend.appropriateDisplayName())")
+        setHeaderTitleText()
         
         if let id = friend.facebookId{
             
@@ -127,6 +135,37 @@ class TransactionsViewController: ACBaseViewController {
             
             //headerView.getHeroImage("http://www.tvchoicemagazine.co.uk/sites/default/files/imagecache/interview_image/intex/michael_emerson.png")
             //headerView.getHeroImage("http://img.joke.co.uk/images/webshop/blog/gangster-silhouette.jpg")
+        }
+    }
+    
+    func setHeaderTitleText() {
+        
+        var text = friend.appropriateDisplayName()
+        
+        if friend.localeDifferenceBetweenActiveUser > 0 {
+            
+            text = "\(friend.appropriateDisplayName()) owes \(Formatter.formatCurrencyAsString(abs(friend.localeDifferenceBetweenActiveUser)))"
+        }
+        else if friend.localeDifferenceBetweenActiveUser < 0 {
+            
+            text = "You owe \(friend.appropriateDisplayName()) \(Formatter.formatCurrencyAsString(abs(friend.localeDifferenceBetweenActiveUser)))"
+        }
+        
+        headerView?.setupTitle(text)
+    }
+    
+    func getDifferenceBetweenActiveUser() {
+    
+        PFCloud.callFunctionInBackground("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) { (response, error) -> Void in
+            
+            if let response: AnyObject = response {
+                
+                let responseJson = JSON(response)
+                let difference = responseJson.doubleValue
+                
+                self.friend.localeDifferenceBetweenActiveUser = difference
+                self.setHeaderTitleText()
+            }
         }
     }
     
@@ -143,24 +182,24 @@ class TransactionsViewController: ACBaseViewController {
         refresh(nil)
     }
     
-    override func didReceivePushNotification(notification: NSNotification) {
-        
-        if let object: AnyObject = notification.object{
-            
-            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
-            
-            if PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved{
-                
-                if let userIds = object["userIds"] as? [String] {
-                    
-                    if contains(userIds, friend.objectId!){
-                        
-                        getDifferenceAndRefreshIfNeccessary(nil)
-                    }
-                }
-            }
-        }
-    }
+//    override func didReceivePushNotification(notification: NSNotification) {
+//        
+//        if let object: AnyObject = notification.object{
+//            
+//            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
+//            
+//            if PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved{
+//                
+//                if let userIds = object["userIds"] as? [String] {
+//                    
+//                    if contains(userIds, friend.objectId!){
+//                        
+//                        getDifferenceAndRefreshIfNeccessary(nil)
+//                    }
+//                }
+//            }
+//        }
+//    }
     
     func query() -> PFQuery? {
         
@@ -183,31 +222,31 @@ class TransactionsViewController: ACBaseViewController {
         return query
     }
     
-    func getDifferenceAndRefreshIfNeccessary(refreshControl: UIRefreshControl?) {
-        
-        PFCloud.callFunctionInBackground("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) { (response, error) -> Void in
-            
-            let responseJson = JSON(response!)
-            let difference = responseJson.doubleValue
-            
-            let previousDifference = self.friend.localeDifferenceBetweenActiveUser
-            self.friend.localeDifferenceBetweenActiveUser = difference
-            
-            self.tableView.beginUpdates()
-            self.tableView.endUpdates()
-
-            if previousDifference != difference {
-
-                println("found difference (transactionscontroller)")
-                self.executeActualRefreshByHiding(true, refreshControl: nil, take: nil, completion: nil)
-            }
-            else {
-                
-                println("found no difference")
-                refreshControl?.endRefreshing()
-            }
-        }
-    }
+//    func getDifferenceAndRefreshIfNeccessary(refreshControl: UIRefreshControl?) {
+//        
+//        PFCloud.callFunctionInBackground("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) { (response, error) -> Void in
+//            
+//            let responseJson = JSON(response!)
+//            let difference = responseJson.doubleValue
+//            
+//            let previousDifference = self.friend.localeDifferenceBetweenActiveUser
+//            self.friend.localeDifferenceBetweenActiveUser = difference
+//            
+//            self.tableView.beginUpdates()
+//            self.tableView.endUpdates()
+//
+//            if previousDifference != difference {
+//
+//                println("found difference (transactionscontroller)")
+//                self.executeActualRefreshByHiding(true, refreshControl: nil, take: nil, completion: nil)
+//            }
+//            else {
+//                
+//                println("found no difference")
+//                refreshControl?.endRefreshing()
+//            }
+//        }
+//    }
     
     func setupToolbar(){
         
@@ -262,6 +301,11 @@ class TransactionsViewController: ACBaseViewController {
         })
     }
     
+    func pinLabel() -> String {
+        
+        return "\(User.currentUser()!.objectId!)_\(self.friend.objectId!)"
+    }
+    
     func executeActualRefreshByHiding(hiding: Bool, refreshControl: UIRefreshControl?, take:Int?, completion: ( ()-> ())?) {
         
         refreshBarButtonItem?.enabled = false
@@ -272,6 +316,9 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         cancelQueries()
+        
+        getDifferenceBetweenActiveUser()
+        
         let remoteQuery = query()
         
         remoteQuery?.skip = 0
@@ -293,25 +340,42 @@ class TransactionsViewController: ACBaseViewController {
             self.refreshBarButtonItem?.enabled = false
             
             remoteQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-                
+
                 if var transactions = objects as? [Transaction] {
                     
                     Task.executeTaskInBackground({ () -> () in
                         
-                        PFObject.unpinAll(self.query()?.fromLocalDatastore().findObjects())
-                        PFObject.pinAll(transactions)
-                        
-                        for transaction in transactions {
+                        if error == nil {
                             
-                            if let id = transaction.purchaseObjectId {
+                            PFObject.unpinAll(self.query()?.fromLocalDatastore().findObjects())
                             
-                                transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
-                                transaction.purchase?.pinInBackground()
-                                purchaseDictionary[transaction.objectId!] = transaction.purchase
+                            var unpinPurchasesQuery1 = Purchase.query()?.whereKey("user", equalTo: User.currentUser()!)
+                            var unpinPurchasesQuery2 = Purchase.query()?.whereKey("user", equalTo: self.friend)
+                            var unpinPurchasesQuery = PFQuery.orQueryWithSubqueries([unpinPurchasesQuery1!, unpinPurchasesQuery2!]).fromLocalDatastore()
+                            // may need to removed from 
+                            
+                            PFObject.unpinAll(unpinPurchasesQuery.findObjects(), withName: self.pinLabel())
+                            PFObject.pinAllInBackground(transactions, withName: self.pinLabel())
+                            
+//                            PFObject.unpinAll(unpinPurchasesQuery.findObjects())
+//                            PFObject.pinAllInBackground(transactions)
+                            
+                            for transaction in transactions {
+                                
+                                if let id = transaction.purchaseObjectId {
+                                    
+                                    transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
+                                    transaction.purchase?.pinInBackgroundWithName(self.pinLabel())
+                                    purchaseDictionary[transaction.objectId!] = transaction.purchase
+                                }
                             }
+                            
+                            self.transactions = transactions
                         }
-                        
-                        self.transactions = transactions
+                        else{
+                            
+                            self.refreshBarButtonItem?.enabled = true // needed (this is twice)
+                        }
 
                     }, completion: { () -> () in
                         
@@ -337,11 +401,16 @@ class TransactionsViewController: ACBaseViewController {
                         completion?()
                     })
                 }
+                else{
+                    
+                    self.refreshBarButtonItem?.enabled = true
+                }
             })
         }
 
         let localQuery: PFQuery? = query()
-        localQuery?.fromLocalDatastore()
+        localQuery?.fromPinWithName(self.pinLabel())
+        //localQuery?.fromLocalDatastore()
         localQuery?.limit = 35
         
         localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
@@ -349,6 +418,8 @@ class TransactionsViewController: ACBaseViewController {
             var successful = true
             
             Task.executeTaskInBackground({ () -> () in
+                
+                var transactionsNotAvailable = [Transaction]()
                 
                 if var transactions = objects as? [Transaction] {
                     
@@ -362,12 +433,25 @@ class TransactionsViewController: ACBaseViewController {
 
                             if transaction.purchase == nil {
                                 
-                                successful = false
+                                transactionsNotAvailable.append(transaction)
+                                //successful = false
+                            }
+                            else{
+                                
+                                if transaction.purchase!.objectId == nil {
+                                    
+                                    
+                                }
                             }
                         }
                     }
                     
-                     self.transactions = transactions
+                    for transaction in transactionsNotAvailable {
+                        
+                        let index = find(transactions, transaction)!
+                        transactions.removeAtIndex(index)
+                    }
+                    self.transactions = transactions
                 }
                 
             }, completion: { () -> () in
@@ -379,10 +463,11 @@ class TransactionsViewController: ACBaseViewController {
                     self.view.hideLoader()
                     self.showOrHideTableOrNoDataView()
                     //self.findAndScrollToCalculatedSelectedCellAtIndexPath(false)
-                    self.refreshBarButtonItem?.enabled = true
                     
                     completion?()
                 }
+                
+                self.refreshBarButtonItem?.enabled = true
 
                 executeRemoteQuery()
             })
@@ -473,10 +558,13 @@ class TransactionsViewController: ACBaseViewController {
             }
         }
         
-        selectedTransactionID = nil
-        selectedPurchaseID = nil
-        selectedRow = nil
-        didJustDelete = false
+        if shouldDeselect {
+            
+            selectedTransactionID = nil
+            selectedPurchaseID = nil
+            selectedRow = nil
+            didJustDelete = false
+        }
     }
     
     override func refresh(refreshControl: UIRefreshControl?) {

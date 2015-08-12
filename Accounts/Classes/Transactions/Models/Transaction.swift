@@ -147,6 +147,7 @@ class Transaction: PFObject {
         transaction.amount = amount
         transaction.title = title
         transaction.transactionDate = transactionDate
+        transaction.purchase = purchase
         
         return transaction
     }
@@ -158,6 +159,7 @@ class Transaction: PFObject {
         amount = transaction.amount
         title = transaction.title
         transactionDate = transaction.transactionDate
+        purchase = transaction.purchase
     }
 }
 

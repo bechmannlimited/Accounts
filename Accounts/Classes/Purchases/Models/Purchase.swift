@@ -82,12 +82,14 @@ class Purchase: PFObject {
             transaction.transactionDate = purchasedDate!
             transaction.fromUser = user
             transaction.title = title
+            transaction.purchase = self
+            //transaction.purchaseObjectId = "NotYetConfirmed"
             //transaction.unpinInBackground()
         }
         
         //unpin()
         
-        self.saveInBackgroundWithBlock { (success, error) -> Void in
+        self.saveEventually { (success, error) -> Void in
             
             ParseUtilities.showAlertWithErrorIfExists(error)
             
@@ -106,8 +108,10 @@ class Purchase: PFObject {
                 }
             }
             
-            completion(success:success)
+            
         }
+        
+        completion(success:true)
     }
     
     func splitTheBill() {
