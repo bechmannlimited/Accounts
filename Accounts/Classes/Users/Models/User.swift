@@ -21,9 +21,23 @@ class User: PFUser {
     var allInvites = [[FriendRequest]]()
     var passwordForVerification = ""
     
+    var firstName: String {
+        get{
+        
+            let pieces = split(appropriateDisplayName()) {$0 == " "}
+            if pieces.count > 0 {
+                
+                return pieces[0]
+            }
+            else{
+                
+                return appropriateDisplayName()
+            }
+        }
+    }
+    
     @NSManaged var facebookId: String?
     @NSManaged var displayName: String?
-    
     @NSManaged var friendsIdsWithDifference: Dictionary<String, NSNumber>?
     
     
@@ -84,13 +98,13 @@ class User: PFUser {
                     
                     Task.executeTaskInBackground({ () -> () in
                         
-                        //PFObject.unpinAll(self.friends)
-                        //self.unpin()
+//                        User.currentUser()?.relationForKey(kParse_User_Friends_Key).addObject(User.query()!.getObjectWithId("dtQy9phAlR")!)
+//                        User.currentUser()?.save()
                         
                         var friendInfo = Dictionary<String, NSNumber>()
                         
                         var queries = [PFQuery]()
-                        var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
+                        var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
                         
                         if let facebookId = self.facebookId {
                             
@@ -104,7 +118,7 @@ class User: PFUser {
                             }
                         }
                         
-                        queries.append(query1!)
+                        queries.append(query1!)  // must add friends relation back to user
                         
                         self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
                         

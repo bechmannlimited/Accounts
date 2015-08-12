@@ -57,7 +57,7 @@ class FriendsViewController: ACBaseViewController {
         setupNoDataLabel(noDataView, text: "Your Facebook friends who have this app, will appear here!") //To get started, invite some friends!
         setupToolbar()
         
-        tableView.layer.opacity = 0
+        //tableView.layer.opacity = 0
         view.showLoader()
     }
     
@@ -226,20 +226,12 @@ class FriendsViewController: ACBaseViewController {
     
     override func refresh(refreshControl: UIRefreshControl?) {
         
-        //toolbar.items = []
-        
         User.currentUser()?.getFriends({ () -> () in
             
             refreshControl?.endRefreshing()
             self.setDataForTable()
             self.tableView.reloadData()
             self.view.hideLoader()
-            
-            UIView.animateWithDuration(0.5, animations: { () -> Void in
-                
-                //self.tableView.layer.opacity = 1
-            })
-            
             self.showOrHideAddButton()
             self.showOrHideTableOrNoDataView()
         })
@@ -296,8 +288,8 @@ class FriendsViewController: ACBaseViewController {
         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
             
             self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
-            self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 0
-            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : kTableViewSeparatorColor //.clearColor()
+            //self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 0
+            //self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : kTableViewSeparatorColor //.clearColor()
             //self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? .whiteColor() : UIColor.groupTableViewBackgroundColor()
         })
     }

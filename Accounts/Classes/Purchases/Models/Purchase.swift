@@ -20,7 +20,7 @@ class Purchase: PFObject {
     @NSManaged var user: User
     @NSManaged var purchasedDate:NSDate?
     
-    @NSManaged var transactions: Array<Transaction>
+    var transactions: Array<Transaction> = []
     //var friends: [User] = []
     //var billSplitDictionary = Dictionary<User, Double>()
     
@@ -75,6 +75,7 @@ class Purchase: PFObject {
         if !modelIsValid() {
 
             completion(success: false)
+            return
         }
         
         for transaction in transactions {
@@ -83,35 +84,13 @@ class Purchase: PFObject {
             transaction.fromUser = user
             transaction.title = title
             transaction.purchase = self
-            //transaction.purchaseObjectId = "NotYetConfirmed"
-            //transaction.unpinInBackground()
-        }
-        
-        //unpin()
-        
-        self.saveEventually { (success, error) -> Void in
             
-            ParseUtilities.showAlertWithErrorIfExists(error)
-            
-            if success {
+            if transaction.fromUser != transaction.toUser{
                 
-                if isNewPurchase {
-                    
-                    //self.pinInBackground()
-                }
-                
-                for transaction in self.transactions {
-                    
-                    transaction.purchase = self
-                    transaction.purchaseObjectId = self.objectId
-                    //transaction.pinInBackground()
-                }
+                transaction.saveEventually()
+                completion(success:true)
             }
-            
-            
         }
-        
-        completion(success:true)
     }
     
     func splitTheBill() {

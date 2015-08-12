@@ -99,7 +99,6 @@ class SaveItemViewController: ACFormViewController {
         }
         
         navigationItem.rightBarButtonItem?.enabled = saveButtonEnabled()
-        navigationItem.leftBarButtonItem?.enabled = saveButtonEnabled()
     }
     
     func saveButtonEnabled() -> Bool {

@@ -14,32 +14,27 @@ import SwiftyJSON
 
 class SaveTransactionViewController: SaveItemViewController {
 
-    var transaction = Transaction()
+    var transaction = Transaction.withDefaultValues()
     var isNew = true
     var transactionObjectId: String?
     var existingTransaction: Transaction?
+    var isExistingTransaction = false
     
     override func viewDidLoad() {
 
         shouldLoadFormOnLoad = false
         super.viewDidLoad()
         
-        if transactionObjectId == nil {
-
-            transaction.fromUser = User.currentUser()
-            transaction.transactionDate = NSDate()
-            transaction.title = ""
-            showOrHideSaveButton()
-            reloadForm()
-        }
+        showOrHideSaveButton()
+        reloadForm()
 
         allowEditing = true // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
         
-        if allowEditing && transaction.objectId == nil {
+        if allowEditing && !isExistingTransaction {
             
             title = "Add payment"
         }
-        else if allowEditing && transaction.objectId != nil {
+        else if allowEditing && !isExistingTransaction {
             
             title = "Edit payment"
         }
@@ -89,9 +84,9 @@ class SaveTransactionViewController: SaveItemViewController {
         
         var copyOfOriginalForIfSaveFails = existingTransaction?.copyWithUsefulValues()
         
-        let transaction = transactionObjectId != nil ? existingTransaction : self.transaction
+        let transaction = isExistingTransaction ? existingTransaction : self.transaction
         
-        if transactionObjectId != nil {
+        if isExistingTransaction {
             
             transaction?.setUsefulValuesFromCopy(self.transaction)
         }
@@ -118,60 +113,17 @@ class SaveTransactionViewController: SaveItemViewController {
             self.updateUIForEditing()
         }
         
-        self.delegate?.itemDidChange()
-        self.delegate?.transactionDidChange(transaction!)
-        self.popAll()
-        
-//        updateUIForSavingOrDeleting()
-//        
-//        var isNew = transaction.objectId == nil
-//        
-//        transaction.saveInBackgroundWithBlock { (success, error) -> Void in
-//            
-//            if success {
-//                
-//                if isNew {
-//                    
-//                    self.transaction.pinInBackground()
-//                }
-//                
-//                self.transaction.sendPushNotifications(self.isNew)
-//            }
-//            else{
-//                
-//                self.transaction.saveEventually()
-//                UIAlertView(title: "No internet connection!", message: "We will save this as soon as the internet connection returns!", delegate: nil, cancelButtonTitle: "Ok").show()
-//            }
-//            
-//            self.popAll()
-//            self.delegate?.itemDidChange()
-//            self.delegate?.transactionDidChange(self.transaction)
-//            
-//            self.updateUIForEditing()
-//        }
+        NSTimer.schedule(delay: 1.5) { timer in
+            
+            self.delegate?.itemDidChange()
+            self.delegate?.transactionDidChange(transaction!)
+            self.popAll()
+        }
     }
     
     override func saveButtonEnabled() -> Bool {
         
         return allowEditing && transaction.modelIsValid() && !isSaving
-    }
-    
-    override func onDiscard() {
-        
-//        if let copyDictionary = copyOfItem as? Dictionary<String, AnyObject> {
-//            
-//            let copy = JSON(copyDictionary)
-//            
-//            transaction.title = copy["title"].stringValue
-//            transaction.amount = copy["amount"].doubleValue
-//            println(copy["amount"].doubleValue)
-//            
-//            transaction.fromUser = copyDictionary["fromUser"] as? User
-//            transaction.toUser = copyDictionary["toUser"] as? User
-//            transaction.transactionDate = (copyDictionary["transactionDate"] as? NSDate)!
-//        }
-        
-        //transaction.hardUnpin()
     }
 }
 
@@ -279,26 +231,20 @@ extension SaveTransactionViewController: FormViewDelegate {
                 if response == AlertResponse.Confirm {
                     
                     self.updateUIForSavingOrDeleting()
+                    self.navigationItem.rightBarButtonItem?.enabled = false
                     
-                    let transaction = self.transactionObjectId != nil ? self.existingTransaction : self.transaction
+                    let transaction = self.isExistingTransaction ? self.existingTransaction : self.transaction
                     
-                    transaction?.deleteInBackgroundWithBlock({ (success, error) -> Void in
+                    transaction?.deleteEventually()
+                    
+                    NSTimer.schedule(delay: 1.5) { timer in
                         
-                        if success{
-                            
-                            self.popAll()
-                            self.delegate?.itemDidGetDeleted()
-                            
-                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) (\(Formatter.formatCurrencyAsString(transaction!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
-                        }
-                        else{
-                            
-                            ParseUtilities.showAlertWithErrorIfExists(error)
-                        }
-                        
-                        self.navigationItem.rightBarButtonItem?.enabled = true
-                        self.navigationItem.leftBarButtonItem?.enabled = true
-                    })
+                        self.popAll()
+                        self.delegate?.itemDidGetDeleted()
+                        self.navigationItem.leftBarButtonItem?.enabled = true // ^^
+                    }
+                    
+                    ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) (\(Formatter.formatCurrencyAsString(transaction!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                 }
             })
         }

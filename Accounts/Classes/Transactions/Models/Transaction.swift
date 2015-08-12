@@ -55,6 +55,17 @@ class Transaction: PFObject {
         }
     }
     
+    class func withDefaultValues() -> Transaction{
+        
+        var transaction = Transaction()
+        
+        transaction.fromUser = User.currentUser()
+        transaction.transactionDate = NSDate()
+        transaction.title = ""
+        
+        return transaction
+    }
+    
     func modelIsValid() -> Bool {
 
         var errors:Array<String> = []

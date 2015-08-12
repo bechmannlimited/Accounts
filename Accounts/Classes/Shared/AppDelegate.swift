@@ -69,9 +69,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Purchase.registerSubclass()
         
         Parse.enableLocalDatastore()
-        
-        Parse.setApplicationId("d24X8b7STLrPskMNRBVgs30iI1G6cG1lGqsPqeMN",
-            clientKey: "fR5DJfzy5x9qlYLiD4xfLd46GmAH1QCWhV1Q8SKc")
+        Parse.setApplicationId("Nc2fYkKYCVLImrZx1ZX1RKv7f4PFDVZ3xLmkDmwM",
+            clientKey: "ZqLepxDYLImFaybsC4CboyWX8OppfYGUPZUj6r5X")
         
         setWindowToLogin()
         
