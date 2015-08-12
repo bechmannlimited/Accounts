@@ -107,14 +107,7 @@ class Transaction: PFObject {
         
         return errors.count == 0
     }
-    
-    func sendPushNotifications(isNew: Bool) {
         
-        let verb: String = isNew ? "added" : "updated"
-        
-        ParseUtilities.sendPushNotificationsInBackgroundToUsers(pushNotificationTargets(), message: "Transaction \(title!) \(verb) by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
-    }
-    
     func pushNotificationTargets() -> [User]{
     
         var targets = [User]()

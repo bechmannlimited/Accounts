@@ -32,15 +32,15 @@ class SaveTransactionViewController: SaveItemViewController {
         
         if allowEditing && !isExistingTransaction {
             
-            title = "Add payment"
+            title = "Add i.o.u"
         }
-        else if allowEditing && !isExistingTransaction {
+        else if allowEditing && isExistingTransaction {
             
-            title = "Edit payment"
+            title = "Edit i.o.u"
         }
         else {
             
-            title = "Payment"
+            title = "i.o.u"
         }
         
         
@@ -80,8 +80,6 @@ class SaveTransactionViewController: SaveItemViewController {
 
         updateUIForSavingOrDeleting()
         
-        var isNew = transactionObjectId == nil
-        
         var copyOfOriginalForIfSaveFails = existingTransaction?.copyWithUsefulValues()
         
         let transaction = isExistingTransaction ? existingTransaction : self.transaction
@@ -94,15 +92,9 @@ class SaveTransactionViewController: SaveItemViewController {
         transaction?.saveEventually { (success, error) -> Void in
 
             if success {
-
-                if isNew {
-                    
-                    //self.transaction.pinInBackground()
-                }
                 
                 self.delegate?.itemDidChange()
                 self.delegate?.transactionDidChange(transaction!)
-                self.transaction.sendPushNotifications(self.isNew)
             }
             else{
                 
@@ -244,7 +236,7 @@ extension SaveTransactionViewController: FormViewDelegate {
                         self.navigationItem.leftBarButtonItem?.enabled = true // ^^
                     }
                     
-                    ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) (\(Formatter.formatCurrencyAsString(transaction!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                    //ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) (\(Formatter.formatCurrencyAsString(transaction!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                 }
             })
         }

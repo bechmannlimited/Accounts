@@ -32,7 +32,7 @@ class SavePurchaseViewController: SaveItemViewController {
 
         if allowEditing && purchaseObjectId == nil {
 
-            title = "New purchase"
+            title = "Split a bill"
             purchase.user = User.currentUser()!
             purchase.title = ""
             purchase.purchasedDate = NSDate()
@@ -48,89 +48,19 @@ class SavePurchaseViewController: SaveItemViewController {
         }
         else if allowEditing && purchaseObjectId != nil {
 
-            title = "Edit purchase"
+            title = "Edit purchase" // N/A
         }
         else {
             
-            title = "Purchase"
+            title = "Split a bill"
         }
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
         
         tableView.setEditing(true, animated: false)
-        
-        if purchaseObjectId != nil {
-            
-            view.showLoader()
-            tableView.layer.opacity = 0
-            
-            var canContinue = false
-            
-            let error = NSErrorPointer()
-            
-            Task.executeTaskInBackground({ () -> () in
-                
-                Purchase.query()?.getObjectWithId(self.purchaseObjectId!, error: error)
-                
-                if let purchase = Purchase.query()?.getObjectWithId(self.purchaseObjectId!) as? Purchase {
-                    
-                    self.existingPurchase = purchase
-                    self.existingPurchase?.user.fetchIfNeeded()
-                    
-                    for transaction in self.existingPurchase!.transactions {
-                        
-                        transaction.fetchIfNeeded()
-                        transaction.fromUser?.fetchIfNeeded()
-                        transaction.toUser?.fetchIfNeeded()
-                    }
-                    
-                    self.purchase = self.existingPurchase!.copyWithUsefulValues()
-                    
-                    canContinue = true
-                }
-                else{
-                    
-                    if error != nil {
-                        
-                        if error.memory?.code == PFErrorCode.ErrorMissingObjectId.rawValue {
-                    
-                            let ghosts = Transaction.query()?.whereKey("purchaseObjectId", equalTo: self.purchaseObjectId!).findObjects() as! [Transaction]
-                            
-                            for transaction in ghosts {
-                                
-                                transaction.deleteEventually()
-                                println("deleting ghost transactions)")
-                            }
-                        }
-                    }
-                    
-                    //PFObject.unpinAll(Purchase.query()?.whereKey("objectId", equalTo: self.purchaseObjectId!).fromLocalDatastore().findObjects())
-                    self.popAll()
-                }
-                
-            }, completion: { () -> () in
-                
-                if canContinue {
-            
-                    self.updateUIForEditing()
-                    self.reloadForm()
-                    
-                    UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
-                        
-                        self.tableView.layer.opacity = 1
-                    })
-                }
-                else{
-                    
-                    self.popAll()
-                }
-            })
-        }
-        else{
-            
-            reloadForm()
-        }
-        
+
+        reloadForm()
+
         askToPopMessage = "Going back will discard any changes, Are you sure?"
     }
         
