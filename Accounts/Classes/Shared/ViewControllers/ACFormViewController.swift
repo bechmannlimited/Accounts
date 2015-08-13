@@ -26,6 +26,11 @@ class ACFormViewController: FormViewController {
         
         setupView()
         shouldAdjustTableViewInsetsForKeyboard = kDevice != .Pad
+        
+        if shouldShowLightTheme() {
+            
+            showLightTheme()
+        }
     }
     
     func didReceivePushNotification(notification: NSNotification) {
@@ -118,5 +123,10 @@ extension ACFormViewController: UITableViewDelegate {
         super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
         
         setTableViewCellAppearanceForBackgroundGradient(cell)
+        
+        if shouldShowLightTheme() {
+            
+            setupCellForLightTheme(cell)
+        }
     }
 }

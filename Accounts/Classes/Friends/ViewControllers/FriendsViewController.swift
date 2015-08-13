@@ -27,13 +27,14 @@ class FriendsViewController: ACBaseViewController {
     var noDataView = UILabel()
     
     var popoverViewController: UIViewController?
-    var toolbar = UIToolbar()
     
     var isLoading = false
     var data: Array<Array<User>> = [[],[],[]]
     
     var invitesCount = 0
     var hasCheckedForInvites = false
+    
+    var refreshBarButtonItem: UIBarButtonItem?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,10 +56,27 @@ class FriendsViewController: ACBaseViewController {
         }
         
         setupNoDataLabel(noDataView, text: "Your Facebook friends who have this app, will appear here!") //To get started, invite some friends!
+        setupTextLabelForSaveStatusInToolbarWithLabel()
         setupToolbar()
         
         //tableView.layer.opacity = 0
         view.showLoader()
+        
+        refreshBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
+        toolbar.items = [
+            UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
+            refreshBarButtonItem!
+        ]
+        
+        if User.currentUser()?.lastSyncedDataInfo == nil {
+            
+            User.currentUser()?.lastSyncedDataInfo = Dictionary<String, NSDate>()
+        }
+        
+        if let lastSyncedDate = User.currentUser()?.lastSyncedDataInfo?["Friends_\(User.currentUser()!.objectId!)"] {
+            
+            self.refreshUpdatedDate = lastSyncedDate
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -154,18 +172,18 @@ class FriendsViewController: ACBaseViewController {
         
         if let addBtn = addBarButtonItem{
             
-            toolbar.items = [
-                UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
-                addBarButtonItem!
+            navigationItem.rightBarButtonItems = [
+                //UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
+                addBtn
                 //UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
             ]
         }
         else{
             
-            toolbar.items = []
+            navigationItem.rightBarButtonItems = []
         }
         
-        toolbar.hidden = User.currentUser()!.friends.count == 0
+        addBarButtonItem?.enabled = User.currentUser()!.friends.count > 0
     }
     
     func friendInvites() {
@@ -226,7 +244,14 @@ class FriendsViewController: ACBaseViewController {
     
     override func refresh(refreshControl: UIRefreshControl?) {
         
-        User.currentUser()?.getFriends({ () -> () in
+        refreshBarButtonItem?.enabled = false
+        
+        NSTimer.schedule(delay: 10, handler: { timer in
+            
+            refreshBarButtonItem?.enabled = true
+        })
+        
+        User.currentUser()?.getFriends({ (completedRemoteRequest) -> () in
             
             refreshControl?.endRefreshing()
             self.setDataForTable()
@@ -234,6 +259,13 @@ class FriendsViewController: ACBaseViewController {
             self.view.hideLoader()
             self.showOrHideAddButton()
             self.showOrHideTableOrNoDataView()
+            
+            if completedRemoteRequest {
+                
+                User.currentUser()?.lastSyncedDataInfo?["Friends_\(User.currentUser()!.objectId!)"] = NSDate()
+                self.refreshUpdatedDate = NSDate()
+                self.refreshBarButtonItem?.enabled = true
+            }
         })
         
         //getInvites()
@@ -248,6 +280,11 @@ class FriendsViewController: ACBaseViewController {
 //            //self.setBarButtonItems()
 //        })
 //    }
+    
+    func refreshFromBarButton(){
+        
+        refresh(nil)
+    }
     
     func openMenu() {
         
@@ -288,9 +325,6 @@ class FriendsViewController: ACBaseViewController {
         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
             
             self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
-            //self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 0
-            //self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : kTableViewSeparatorColor //.clearColor()
-            //self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? .whiteColor() : UIColor.groupTableViewBackgroundColor()
         })
     }
 }

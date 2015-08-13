@@ -122,7 +122,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func setupAppearances() {
-        
+                
         UINavigationBar.appearance().tintColor = kNavigationBarTintColor
         UINavigationBar.appearance().setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
         UINavigationBar.appearance().shadowImage = kDefaultNavigationBarShadowImage
@@ -135,7 +135,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UITableViewCell.appearanceWhenContainedWithin([BaseViewController.self]).tintColor = kNavigationBarTintColor
         UITableViewCell.appearanceWhenContainedWithin([BaseViewController.self]).backgroundColor = kDarkColor
         UITableViewCell.appearanceWhenContainedWithin([BaseViewController.self]).textLabel?.textColor = .whiteColor()
-        
+                
         UITabBar.appearance().tintColor = kNavigationBarTintColor
         
         UITableView.appearance().backgroundColor = kNavigationBarBarTintColor

@@ -13,11 +13,14 @@ import ParseFacebookUtilsV4
 import SwiftyJSON
 
 class StartViewController: ACBaseViewController {
-
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
         if PFUser.currentUser() == nil {
+            
+            view.backgroundColor = UIColor.whiteColor()
+            navigationController?.setNavigationBarHidden(true, animated: false)
             
             var loginViewController = PFLogInViewController()
             

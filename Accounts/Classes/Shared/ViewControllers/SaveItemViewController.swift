@@ -22,14 +22,15 @@ class SaveItemViewController: ACFormViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        if kDevice == .Pad { // isInsidePopover() {
+        if shouldShowLightTheme() {
             
-            navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
-            navigationController?.view.backgroundColor = UIColor.darkGrayColor()
-            view.backgroundColor = UIColor.clearColor()
-            println(isInsidePopover())
-            tableView.backgroundColor = UIColor.clearColor()
+            setLightThemeForTableView(tableView)
         }
+    }
+    
+    override func shouldShowLightTheme() -> Bool {
+        
+        return kDevice == .Pad
     }
     
     func pop() {

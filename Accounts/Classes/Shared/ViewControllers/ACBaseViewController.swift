@@ -15,6 +15,9 @@ class ACBaseViewController: BaseViewController {
     var gradient: CAGradientLayer = CAGradientLayer()
     
     var activeQueries = [PFQuery?]()
+    var toolbar = UIToolbar()
+    
+    var refreshUpdatedDate: NSDate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,12 +25,23 @@ class ACBaseViewController: BaseViewController {
         view.backgroundColor = kViewBackgroundColor
         
         //NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "appDidResume", name: UIApplicationDidBecomeActiveNotification, object: nil)
+    }
+    
+    func appDidResume() {
+        
+        refresh(nil)
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
         setupView()
+        
+        if shouldShowLightTheme() {
+            
+            showLightTheme()
+        }
     }
     
     func didReceivePushNotification(notification: NSNotification) {
@@ -78,6 +92,34 @@ class ACBaseViewController: BaseViewController {
             query?.cancel()
         }
     }
+    
+    func setupTextLabelForSaveStatusInToolbarWithLabel() {
+        
+        let label = UILabel()
+        label.setTranslatesAutoresizingMaskIntoConstraints(false)
+        label.numberOfLines = 2
+        toolbar.addSubview(label)
+        
+        label.fillSuperView(UIEdgeInsets(top: 5, left: 15, bottom: -5, right: -40))
+        
+        label.font = UIFont(name: "HelveticaNeue-Light", size: 13)
+        label.lineBreakMode = NSLineBreakMode.ByWordWrapping
+        label.textColor = UIColor.lightGrayColor()
+        
+        let setLabelText: () -> () = {
+            
+            if let date = self.refreshUpdatedDate {
+                
+                label.text = "Last synced \(date.readableFormattedStringForDateRange())"
+            }
+        }
+        
+        setLabelText()
+        NSTimer.schedule(repeatInterval: 1, handler: { timer in
+            
+            setLabelText()
+        })
+    }
 }
 
 extension ACBaseViewController: UITableViewDelegate {
@@ -91,5 +133,10 @@ extension ACBaseViewController: UITableViewDelegate {
         super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
         
         setTableViewCellAppearanceForBackgroundGradient(cell)
+        
+        if shouldShowLightTheme() {
+            
+            setupCellForLightTheme(cell)
+        }
     }
 }

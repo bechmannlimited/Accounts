@@ -40,7 +40,7 @@ class User: PFUser {
     @NSManaged var displayName: String?
     @NSManaged var friendsIdsWithDifference: Dictionary<String, NSNumber>?
     
-    
+    @NSManaged var lastSyncedDataInfo: Dictionary<String, NSDate>?
     
     func modelIsValid() -> Bool {
         
@@ -83,7 +83,7 @@ class User: PFUser {
         return rc
     }
     
-    func getFriends(completion:() -> ()) {
+    func getFriends(completion:(completedRemoteRequest:Bool) -> ()) {
 
         let execRemoteQuery: () -> () = {
             
@@ -94,7 +94,7 @@ class User: PFUser {
                 
                 if error == nil{
                     
-                    var canContinue = false
+                    var canContinue = true
                     
                     Task.executeTaskInBackground({ () -> () in
                         
@@ -124,23 +124,32 @@ class User: PFUser {
                         
                         for friend in self.friends {
                             
-                            let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
-                            friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                            friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                            if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
+                                
+                                let responseJson = JSON(cloudResponse)
+                                friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+                                friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                            }
+                            else {
+                                
+                                canContinue = false
+                            }
                         }
                         
-                        PFObject.pinAll(self.friends)
-
-                        self.friendsIdsWithDifference = friendInfo
-                        self.pinInBackground()
-                        self.saveInBackground()
-                        canContinue = true
+                        if canContinue {
+                            
+                            PFObject.pinAll(self.friends)
+                            
+                            self.friendsIdsWithDifference = friendInfo
+                            self.pinInBackground()
+                            self.saveInBackground()
+                        }
                         
                     }, completion: { () -> () in
                         
                         if canContinue {
                             
-                            completion()
+                            completion(completedRemoteRequest: true)
                         }
                     })
                 }
@@ -173,7 +182,7 @@ class User: PFUser {
                         friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
                     }
                     
-                    completion()
+                    completion(completedRemoteRequest: false)
                     execRemoteQuery()
                 }
             })

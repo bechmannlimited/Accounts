@@ -30,13 +30,9 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        if kDevice == .Pad { // isInsidePopover() {
-
-            navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
-            navigationController?.view.backgroundColor = UIColor.darkGrayColor()
-            view.backgroundColor = UIColor.clearColor()
-            println(isInsidePopover())
-            tableView.backgroundColor = UIColor.clearColor()
+        if shouldShowLightTheme() {
+            
+            setLightThemeForTableView(tableView)
         }
     }
     
@@ -56,6 +52,11 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
         super.setupTableView(tableView, delegate: delegate, dataSource: dataSource)
         
         tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+    }
+    
+    override func shouldShowLightTheme() -> Bool {
+        
+        return kDevice == .Pad
     }
 }
 

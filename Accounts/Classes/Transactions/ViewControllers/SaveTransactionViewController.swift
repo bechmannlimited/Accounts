@@ -102,7 +102,7 @@ class SaveTransactionViewController: SaveItemViewController {
                 ParseUtilities.showAlertWithErrorIfExists(error)
             }
 
-            self.updateUIForEditing()
+            //self.updateUIForEditing()
         }
         
         NSTimer.schedule(delay: 1.5) { timer in

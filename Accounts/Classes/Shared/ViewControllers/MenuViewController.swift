@@ -56,18 +56,20 @@ class MenuViewController: ACBaseViewController {
         title = "Settings"
     }
     
+    override func shouldShowLightTheme() -> Bool {
+        
+        return kDevice == .Pad
+    }
+    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
         tableView.reloadData()
         //deselectSelectedCell(tableView)
         
-        if kDevice == .Pad { // isInsidePopover() {
+        if shouldShowLightTheme() {
             
-            navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
-            navigationController?.view.backgroundColor = UIColor.darkGrayColor()
-            view.backgroundColor = UIColor.clearColor()
-            tableView.backgroundColor = UIColor.clearColor()
+            setLightThemeForTableView(tableView)
         }
     }
     
@@ -186,6 +188,17 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         return ""
+    }
+    
+    func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        
+        if kDevice == .Pad {
+            
+            if let v = view as? UITableViewHeaderFooterView {
+                
+                v.textLabel.textColor = UIColor.darkGrayColor()
+            }
+        }
     }
 }
 

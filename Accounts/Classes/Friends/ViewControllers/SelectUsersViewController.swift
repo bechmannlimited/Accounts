@@ -59,6 +59,11 @@ class SelectUsersViewController: ACBaseViewController {
         }
     }
     
+    override func shouldShowLightTheme() -> Bool {
+        
+        return kDevice == .Pad
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -98,6 +103,11 @@ class SelectUsersViewController: ACBaseViewController {
         super.viewWillAppear(animated)
         
         refresh(nil)
+        
+        if shouldShowLightTheme() {
+            
+            setLightThemeForTableView(tableView)
+        }
     }
     
     override func refresh(refreshControl: UIRefreshControl?) {

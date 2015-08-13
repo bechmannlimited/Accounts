@@ -44,9 +44,7 @@ class TransactionsViewController: ACBaseViewController {
     var selectedPurchaseID: String?
     var selectedTransactionID: String?
     var didJustDelete: Bool = false
-    
-    var toolbar = UIToolbar()
-    
+
     var headerView: BouncyHeaderView?
     
     var bounceViewHeightConstraint: NSLayoutConstraint?
@@ -63,34 +61,28 @@ class TransactionsViewController: ACBaseViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        //setupQuery()
-        
+
         if kDevice == .Pad {
         
             tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
         setupTableView(tableView, delegate: self, dataSource: self)
-        //title = "Transactions with \(friend.appropriateDisplayName())"
-
-        //setupLoadMoreView()
-        setupNoDataLabel(noDataView, text: "Tap plus to add a purchase or payment")
+        setupNoDataLabel(noDataView, text: "Tap plus to split a bill or add an i.o.u")
         tableView.addSubview(noDataView)
+        setupTextLabelForSaveStatusInToolbarWithLabel()
         
         refresh(nil)
         
         setupToolbar()
         addBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
+        refreshBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
         
         toolbar.items = [
             UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
-            addBarButtonItem!
-            //UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
+            refreshBarButtonItem!
         ]
-        
-        refreshBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
-        navigationItem.rightBarButtonItem = refreshBarButtonItem
+        navigationItem.rightBarButtonItem = addBarButtonItem!
         
         if headerView == nil {
             
@@ -105,6 +97,16 @@ class TransactionsViewController: ACBaseViewController {
         view.showLoader()
         self.tableView.separatorColor = UIColor.clearColor()
         self.tableView.layer.opacity = 0.25
+        
+        if User.currentUser()?.lastSyncedDataInfo == nil { // dont think is needed again...
+            
+            User.currentUser()?.lastSyncedDataInfo = Dictionary<String, NSDate>()
+        }
+        
+        if let lastSyncedDate = User.currentUser()?.lastSyncedDataInfo?["Transactions_\(self.friend.objectId!)"] {
+            
+            self.refreshUpdatedDate = lastSyncedDate
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -164,6 +166,8 @@ class TransactionsViewController: ACBaseViewController {
                 let difference = responseJson.doubleValue
                 
                 self.friend.localeDifferenceBetweenActiveUser = difference
+                User.currentUser()?.friendsIdsWithDifference?[self.friend.objectId!] = difference
+                
                 self.setHeaderTitleText()
             }
         }
@@ -173,7 +177,6 @@ class TransactionsViewController: ACBaseViewController {
         super.viewDidAppear(animated)
         
         popoverViewController = nil // to make sure
-        
         setupInfiniteScrolling()
     }
     
@@ -558,6 +561,10 @@ class TransactionsViewController: ACBaseViewController {
                             
                             self.tableView.layer.opacity = 1
                         })
+                        
+                        //last synced label
+                        User.currentUser()?.lastSyncedDataInfo?["Transactions_\(self.friend.objectId!)"] = NSDate()
+                        self.refreshUpdatedDate = NSDate()
                     })
                 }
             })
@@ -731,13 +738,13 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         let dateString:String = transaction.transactionDate.toString(DateFormat.Date.rawValue)
         cell.imageView?.image = kTransactionImage
         
-        let tintColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.positiveColor() : AccountColor.negativeColor()
+        let tintColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.negativeColor() : AccountColor.positiveColor()
         
         cell.detailTextLabel?.textColor = tintColor
         cell.imageView?.tintWithColor(tintColor)
         
         let amountText = Formatter.formatCurrencyAsString(abs(amount))
-        let iouText = transaction.fromUser == User.currentUser() ? "You paid \(amountText)" : "\(transaction.fromUser!.firstName) paid \(amountText)"
+        let iouText = transaction.fromUser == User.currentUser() ? "You paid \(transaction.fromUser!.firstName) \(amountText)" : "\(transaction.fromUser!.firstName) paid you \(amountText)"
         
         cell.textLabel?.text = "\(transaction.title!)"
         cell.detailTextLabel?.text = iouText

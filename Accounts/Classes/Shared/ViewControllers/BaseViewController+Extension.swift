@@ -9,8 +9,6 @@
 import UIKit
 import ABToolKit
 
-
-
 extension BaseViewController {
     
     func setupView() {
@@ -46,6 +44,20 @@ extension BaseViewController {
 //        tableView.backgroundColor = kTableViewBackgroundColor
     }
     
+    func setLightThemeForTableView(tableView:UITableView) {
+        
+        tableView.backgroundColor = UIColor.clearColor()
+    }
+    
+    func showLightTheme() {
+        
+        navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
+        navigationController?.view.backgroundColor = UIColor.groupTableViewBackgroundColor()
+        navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(UIColor.whiteColor().colorWithAlphaComponent(0.95), size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
+        navigationController?.navigationBar.tintColor = AccountColor.blueColor()
+        view.backgroundColor = UIColor.groupTableViewBackgroundColor()
+    }
+    
     func setNavigationControllerToDefault(){
         
         navigationController?.navigationBar.tintColor = kNavigationBarTintColor
@@ -66,16 +78,31 @@ extension BaseViewController {
             
             cell.friendNameLabel.textColor = .whiteColor()
         }
+    }
+    
+    func setupCellForLightTheme(cell: UITableViewCell) {
         
+        cell.backgroundColor = UIColor.whiteColor()
+        cell.textLabel?.textColor = UIColor.blackColor()
+        cell.detailTextLabel?.textColor = UIColor.lightGrayColor()
         
-//        cell.backgroundColor = kTableViewCellBackgroundColor
-//        cell.textLabel?.textColor = kTableViewCellTextColor
-//        cell.tintColor = kTableViewCellTintColor
+        if let cell = cell as? FormViewTextFieldCell {
+            
+            cell.label.textColor = UIColor.blackColor()
+            cell.textField.textColor = UIColor.lightGrayColor()
+        }
+        
+        cell.tintColor = AccountColor.blueColor()
     }
     
     func isInsidePopover() -> Bool {
 
         return view.frame != UIScreen.mainScreen().bounds
+    }
+    
+    func shouldShowLightTheme() -> Bool {
+        
+        return false
     }
     
     func setupNoDataLabel(noDataView:UILabel, text: String) {

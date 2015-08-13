@@ -97,7 +97,7 @@ class SavePurchaseViewController: SaveItemViewController {
                 println("error saving purchase")
             }
             
-            self.updateUIForEditing()
+            //self.updateUIForEditing()
         }
     }
     
