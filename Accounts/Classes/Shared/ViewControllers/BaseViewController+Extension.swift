@@ -55,8 +55,9 @@ extension BaseViewController {
         navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
         navigationController?.view.backgroundColor = UIColor.groupTableViewBackgroundColor()
         navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(UIColor.whiteColor().colorWithAlphaComponent(0.95), size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
-        navigationController?.navigationBar.tintColor = UIColor.blackColor()
+        navigationController?.navigationBar.tintColor = AccountColor.greenColor()
         view.backgroundColor = UIColor.groupTableViewBackgroundColor()
+        navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.blackColor()]
     }
     
     func setNavigationControllerToDefault(){

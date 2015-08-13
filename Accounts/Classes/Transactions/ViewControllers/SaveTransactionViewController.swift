@@ -90,13 +90,23 @@ class SaveTransactionViewController: SaveItemViewController {
             transaction?.setUsefulValuesFromCopy(self.transaction)
         }
         
+        var delegateCallbackHasBeenFired = false
+        
         transaction?.saveEventually { (success, error) -> Void in
 
             if success {
+
+                NSTimer.schedule(delay: 2, handler: { timer in
                 
-                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
-                self.delegate?.itemDidChange()
-                self.delegate?.transactionDidChange(transaction!)
+                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                    
+                    if !delegateCallbackHasBeenFired {
+                    
+                        self.delegate?.itemDidChange()
+                        self.delegate?.transactionDidChange(transaction!)
+                        delegateCallbackHasBeenFired = true
+                    }
+                })
             }
             else{
                 
@@ -118,8 +128,13 @@ class SaveTransactionViewController: SaveItemViewController {
         
         NSTimer.schedule(delay: 2) { timer in
             
-            self.delegate?.itemDidChange()
-            self.delegate?.transactionDidChange(transaction!)
+            if !delegateCallbackHasBeenFired {
+                
+                self.delegate?.itemDidChange()
+                self.delegate?.transactionDidChange(transaction!)
+                delegateCallbackHasBeenFired = true
+            }
+            
             self.popAll()
         }
     }
@@ -238,9 +253,11 @@ extension SaveTransactionViewController: FormViewDelegate {
                     
                     let transaction = self.isExistingTransaction ? self.existingTransaction : self.transaction
                     
+                    IOSession.sharedSession().deletedTransactionIds.append(String.emptyIfNull(transaction?.objectId))
+                    
                     transaction?.deleteEventually()
                     
-                    NSTimer.schedule(delay: 1.5) { timer in
+                    NSTimer.schedule(delay: 2.5) { timer in
                         
                         self.popAll()
                         self.delegate?.itemDidGetDeleted()

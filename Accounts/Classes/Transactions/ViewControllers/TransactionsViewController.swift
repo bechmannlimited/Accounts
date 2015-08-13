@@ -217,8 +217,8 @@ class TransactionsViewController: ACBaseViewController {
         queryForToUser?.whereKey("fromUser", equalTo: friend)
         
         query = PFQuery.orQueryWithSubqueries([queryForFromUser!, queryForToUser!])
-        //query?.includeKey("purchase")
         query?.orderByDescending("transactionDate")
+        query?.whereKey("objectId", notContainedIn: IOSession.sharedSession().deletedTransactionIds)
         
         activeQueries.append(query)
         
@@ -483,7 +483,7 @@ class TransactionsViewController: ACBaseViewController {
             }
             else if selectedPurchaseID == nil && selectedTransactionID == nil {
                 
-                rowToDeselect = nil // for now (needsto get id from postback)
+                rowToDeselect = nil // for now (needsto get id from postback) / /is this still true?
                 
                 if transactions.count > 0 {
                     
@@ -500,7 +500,7 @@ class TransactionsViewController: ACBaseViewController {
                         
                         var cellRect = self.tableView.rectForRowAtIndexPath(indexPath)
                         
-                        let rectToCheck = CGRect(x: self.tableView.bounds.origin.x, y: self.tableView.bounds.origin.y + 64, width: self.tableView.bounds.width, height: self.tableView.bounds.height - 64)
+                        let rectToCheck = CGRect(x: self.tableView.bounds.origin.x, y: self.tableView.bounds.origin.y + 64, width: self.tableView.bounds.width, height: self.tableView.bounds.height - 64 - 44)
                         
                         var completelyVisible = CGRectContainsRect(rectToCheck, cellRect)
                         
@@ -542,6 +542,8 @@ class TransactionsViewController: ACBaseViewController {
         selectedPurchaseID = nil
         selectedRow = nil
         didJustDelete = false
+        
+        cancelQueries()
         
         getDifferenceBetweenActiveUser()
         

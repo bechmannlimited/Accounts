@@ -48,6 +48,7 @@
 		E442C34A1B510FAF0061CAE6 /* Assets in Resources */ = {isa = PBXBuildFile; fileRef = E442C3491B510FAF0061CAE6 /* Assets */; };
 		E442C3501B52BE030061CAE6 /* ParseKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C34F1B52BE030061CAE6 /* ParseKeys.swift */; };
 		E442C3521B52C3150061CAE6 /* FriendRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C3511B52C3150061CAE6 /* FriendRequest.swift */; };
+		E44881F51B7D145900043237 /* IOSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44881F41B7D145900043237 /* IOSession.swift */; };
 		E46BCE551B66D4E800CA09BF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE541B66D4E800CA09BF /* AudioToolbox.framework */; };
 		E46BCE571B66D4F100CA09BF /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE561B66D4F100CA09BF /* CFNetwork.framework */; };
 		E46BCE591B66D4F900CA09BF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE581B66D4F900CA09BF /* CoreGraphics.framework */; };
@@ -129,6 +130,7 @@
 		E442C3491B510FAF0061CAE6 /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Assets; sourceTree = SOURCE_ROOT; };
 		E442C34F1B52BE030061CAE6 /* ParseKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ParseKeys.swift; path = ../ParseKeys.swift; sourceTree = "<group>"; };
 		E442C3511B52C3150061CAE6 /* FriendRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendRequest.swift; sourceTree = "<group>"; };
+		E44881F41B7D145900043237 /* IOSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IOSession.swift; sourceTree = "<group>"; };
 		E46BCE541B66D4E800CA09BF /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E46BCE561B66D4F100CA09BF /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		E46BCE581B66D4F900CA09BF /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -445,6 +447,7 @@
 				E442C30D1B510E940061CAE6 /* Friend.swift */,
 				E442C30E1B510E940061CAE6 /* RelationStatus.swift */,
 				E412F9161B7CC3FC00A30F60 /* ABImageLoader.swift */,
+				E44881F41B7D145900043237 /* IOSession.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -722,6 +725,7 @@
 				E4E7CAD91B66D24E0027833E /* StartViewController.swift in Sources */,
 				E442C3381B510E940061CAE6 /* UIView+Extension.swift in Sources */,
 				E442C32F1B510E940061CAE6 /* Settings.swift in Sources */,
+				E44881F51B7D145900043237 /* IOSession.swift in Sources */,
 				E47FD8191B5FF042004B4C56 /* Task.swift in Sources */,
 				E442C33C1B510E940061CAE6 /* MenuViewController.swift in Sources */,
 				E48C52681B6978CC0056A7E3 /* ViewController.swift in Sources */,

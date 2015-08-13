@@ -14,6 +14,7 @@ import Parse
 import Bolts
 import ParseFacebookUtilsV4
 import KFSwiftImageLoader
+//import ParseCrashReporting
 
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
 
@@ -69,6 +70,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         Transaction.registerSubclass()
         Purchase.registerSubclass()
         
+        //ParseCrashReporting.enable()
         Parse.enableLocalDatastore()
         Parse.setApplicationId("Nc2fYkKYCVLImrZx1ZX1RKv7f4PFDVZ3xLmkDmwM",
             clientKey: "ZqLepxDYLImFaybsC4CboyWX8OppfYGUPZUj6r5X")
