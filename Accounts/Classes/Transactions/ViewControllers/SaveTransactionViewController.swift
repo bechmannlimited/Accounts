@@ -94,6 +94,7 @@ class SaveTransactionViewController: SaveItemViewController {
 
             if success {
                 
+                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
                 self.delegate?.itemDidChange()
                 self.delegate?.transactionDidChange(transaction!)
             }
@@ -115,7 +116,7 @@ class SaveTransactionViewController: SaveItemViewController {
 //        
 //        reachability.startNotifier()
         
-        NSTimer.schedule(delay: 1.5) { timer in
+        NSTimer.schedule(delay: 2) { timer in
             
             self.delegate?.itemDidChange()
             self.delegate?.transactionDidChange(transaction!)

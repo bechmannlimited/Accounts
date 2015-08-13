@@ -49,6 +49,7 @@ let kAnimationDuration:NSTimeInterval = 0.5
 
 let kParseInstallationUserKey = "user"
 let kNotificationCenterPushNotificationKey = "pushNotificationUserInfoReceived"
+let kNotificationCenterSaveEventuallyItemDidSaveKey = "saveEventuallyItemDidSave"
 
 let kDefaultNavigationBarShadowImage = UINavigationBar().shadowImage // UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
 

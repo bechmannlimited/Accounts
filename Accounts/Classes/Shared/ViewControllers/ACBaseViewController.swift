@@ -40,12 +40,19 @@ class ACBaseViewController: BaseViewController {
             showLightTheme()
         }
         
-         NSNotificationCenter.defaultCenter().addObserver(self, selector: "appDidResume", name: UIApplicationDidBecomeActiveNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "appDidResume", name: UIApplicationDidBecomeActiveNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "saveEventuallyItemDidSave", name: kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil)
     }
     
     func didReceivePushNotification(notification: NSNotification) {
         
         //println("hi")
+    }
+    
+    func saveEventuallyItemDidSave() {
+        
+        println("saveEventuallyItemDidSave triggered")
+        appDidResume()
     }
     
     func setupNavigationBarAppearance() {

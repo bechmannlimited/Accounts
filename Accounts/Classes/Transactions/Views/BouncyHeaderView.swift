@@ -92,7 +92,6 @@ class BouncyHeaderView: UIView{
             
             var titleOpacity: CGFloat = y / 40
             titleLabel.layer.opacity = 1 - Float(titleOpacity)
-            println(1 - titleOpacity)
         }
         else{
             titleLabel.layer.opacity = 1

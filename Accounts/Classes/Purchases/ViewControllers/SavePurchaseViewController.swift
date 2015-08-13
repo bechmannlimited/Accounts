@@ -84,8 +84,9 @@ class SavePurchaseViewController: SaveItemViewController {
                 //self.existingPurchase?.hardUnpin()
                 //PFObject.unpinAll(self.existingPurchase?.transactions)
                 
-                NSTimer.schedule(delay: 1.5){ timer in
+                NSTimer.schedule(delay: 2){ timer in
                    
+                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
                     self.delegate?.itemDidChange()
                     self.delegate?.purchaseDidChange(purchase!)
                     self.popAll()
