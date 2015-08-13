@@ -152,14 +152,18 @@ extension SaveTransactionViewController: FormViewDelegate {
         let locale = Settings.getCurrencyLocaleWithIdentifier().locale
         
         var sections = Array<Array<FormViewConfiguration>>()
+        
         sections.append([
-            FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
-            FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.localeAmount), identifier: "Amount", locale: locale)
+            FormViewConfiguration.normalCell("Friend")
         ])
         
         sections.append([
-            FormViewConfiguration.normalCell("User"),
-            FormViewConfiguration.normalCell("Friend"),
+            FormViewConfiguration.normalCell("User")
+        ])
+        
+        sections.append([
+            FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
+            FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.localeAmount), identifier: "Amount", locale: locale),
             FormViewConfiguration.datePicker("Transaction date", date: transaction.transactionDate, identifier: "TransactionDate", format: nil)
         ])
         
@@ -177,37 +181,44 @@ extension SaveTransactionViewController: FormViewDelegate {
         
         let cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "Cell")
         
-        if identifier == "Friend" {
+        if identifier == "Friend" || identifier == "User" {
             
-            cell.textLabel?.text = "Receiver"
-            if let username = transaction.toUser?.appropriateDisplayName() {
-                
-                cell.detailTextLabel?.text = "\(username)"
-            }
-            else{
-                
-                cell.detailTextLabel?.text = ""
-            }
+            var label = UILabel()
+            label.font = UIFont.systemFontOfSize(17)
+            label.textAlignment = .Center
+            label.textColor = shouldShowLightTheme() ? .blackColor() : .whiteColor()
             
-            cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-
-            return cell
-        }
-        
-        if identifier == "User" {
+            label.setTranslatesAutoresizingMaskIntoConstraints(false)
+            cell.contentView.addSubview(label)
+            label.fillSuperView(UIEdgeInsetsZero)
             
-            cell.textLabel?.text = "Payer"
-            if let username = transaction.fromUser?.appropriateDisplayName() {
+            if identifier == "Friend" {
                 
-                cell.detailTextLabel?.text = "\(username)"
-                cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-            }
-            else{
-                
-                cell.detailTextLabel?.text = ""
+                if let username = transaction.toUser?.appropriateDisplayName() {
+                 
+                    label.text = username
+                }
+                else {
+                    
+                    label.text = "Tap to select user"
+                    label.textColor = UIColor.lightGrayColor()
+                }
             }
             
-            cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+            if identifier == "User" {
+             
+                if let username = transaction.fromUser?.appropriateDisplayName() {
+                    
+                    label.text = username
+                }
+                else {
+                    
+                    label.text = "Tap to select user"
+                    label.textColor = UIColor.lightGrayColor()
+                }
+            }
+            
+            //cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             
             return cell
         }
@@ -274,7 +285,7 @@ extension SaveTransactionViewController: FormViewDelegate {
         
         if identifier == "Friend" {
 
-            let usersToChooseFrom = User.userListExcludingID(transaction.fromUser?.objectId)
+            let usersToChooseFrom = User.userListExcludingID(nil) // User.userListExcludingID(transaction.fromUser?.objectId)
             
             let v = SelectUsersViewController(identifier: identifier, user: transaction.toUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
             navigationController?.pushViewController(v, animated: true)
@@ -315,6 +326,29 @@ extension SaveTransactionViewController: UITableViewDelegate {
         
         return cell
     }
+    
+    func tableView(tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        
+        if section == 0 {
+            
+            var view = UIView()
+            
+            var label = UILabel()
+            label.font = UIFont(name: "Helvetica-Light", size: 14)
+            label.textAlignment = NSTextAlignment.Center
+            var s: String = transaction.toUser?.objectId == User.currentUser()?.objectId ? "" : "s"
+            label.text = "- owe\(s) -"
+            label.textColor = shouldShowLightTheme() ? .darkGrayColor() : .lightGrayColor()
+            
+            label.setTranslatesAutoresizingMaskIntoConstraints(false)
+            view.addSubview(label)
+            label.fillSuperView(UIEdgeInsets(top: 0, left: 0, bottom: 17, right: 0))
+            
+            return view
+        }
+        
+        return nil
+    }
 }
 
 extension SaveTransactionViewController: SelectUserDelegate {
@@ -324,11 +358,20 @@ extension SaveTransactionViewController: SelectUserDelegate {
         if identifier == "Friend" {
             
             transaction.toUser = user
+            
+            if transaction.fromUser?.objectId == user.objectId {
+                
+                transaction.fromUser = nil
+            }
         }
         if identifier == "User" {
         
             transaction.fromUser = user
-            transaction.toUser = nil
+            
+            if transaction.toUser?.objectId == user.objectId {
+                
+                transaction.toUser = nil
+            }
         }
         
         itemDidChange = true

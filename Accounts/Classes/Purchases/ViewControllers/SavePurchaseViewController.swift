@@ -106,41 +106,6 @@ class SavePurchaseViewController: SaveItemViewController {
         
         return allowEditing && purchase.modelIsValid() && !isSaving
     }
-    
-    override func onDiscard() {
-        
-//        if let copyDictionary = copyOfItem as? Dictionary<String, AnyObject> {
-//            
-//            let copy = JSON(copyDictionary)
-//            
-//            purchase.title = copy["title"].stringValue
-//            purchase.amount = copy["amount"].doubleValue
-//            println(copy["amount"].doubleValue)
-//            
-//            purchase.user = (copyDictionary["user"] as? User)!
-//            purchase.purchasedDate = copyDictionary["purchasedDate"] as? NSDate
-//            
-//            purchase.transactions = []
-//            
-//            for transactionDictionary in self.oldTransactions {
-//                
-//                if let transactionDictionary = transactionDictionary as? Dictionary<String, AnyObject> {
-//                    
-//                    let transactionJson = JSON(transactionDictionary)
-//                    
-//                    let t = Transaction()
-//                    t.objectId = transactionDictionary["objectId"] as? String
-//                    t.fromUser = transactionDictionary["fromUser"] as? User
-//                    t.toUser = transactionDictionary["toUser"] as? User
-//                    t.amount = transactionJson["amount"].doubleValue
-//                }
-//            }
-//            
-//            purchase.pin()
-//        }
-        
-        //purchase.hardUnpin()
-    }
 }
 
 extension SavePurchaseViewController: FormViewDelegate {
@@ -166,7 +131,9 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             if transaction.toUser?.objectId == purchase.user.objectId {
                 
-                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(transaction.toUser!.appropriateDisplayName(), value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
+                var textLabelText = "\(transaction.toUser!.appropriateShortDisplayName()) paid"
+                
+                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
             }
         }
         
@@ -175,7 +142,10 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             if transaction.toUser?.objectId != purchase.user.objectId {
                 
-                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(transaction.toUser!.appropriateDisplayName(), value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
+                var s: String = transaction.toUser?.objectId == User.currentUser()?.objectId ? "" : "s"
+                var textLabelText = "\(transaction.toUser!.appropriateShortDisplayName()) owe\(s)"
+                
+                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
             }
         }
         
@@ -327,7 +297,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         
         if identifier == "Friends" {
             
-            cell.textLabel?.text = "Who paid for"
+            cell.textLabel?.text = "Split with"
             
             var friendCount = purchase.transactions.count - 1
             

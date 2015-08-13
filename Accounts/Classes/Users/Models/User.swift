@@ -24,7 +24,7 @@ class User: PFUser {
     var firstName: String {
         get{
         
-            let pieces = split(appropriateDisplayName()) {$0 == " "}
+            let pieces = appropriateDisplayNamesAsArray()
             if pieces.count > 0 {
                 
                 return pieces[0]
@@ -71,7 +71,11 @@ class User: PFUser {
     
         var rc = ""
         
-        if let name = displayName {
+        if objectId == User.currentUser()?.objectId {
+            
+            rc = "You"
+        }
+        else if let name = displayName {
             
             rc = name
         }
@@ -81,6 +85,53 @@ class User: PFUser {
         }
         
         return rc
+    }
+    
+    func appropriateShortDisplayName() -> String {
+        
+        let name = appropriateDisplayName()
+        
+        if objectId == User.currentUser()?.objectId {
+         
+            return name
+        }
+        
+        let names = appropriateDisplayNamesAsArray()
+        
+        var secondName: String = ""
+        
+        if names.count > 1 {
+            
+            secondName = String.emptyIfNull(names[1])
+        }
+        
+        var requiresExtraInfo = false
+        
+        for friend in friends {
+            
+            for f in friends {
+                
+                if f.firstName == friend.firstName {
+                    
+                    requiresExtraInfo = true
+                }
+            }
+        }
+        
+        if requiresExtraInfo {
+            
+            if secondName.length() >= 1 {
+                
+                return "\(firstName) \(String.emptyIfNull(secondName[0]))"
+            }
+        }
+        
+        return firstName
+    }
+    
+    func appropriateDisplayNamesAsArray() -> [String] {
+        
+        return split(appropriateDisplayName()) {$0 == " "}
     }
     
     func getFriends(completion:(completedRemoteRequest:Bool) -> ()) {

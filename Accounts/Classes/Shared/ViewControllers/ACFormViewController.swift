@@ -128,5 +128,15 @@ extension ACFormViewController: UITableViewDelegate {
             
             setupCellForLightTheme(cell)
         }
+        
+        if let cell = cell as? FormViewTextFieldCell {
+
+            cell.textField.addTarget(self, action: "replaceNormalSpacesWithNonBreakingSpaces:", forControlEvents: UIControlEvents.EditingChanged)
+        }
+    }
+    
+    func replaceNormalSpacesWithNonBreakingSpaces(textField: UITextField) {
+        
+        textField.text = textField.text.replaceString(" ", withString: "\u{00a0}")
     }
 }
