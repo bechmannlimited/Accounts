@@ -47,6 +47,7 @@ extension BaseViewController {
     func setLightThemeForTableView(tableView:UITableView) {
         
         tableView.backgroundColor = UIColor.clearColor()
+        tableView.separatorColor = UIColor.lightGrayColor()
     }
     
     func showLightTheme() {

@@ -39,6 +39,11 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>Pods-KFSwiftImageLoader.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>Pods-Parse.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -50,6 +55,11 @@
 			<false/>
 		</dict>
 		<key>Pods-ParseUI.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>Pods-ReachabilitySwift.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -77,72 +87,82 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>1447661B63513C1843490CA4</key>
+		<key>006D4B9C543C779210956AF9</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>16DC7C3DDFC43A2E319B3768</key>
+		<key>1366B5864B30269E925CE467</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>22AF4C77480A93BF510D6EB2</key>
+		<key>224CBC1FF33E01F02BD528DE</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>2B277B3A08157DA139059E15</key>
+		<key>273E791B25095E33D29A101D</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>84B7EB4AA93A339D9D0D702E</key>
+		<key>50881A300BB8C756C8FABD54</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>8FDF3AB8AC342809FA00941D</key>
+		<key>547856F03480072122C00640</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>92DC861075DCF87D332197AD</key>
+		<key>6530E3DC8B07A630121BF6CC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>9543CC0892978721C985C59A</key>
+		<key>9733D60802625A02DF84804A</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>C447AB465A221FFC01AEECE4</key>
+		<key>9C7E71B8B47BDA6B97CC5ACE</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>C695F23F67961C8541C92B39</key>
+		<key>A2C6E2D3747CCA469D6EC3C1</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>CE7AD7F6F0DE7B37BBF0ECC5</key>
+		<key>BC77E6419E21C3A57031204E</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>E52BDDA1136033030A18C642</key>
+		<key>C09C28149CF0383A7D2A0455</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>F6323FE438EF31BDFF0A59C0</key>
+		<key>C32D5264EE0D20726F8998EC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>F91DE3CF728C559A71E8ADE9</key>
+		<key>D4EF3859CB18AE91500024D0</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D86D704D06D38B3B0B2855FE</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>F1CA1F85C221434015CF6FD2</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -11,6 +11,7 @@ import UIKit
 import ABToolKit
 import SwiftyUserDefaults
 import SwiftyJSON
+//import Reachability
 
 class SaveTransactionViewController: SaveItemViewController {
 
@@ -98,12 +99,21 @@ class SaveTransactionViewController: SaveItemViewController {
             }
             else{
                 
-                self.existingTransaction?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!) // remove this again?
+                //self.existingTransaction?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!) // remove this again?
                 ParseUtilities.showAlertWithErrorIfExists(error)
             }
 
             //self.updateUIForEditing()
         }
+        
+//        let reachability = Reachability.reachabilityForInternetConnection()
+//        
+//        reachability.whenUnreachable = { reachability in
+//            
+//            UIAlertView(title: "No connection", message: "This item will be saved online as soon as a network connection is available.", delegate: nil, cancelButtonTitle: "Ok", otherButtonTitles: nil, nil).show()
+//        }
+//        
+//        reachability.startNotifier()
         
         NSTimer.schedule(delay: 1.5) { timer in
             

@@ -66,6 +66,12 @@
 #define COCOAPODS_VERSION_MINOR_FBSDKShareKit 1
 #define COCOAPODS_VERSION_PATCH_FBSDKShareKit 0
 
+// KFSwiftImageLoader
+#define COCOAPODS_POD_AVAILABLE_KFSwiftImageLoader
+#define COCOAPODS_VERSION_MAJOR_KFSwiftImageLoader 1
+#define COCOAPODS_VERSION_MINOR_KFSwiftImageLoader 2
+#define COCOAPODS_VERSION_PATCH_KFSwiftImageLoader 0
+
 // Parse
 #define COCOAPODS_POD_AVAILABLE_Parse
 // This library does not follow semantic-versioning,
@@ -85,6 +91,12 @@
 #define COCOAPODS_VERSION_MAJOR_ParseUI 1
 #define COCOAPODS_VERSION_MINOR_ParseUI 1
 #define COCOAPODS_VERSION_PATCH_ParseUI 4
+
+// ReachabilitySwift
+#define COCOAPODS_POD_AVAILABLE_ReachabilitySwift
+#define COCOAPODS_VERSION_MAJOR_ReachabilitySwift 1
+#define COCOAPODS_VERSION_MINOR_ReachabilitySwift 1
+#define COCOAPODS_VERSION_PATCH_ReachabilitySwift 0
 
 // SVPullToRefresh
 #define COCOAPODS_POD_AVAILABLE_SVPullToRefresh

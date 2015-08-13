@@ -120,22 +120,15 @@ class BouncyHeaderView: UIView{
         
         heroImageView.layer.opacity = 0
         
-        ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
+        heroImageView.loadImageFromURLString(url, placeholderImage: nil) {
+            (finished, error) in
             
-            self.heroImageView.image = image
-            
+            println("heroImage: \(error), \(finished)")
             UIView.animateWithDuration(0.35, animations: { () -> Void in
                 
                 self.heroImageView.layer.opacity = 1
-                
             })
-            
-            //self.heroImageView.hideLoader()
-            
-            //self.setupHeroImageBlurView()
-            //self.setupTitle()
-        })
-        
+        }
     }
     
     func setupHeroImageBlurView() {

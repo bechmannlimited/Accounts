@@ -13,5 +13,7 @@ pod 'Parse'
 pod 'ParseFacebookUtilsV4', '~>1.7.2'
 pod 'SVPullToRefresh'
 pod 'SupportKit'
+pod 'ReachabilitySwift', git: 'https://github.com/ashleymills/Reachability.swift'
+pod 'KFSwiftImageLoader', '~> 1.2'
 
 use_frameworks!

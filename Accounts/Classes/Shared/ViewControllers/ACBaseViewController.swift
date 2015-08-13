@@ -23,9 +23,6 @@ class ACBaseViewController: BaseViewController {
         super.viewDidLoad()
         
         view.backgroundColor = kViewBackgroundColor
-        
-        //NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "appDidResume", name: UIApplicationDidBecomeActiveNotification, object: nil)
     }
     
     func appDidResume() {
@@ -42,6 +39,8 @@ class ACBaseViewController: BaseViewController {
             
             showLightTheme()
         }
+        
+         NSNotificationCenter.defaultCenter().addObserver(self, selector: "appDidResume", name: UIApplicationDidBecomeActiveNotification, object: nil)
     }
     
     func didReceivePushNotification(notification: NSNotification) {

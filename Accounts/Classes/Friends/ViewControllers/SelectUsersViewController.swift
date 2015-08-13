@@ -107,6 +107,7 @@ class SelectUsersViewController: ACBaseViewController {
         if shouldShowLightTheme() {
             
             setLightThemeForTableView(tableView)
+            tableView.backgroundColor = UIColor.whiteColor()
         }
     }
     

@@ -8,6 +8,7 @@
 
 import UIKit
 import ABToolKit
+import KFSwiftImageLoader
 
 private let kContentViewVerticalPadding: CGFloat = 10
 private let kContentViewHorizontalPadding: CGFloat = 15
@@ -78,13 +79,40 @@ class FriendTableViewCell: UITableViewCell {
                 
                 let url = "https://graph.facebook.com/\(id)/picture?width=\(150)&height=\(150)"
                 
-                ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
+                let completionHandler: () -> () = {
                     
                     self.friendImageView.hideLoader()
                     self.friendImageView.contentMode = UIViewContentMode.ScaleAspectFill
-                    self.friendImageView.image = image
+                    //self.friendImageView.image = image
                     self.friendImageView.layer.cornerRadius = self.friendImageViewWidth() / 2
-                })
+                }
+                
+                friendImageView.loadImageFromURLString(url, placeholderImage: nil) {
+                    (finished, error) in
+                    
+                    completionHandler()
+                }
+                
+//                ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+//                    
+//                    completionHandler(image: image)
+//                })
+                
+//                ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
+//                    
+//                    if let image = image {
+//                        
+//                        completionHandler(image: image)
+//                    }
+//                    
+//                    if image == nil {
+//                        
+//                        ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+//                            
+//                            completionHandler(image: image)
+//                        })
+//                    }
+//                })
             }
         }
     }
@@ -157,7 +185,8 @@ class FriendTableViewCell: UITableViewCell {
     }
     
     private func friendImageViewWidth() -> CGFloat{
-        
-        return contentView.frame.height - (kContentViewVerticalPadding * 2)
+        //println(contentView.frame.height - (kContentViewVerticalPadding * 2))
+        //return contentView.frame.height - (kContentViewVerticalPadding * 2)
+        return 49.5
     }
 }

@@ -225,6 +225,21 @@ class TransactionsViewController: ACBaseViewController {
         return query
     }
     
+    func transactionIds() -> [String] {
+        
+        var ids = [String]()
+        
+        for transaction in transactions {
+            
+            if let id = transaction.objectId{
+                
+                ids.append(id)
+            }
+        }
+        
+        return ids
+    }
+    
     func setupToolbar(){
         
         toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
@@ -534,6 +549,11 @@ class TransactionsViewController: ACBaseViewController {
             
             self.refreshBarButtonItem?.enabled = false
             
+            NSTimer.schedule(delay: 10, handler: { timer in
+                
+                refreshBarButtonItem?.enabled = true
+            })
+            
             var remoteQuery = self.query()
             remoteQuery?.limit = 16
             
@@ -623,16 +643,16 @@ class TransactionsViewController: ACBaseViewController {
     
     func loadMore() {
         
-        //cancelQueries()
-        
+        cancelQueries()
         let skip = 16
         
         if transactions.count >= skip {
             
             let loadMoreQuery = query()
             
-            loadMoreQuery?.skip = transactions.count
+            //loadMoreQuery?.skip = transactions.count
             loadMoreQuery?.limit = skip
+            loadMoreQuery?.whereKey("objectId", notContainedIn: transactionIds())
             
             loadMoreQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
@@ -744,7 +764,7 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         cell.imageView?.tintWithColor(tintColor)
         
         let amountText = Formatter.formatCurrencyAsString(abs(amount))
-        let iouText = transaction.fromUser == User.currentUser() ? "You paid \(transaction.fromUser!.firstName) \(amountText)" : "\(transaction.fromUser!.firstName) paid you \(amountText)"
+        let iouText = transaction.fromUser == User.currentUser() ? "You paid \(transaction.toUser!.firstName) \(amountText)" : "\(transaction.fromUser!.firstName) paid you \(amountText)"
         
         cell.textLabel?.text = "\(transaction.title!)"
         cell.detailTextLabel?.text = iouText

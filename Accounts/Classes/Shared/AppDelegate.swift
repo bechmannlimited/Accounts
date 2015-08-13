@@ -13,7 +13,7 @@ import Alamofire
 import Parse
 import Bolts
 import ParseFacebookUtilsV4
-
+import KFSwiftImageLoader
 
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
 
@@ -79,6 +79,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         SupportKit.initWithSettings(SKTSettings(appToken: "amtp9h7tc5dq2sby4q6yc5ke6"))
         SupportKit.settings().conversationStatusBarStyle = UIStatusBarStyle.LightContent
+        
+//        let URLCache = NSURLCache(memoryCapacity: 4 * 1024 * 1024, diskCapacity: 20 * 1024 * 1024, diskPath: nil)
+//        NSURLCache.setSharedURLCache(URLCache)
+        
+        //KFImageCacheManager.sharedInstance.requestCachePolicy = NSURLRequestCachePolicy.UseProtocolCachePolicy
         
         return true
     }
