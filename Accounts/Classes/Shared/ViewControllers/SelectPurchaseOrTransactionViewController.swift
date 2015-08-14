@@ -13,7 +13,13 @@ import ABToolKit
 class SelectPurchaseOrTransactionViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
-    var data = [(identifier: "Purchase", textLabelText: "Split a bill"), (identifier: "Transaction", textLabelText: "Add an i.o.u")]
+    
+    var data = [
+        (identifier: "Purchase", textLabelText: "Split a bill"),
+        (identifier: "Transaction", textLabelText: "Add an i.o.u"),
+        (identifier: "TransactionPayment", textLabelText: "Add a payback")
+    ]
+
     var contextualFriend: User?
     var saveItemDelegate: SaveItemDelegate?
     
@@ -104,7 +110,8 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
             
             navigationController?.pushViewController(v, animated: true)
         }
-        else if identifier == "Transaction" {
+        else if identifier == "Transaction" || identifier == "TransactionPayment" {
+
             
             let v = SaveTransactionViewController()
             
@@ -113,6 +120,11 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
                 v.transaction.toUser = friend
             }
             
+            if identifier == "TransactionPayment" {
+                
+                v.transaction.type = TransactionType.payment
+            }
+
             v.delegate = saveItemDelegate
             saveItemDelegate?.newItemViewControllerWasPresented(v)
             

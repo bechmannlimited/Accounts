@@ -25,19 +25,19 @@ class SaveTransactionViewController: SaveItemViewController {
 
         shouldLoadFormOnLoad = false
         super.viewDidLoad()
-        
-        showOrHideSaveButton()
-        reloadForm()
 
         allowEditing = true // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
         
+        showOrHideSaveButton()
+        reloadForm()
+        
         if allowEditing && !isExistingTransaction {
             
-            title = "Add i.o.u"
+            title = transaction.type == .iou ? "Add i.o.u" : "Add payback"
         }
         else if allowEditing && isExistingTransaction {
             
-            title = "Edit i.o.u"
+            title = transaction.type == .iou ? "Edit i.o.u" : "Edit payback"
         }
         else {
             
@@ -153,13 +153,27 @@ extension SaveTransactionViewController: FormViewDelegate {
         
         var sections = Array<Array<FormViewConfiguration>>()
         
-        sections.append([
-            FormViewConfiguration.normalCell("Friend")
-        ])
-        
-        sections.append([
-            FormViewConfiguration.normalCell("User")
-        ])
+        if transaction.type == TransactionType.iou {
+            
+            sections.append([
+                FormViewConfiguration.normalCell("Friend")
+            ])
+            
+            sections.append([
+                FormViewConfiguration.normalCell("User")
+            ])
+        }
+        else if transaction.type == TransactionType.payment {
+            
+            sections.append([
+                FormViewConfiguration.normalCell("User")
+            ])
+            
+            sections.append([
+                FormViewConfiguration.normalCell("Friend")
+            ])
+        }
+
         
         sections.append([
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
@@ -167,7 +181,7 @@ extension SaveTransactionViewController: FormViewDelegate {
             FormViewConfiguration.datePicker("Transaction date", date: transaction.transactionDate, identifier: "TransactionDate", format: nil)
         ])
         
-        if transactionObjectId != nil {
+        if isExistingTransaction {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
@@ -336,8 +350,17 @@ extension SaveTransactionViewController: UITableViewDelegate {
             var label = UILabel()
             label.font = UIFont(name: "Helvetica-Light", size: 14)
             label.textAlignment = NSTextAlignment.Center
-            var s: String = transaction.toUser?.objectId == User.currentUser()?.objectId ? "" : "s"
-            label.text = "- owe\(s) -"
+            
+            var verb = "owe"
+            var s: String = User.isCurrentUser(transaction.toUser) ? "" : "s"
+            
+            if transaction.type == TransactionType.payment {
+                
+                verb = "paid"
+                s = ""
+            }
+            
+            label.text = "- \(verb)\(s) -"
             label.textColor = shouldShowLightTheme() ? .darkGrayColor() : .lightGrayColor()
             
             label.setTranslatesAutoresizingMaskIntoConstraints(false)

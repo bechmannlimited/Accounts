@@ -131,7 +131,9 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             if transaction.toUser?.objectId == purchase.user.objectId {
                 
-                var textLabelText = "\(transaction.toUser!.appropriateShortDisplayName()) paid"
+                var verb = User.isCurrentUser(transaction.toUser) ? "'re part cost" : "'s part cost"
+                var textLabelText = "\(transaction.toUser!.appropriateShortDisplayName())\(verb)"
+
                 
                 transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
             }

@@ -367,4 +367,10 @@ class User: PFUser {
 
         return usersToChooseFrom
     }
+    
+    class func isCurrentUser(user: User?) -> Bool {
+        
+        return user?.objectId == User.currentUser()?.objectId
+    }
+
 }

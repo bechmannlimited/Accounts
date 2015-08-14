@@ -12,6 +12,13 @@ import SwiftyJSON
 import Alamofire
 import Parse
 
+enum TransactionType: NSNumber {
+    
+    case iou = 0
+    case payment = 1
+}
+
+
 class Transaction: PFObject {
    
     @NSManaged var fromUser: User?
@@ -21,8 +28,30 @@ class Transaction: PFObject {
     @NSManaged var title: String?
     @NSManaged var purchaseObjectId: String?
     @NSManaged var transactionDate: NSDate
+    @NSManaged private var transactionType: NSNumber?
     
     var purchase: Purchase?
+    
+    var type: TransactionType {
+        
+        get{
+            
+            if let transactionType = transactionType {
+
+                if let t = TransactionType(rawValue: transactionType) {
+
+                    return t
+                }
+            }
+            
+            return TransactionType.iou
+        }
+        set {
+            
+            transactionType = newValue.rawValue
+        }
+    }
+
     
     var localeAmount: Double {
         
@@ -152,6 +181,7 @@ class Transaction: PFObject {
         transaction.title = title
         transaction.transactionDate = transactionDate
         transaction.purchase = purchase
+        transaction.type = type
         
         return transaction
     }

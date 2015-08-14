@@ -766,8 +766,18 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         cell.imageView?.tintWithColor(tintColor)
         
         let amountText = Formatter.formatCurrencyAsString(abs(amount))
-        let iouText = transaction.fromUser == User.currentUser() ? "\(transaction.toUser!.firstName) owes you \(amountText)" : "You owe \(amountText)"
         
+        var iouText = ""
+        
+        if transaction.type == TransactionType.payment {
+            
+            iouText = transaction.fromUser == User.currentUser() ? "You paid \(transaction.toUser!.firstName) \(amountText)" : "\(transaction.fromUser!.firstName) paid you \(amountText)"
+        }
+        else if transaction.type == TransactionType.iou {
+            
+            iouText = transaction.fromUser == User.currentUser() ? "\(transaction.toUser!.firstName) owes you \(amountText)" : "You owe \(amountText)"
+        }
+
         cell.textLabel?.text = "\(transaction.title!)"
         cell.detailTextLabel?.text = iouText
         cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
