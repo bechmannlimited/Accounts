@@ -17,6 +17,8 @@ class ACBaseViewController: BaseViewController {
     var activeQueries = [PFQuery?]()
     var toolbar = UIToolbar()
     
+    var noDataView = UILabel()
+    
     var refreshUpdatedDate: NSDate?
     
     override func viewDidLoad() {
@@ -34,11 +36,6 @@ class ACBaseViewController: BaseViewController {
         super.viewWillAppear(animated)
         
         setupView()
-        
-        if shouldShowLightTheme() {
-            
-            showLightTheme()
-        }
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "appDidResume", name: UIApplicationDidBecomeActiveNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "saveEventuallyItemDidSave", name: kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil)
@@ -108,9 +105,9 @@ class ACBaseViewController: BaseViewController {
         
         label.fillSuperView(UIEdgeInsets(top: 5, left: 15, bottom: -5, right: -40))
         
-        label.font = UIFont(name: "HelveticaNeue-Light", size: 13)
+        label.font = UIFont.lightFont(13)
         label.lineBreakMode = NSLineBreakMode.ByWordWrapping
-        label.textColor = UIColor.lightGrayColor()
+        label.textColor = UIColor.grayColor()
         
         let setLabelText: () -> () = {
             
@@ -133,16 +130,5 @@ extension ACBaseViewController: UITableViewDelegate {
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         
         return kTableViewCellHeight
-    }
-    
-    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
-        
-        setTableViewCellAppearanceForBackgroundGradient(cell)
-        
-        if shouldShowLightTheme() {
-            
-            setupCellForLightTheme(cell)
-        }
     }
 }

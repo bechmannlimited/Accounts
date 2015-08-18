@@ -24,7 +24,7 @@ class StartViewController: ACBaseViewController {
             
             var loginViewController = PFLogInViewController()
             
-            loginViewController.fields =  PFLogInFields.Facebook // | PFLogInFields.UsernameAndPassword |  PFLogInFields.SignUpButton PFLogInFields.LogInButton | PFLogInFields.PasswordForgotten |
+            loginViewController.fields =  PFLogInFields.Facebook //| PFLogInFields.UsernameAndPassword |  PFLogInFields.SignUpButton | PFLogInFields.LogInButton | PFLogInFields.PasswordForgotten
             loginViewController.facebookPermissions = ["email", "public_profile", "user_friends"]
             loginViewController.logInView?.logo = titleView()
             
@@ -72,7 +72,7 @@ class StartViewController: ACBaseViewController {
         subTitleLabel.textAlignment = NSTextAlignment.Center
         subTitleLabel.text = "Please login with Facebook. Don't worry, we won't post anything!"
         subTitleLabel.numberOfLines = 0
-        subTitleLabel.font = UIFont.systemFontOfSize(22)
+        subTitleLabel.font = UIFont.lightFont(24)
         subTitleLabel.textColor = UIColor.lightGrayColor()
         subTitleLabel.addTopConstraint(toView: logo, attribute: NSLayoutAttribute.Bottom, relation: .Equal, constant: 10)
         subTitleLabel.addLeftConstraint(toView: titleView, relation: .Equal, constant: -30)

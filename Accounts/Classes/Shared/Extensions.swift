@@ -72,3 +72,47 @@ extension NSDate {
         return rc
     }
 }
+
+extension UILabel {
+    
+    func changeFontWithExistingSize(fontName: String) {
+        
+        var size: CGFloat = 15
+        
+        if let previousFontSize = self.font?.pointSize {
+            
+            size = previousFontSize
+        }
+        
+        self.font = UIFont(name: fontName, size: size)
+    }
+}
+
+extension UITextField {
+    
+    func changeFontWithExistingSize(fontName: String) {
+        
+        var size: CGFloat = 15
+        
+        if let previousFontSize = self.font?.pointSize {
+            
+            size = previousFontSize
+        }
+        
+        self.font = UIFont(name: fontName, size: size)
+    }
+}
+
+extension UIView {
+    
+    func screenShot() -> UIImage? {
+        
+        UIGraphicsBeginImageContextWithOptions(bounds.size, false, 0)
+        drawViewHierarchyInRect(bounds, afterScreenUpdates: true)
+        var image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return image
+    }
+}
+
+

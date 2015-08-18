@@ -11,7 +11,9 @@ import UIKit
 import ABToolKit
 import SwiftyUserDefaults
 import SwiftyJSON
+import GoogleMaps
 //import Reachability
+import SwiftOverlays
 
 class SaveTransactionViewController: SaveItemViewController {
 
@@ -33,11 +35,11 @@ class SaveTransactionViewController: SaveItemViewController {
         
         if allowEditing && !isExistingTransaction {
             
-            title = transaction.type == .iou ? "Add i.o.u" : "Add payback"
+            title = transaction.type == .iou ? "Add i.o.u" : "Add payment"
         }
         else if allowEditing && isExistingTransaction {
             
-            title = transaction.type == .iou ? "Edit i.o.u" : "Edit payback"
+            title = transaction.type == .iou ? "Edit i.o.u" : "Edit payment"
         }
         else {
             
@@ -79,6 +81,7 @@ class SaveTransactionViewController: SaveItemViewController {
     
     func save() {
 
+        isSaving = true
         updateUIForSavingOrDeleting()
         
         var copyOfOriginalForIfSaveFails = existingTransaction?.copyWithUsefulValues()
@@ -91,6 +94,8 @@ class SaveTransactionViewController: SaveItemViewController {
         }
         
         var delegateCallbackHasBeenFired = false
+        
+        showSavingOverlay()
         
         transaction?.saveEventually { (success, error) -> Void in
 
@@ -143,6 +148,12 @@ class SaveTransactionViewController: SaveItemViewController {
         
         return allowEditing && transaction.modelIsValid() && !isSaving
     }
+    
+    func selectPlace() {
+        
+        var view = SelectLocationViewController()
+        navigationController?.pushViewController(view, animated: true)
+    }
 }
 
 extension SaveTransactionViewController: FormViewDelegate {
@@ -176,9 +187,10 @@ extension SaveTransactionViewController: FormViewDelegate {
 
         
         sections.append([
-            FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
             FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.localeAmount), identifier: "Amount", locale: locale),
+            FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
             FormViewConfiguration.datePicker("Transaction date", date: transaction.transactionDate, identifier: "TransactionDate", format: nil)
+            //FormViewConfiguration.normalCell("Location")
         ])
         
         if isExistingTransaction {
@@ -198,9 +210,9 @@ extension SaveTransactionViewController: FormViewDelegate {
         if identifier == "Friend" || identifier == "User" {
             
             var label = UILabel()
-            label.font = UIFont.systemFontOfSize(17)
+            label.font = UIFont.normalFont(17)
             label.textAlignment = .Center
-            label.textColor = shouldShowLightTheme() ? .blackColor() : .whiteColor()
+            label.textColor = .blackColor()
             
             label.setTranslatesAutoresizingMaskIntoConstraints(false)
             cell.contentView.addSubview(label)
@@ -232,9 +244,13 @@ extension SaveTransactionViewController: FormViewDelegate {
                 }
             }
             
-            //cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-            
             return cell
+        }
+        else if identifier == "Location" {
+            
+            cell.textLabel?.text = "Location"
+            cell.detailTextLabel?.text = "None"
+            cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
         }
         
         return UITableViewCell()
@@ -280,16 +296,16 @@ extension SaveTransactionViewController: FormViewDelegate {
                     
                     IOSession.sharedSession().deletedTransactionIds.append(String.emptyIfNull(transaction?.objectId))
                     
+                    self.isSaving = true
                     transaction?.deleteEventually()
+                    
+                    self.showDeletingOverlay()
                     
                     NSTimer.schedule(delay: 2.5) { timer in
                         
                         self.popAll()
                         self.delegate?.itemDidGetDeleted()
-                        self.navigationItem.leftBarButtonItem?.enabled = true // ^^
                     }
-                    
-                    //ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) (\(Formatter.formatCurrencyAsString(transaction!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                 }
             })
         }
@@ -304,13 +320,16 @@ extension SaveTransactionViewController: FormViewDelegate {
             let v = SelectUsersViewController(identifier: identifier, user: transaction.toUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
             navigationController?.pushViewController(v, animated: true)
         }
-        
-        if identifier == "User" {
+        else if identifier == "User" {
             
             let usersToChooseFrom = User.userListExcludingID(nil)
             
             let v = SelectUsersViewController(identifier: identifier, user: transaction.fromUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
             navigationController?.pushViewController(v, animated: true)
+        }
+        else if identifier == "Location" {
+            
+            selectPlace()
         }
     }
     
@@ -361,7 +380,7 @@ extension SaveTransactionViewController: UITableViewDelegate {
             }
             
             label.text = "- \(verb)\(s) -"
-            label.textColor = shouldShowLightTheme() ? .darkGrayColor() : .lightGrayColor()
+            label.textColor = .darkGrayColor()
             
             label.setTranslatesAutoresizingMaskIntoConstraints(false)
             view.addSubview(label)

@@ -14,38 +14,33 @@ import Parse
 import Bolts
 import ParseFacebookUtilsV4
 import KFSwiftImageLoader
+import GoogleMaps
 //import ParseCrashReporting
 
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
 
-let kViewBackgroundColor = kNavigationBarBarTintColor
+let kViewBackgroundColor = AccountColor.grayColor()
 let kViewBackgroundGradientTop =  AccountColor.blueColor()
 let kViewBackgroundGradientBottom =  AccountColor.greenColor()
 
 let kDarkColor = UIColor(hex: "252525")
 
 let kTableViewCellBackgroundColor = UIColor.blackColor().colorWithAlphaComponent(0.55)
-let kTableViewCellTextColor = UIColor.whiteColor()
-let kTableViewCellDetailTextColor = UIColor.whiteColor()
-let kTableViewCellSeperatorStyle = UITableViewCellSeparatorStyle.SingleLine
 let kTableViewCellHeight: CGFloat = 50
-let kTableViewCellTintColor = UIColor.whiteColor()
 
 let kTableViewBackgroundColor = UIColor.clearColor()
-let kTableViewSeparatorColor = UIColor.clearColor()
+let kTableViewSeparatorColor = UITableView().separatorColor
 
 let kNavigationBarPositiveActionColor = kNavigationBarTintColor
-let kNavigationBarTintColor = UIColor(hex: "E8DA8A") // AccountColor.greenColor() // UIColor(hex: "9043FF")  // UIColor.whiteColor() // UIColor.yellowColor() // UIColor(hex: "00AEE5")
-let kNavigationBarBarTintColor:UIColor =  UIColor(hex: "161616")
-let kNavigationBarTitleColor = UIColor.blackColor()
+let kNavigationBarTintColor = UIColor(hex: "00AEE5")
+let kNavigationBarBarTintColor:UIColor =  UIColor.whiteColor()
 let kNavigationBarStyle = UIBarStyle.Default
 
-let kFormDeleteButtonTextColor = AccountColor.negativeColor()
+let kFormDeleteButtonTextColor = AccountColor.redColor()
 
 let kTableViewMaxWidth:CGFloat = 570
 let kTableViewCellIpadCornerRadiusSize = CGSize(width: 5, height: 5)
 
-//let kDefaultSeperatorColor = UITableView().separatorColor
 let kAnimationDuration:NSTimeInterval = 0.5
 
 let kParseInstallationUserKey = "user"
@@ -81,12 +76,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
         SupportKit.initWithSettings(SKTSettings(appToken: "amtp9h7tc5dq2sby4q6yc5ke6"))
-        SupportKit.settings().conversationStatusBarStyle = UIStatusBarStyle.LightContent
         
-//        let URLCache = NSURLCache(memoryCapacity: 4 * 1024 * 1024, diskCapacity: 20 * 1024 * 1024, diskPath: nil)
-//        NSURLCache.setSharedURLCache(URLCache)
-        
-        //KFImageCacheManager.sharedInstance.requestCachePolicy = NSURLRequestCachePolicy.UseProtocolCachePolicy
+        GMSServices.provideAPIKey("AIzaSyB7bF8J5Oe5E87ovtdy7l1MRvpe3Rc1zkU")
         
         return true
     }
@@ -126,34 +117,48 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
         
         println(userInfo)
-        //NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterPushNotificationKey, object: userInfo, userInfo: userInfo)
+
+        if userInfo.indexForKey("iouEvent") != nil {
+            
+            if let value = userInfo["iouEvent"] as? String {
+                
+                if value == "ItemSaved" {
+
+                    HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfo["alert"] as! String, isAutoHide: true, onTouch: { () -> Void in
+
+                    })
+                    
+                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                }
+            }
+        }
     }
     
     func setupAppearances() {
                 
         UINavigationBar.appearance().tintColor = kNavigationBarTintColor
-        UINavigationBar.appearance().setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
+        //UINavigationBar.appearance().setBackgroundImage(UIImage.imageWithColor(UIColor.redColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
         UINavigationBar.appearance().shadowImage = kDefaultNavigationBarShadowImage
         UINavigationBar.appearance().barStyle = kNavigationBarStyle
-        UINavigationBar.appearance().titleTextAttributes = [NSForegroundColorAttributeName: UIColor.whiteColor()]
+        UINavigationBar.appearance().titleTextAttributes = [NSFontAttributeName : UIFont.boldFont(17)]
         
         UIToolbar.appearance().tintColor = kNavigationBarTintColor
-        UIToolbar.appearance().barStyle = UIBarStyle.Black
         
-        UITableViewCell.appearanceWhenContainedWithin([BaseViewController.self]).tintColor = kNavigationBarTintColor
-        UITableViewCell.appearanceWhenContainedWithin([BaseViewController.self]).backgroundColor = kDarkColor
-        UITableViewCell.appearanceWhenContainedWithin([BaseViewController.self]).textLabel?.textColor = .whiteColor()
-                
+        UITableViewCell.appearance().tintColor = kNavigationBarTintColor
+        
         UITabBar.appearance().tintColor = kNavigationBarTintColor
         
-        UITableView.appearance().backgroundColor = kNavigationBarBarTintColor
-        UITableView.appearance().separatorColor = kTableViewSeparatorColor
+        UITableView.appearance().backgroundColor = .clearColor()
         
-        UILabel.appearance().textColor = .whiteColor()
+        UITextField.appearance().tintColor = kNavigationBarTintColor
         
-        UITextField.appearance().keyboardAppearance = UIKeyboardAppearance.Dark
-        
-        UIActivityIndicatorView.appearance().color = .whiteColor()
+        for familyName in UIFont.familyNames() {
+            
+            for font in UIFont.fontNamesForFamilyName(familyName as! String) {
+                
+                println(font)
+            }
+        }
     }
     
     private func setWindowToLogin() {

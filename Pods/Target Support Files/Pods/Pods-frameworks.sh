@@ -49,6 +49,7 @@ code_sign() {
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework 'ABToolKit.framework'
+  install_framework 'AFDropdownNotification.framework'
   install_framework 'Alamofire.framework'
   install_framework 'Bolts.framework'
   install_framework 'FBSDKCoreKit.framework'
@@ -60,11 +61,14 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework 'ParseUI.framework'
   install_framework 'ReachabilitySwift.framework'
   install_framework 'SVPullToRefresh.framework'
+  install_framework 'SwiftOverlays.framework'
   install_framework 'SwiftyJSON.framework'
   install_framework 'SwiftyUserDefaults.framework'
+  install_framework 'TMCache.framework'
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework 'ABToolKit.framework'
+  install_framework 'AFDropdownNotification.framework'
   install_framework 'Alamofire.framework'
   install_framework 'Bolts.framework'
   install_framework 'FBSDKCoreKit.framework'
@@ -76,6 +80,8 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework 'ParseUI.framework'
   install_framework 'ReachabilitySwift.framework'
   install_framework 'SVPullToRefresh.framework'
+  install_framework 'SwiftOverlays.framework'
   install_framework 'SwiftyJSON.framework'
   install_framework 'SwiftyUserDefaults.framework'
+  install_framework 'TMCache.framework'
 fi

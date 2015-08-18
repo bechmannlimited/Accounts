@@ -15,5 +15,8 @@ pod 'SVPullToRefresh'
 pod 'SupportKit'
 pod 'ReachabilitySwift', git: 'https://github.com/ashleymills/Reachability.swift'
 pod 'KFSwiftImageLoader', '~> 1.2'
+pod 'GoogleMaps'
+pod 'TMCache'
+pod 'SwiftOverlays', '~> 0.14'
 
 use_frameworks!

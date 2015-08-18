@@ -24,7 +24,6 @@ class FriendInvitesViewController: ACBaseViewController {
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var invites:Array<Array<FriendRequest>> = []
     var delegate: FriendInvitesDelegate?
-    var noDataView = UILabel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,7 +40,7 @@ class FriendInvitesViewController: ACBaseViewController {
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "findFriends")
         
-        setupNoDataLabel(noDataView, text: "Tap plus to send someone a friend invitation")
+        setupNoDataLabel(noDataView, text: "Tap plus to send someone a friend invitation", originView: view)
         
        
     }

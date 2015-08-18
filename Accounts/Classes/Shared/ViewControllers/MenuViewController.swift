@@ -12,10 +12,9 @@ import SwiftyUserDefaults
 import SwiftyJSON
 import Parse
 
-private let kProfileSection = 1
-private let kCurrencySection = 1
+private let kProfileSection = 2
+private let kShareSection = 1
 private let kFeedbackSection = 0
-//private let kLogoutSection = 2
 
 private let kProfileIndexPath = NSIndexPath(forRow: 09999, inSection: kProfileSection)
 private let kLogoutIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
@@ -23,6 +22,7 @@ private let kLogoutIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection
 private let kCurrencyIndexPath = NSIndexPath(forRow: 999, inSection: 9999)
 
 private let kFeedbackIndexPath = NSIndexPath(forRow: 0, inSection: kFeedbackSection)
+private let kShareIndexPath = NSIndexPath(forRow: 0, inSection: kShareSection)
 
 //protocol MenuDelegate {
 //    
@@ -33,8 +33,9 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
-        [kLogoutIndexPath],
-        [kFeedbackIndexPath]
+        [kShareIndexPath],
+        [kFeedbackIndexPath],
+        [kLogoutIndexPath]
     ]
     
     //var delegate: MenuDelegate?
@@ -56,27 +57,10 @@ class MenuViewController: ACBaseViewController {
         title = "Settings"
     }
     
-    override func shouldShowLightTheme() -> Bool {
-        
-        return kDevice == .Pad
-    }
-    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
         tableView.reloadData()
-        //deselectSelectedCell(tableView)
-        
-        if shouldShowLightTheme() {
-            
-            setLightThemeForTableView(tableView)
-        }
-    }
-    
-    override func viewWillDisappear(animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        //delegate?.menuDidClose()
     }
 }
 
@@ -117,6 +101,10 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
          
             cell.textLabel?.text = "Contact support team"
             cell.detailTextLabel?.text = "feedback/questions"
+        }
+        else if indexPath == kShareIndexPath {
+            
+            cell.textLabel?.text = "Send app link to a friend"
         }
         
         return cell
@@ -178,6 +166,20 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             SupportKit.show()
             tableView.deselectRowAtIndexPath(indexPath, animated: true)
         }
+        else if indexPath == kShareIndexPath {
+            
+            let textToShare = "Download iou from the app store!"
+            
+            if let myWebsite = NSURL(string: "itms://itunes.apple.com/us/app/iou-shared-expenses/id1024589247?ls=1&mt=8")
+            {
+                let objectsToShare = [textToShare, myWebsite]
+                let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
+                
+                //New Excluded Activities Code
+                activityVC.excludedActivityTypes = [UIActivityTypeAirDrop, UIActivityTypeAddToReadingList]
+                self.presentViewController(activityVC, animated: true, completion: nil)
+            }
+        }
     }
     
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -188,17 +190,6 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         return ""
-    }
-    
-    func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
-        
-        if kDevice == .Pad {
-            
-            if let v = view as? UITableViewHeaderFooterView {
-                
-                v.textLabel.textColor = UIColor.darkGrayColor()
-            }
-        }
     }
 }
 

@@ -4,7 +4,13 @@ import ABToolKit
 
 private let kTitlePadding: CGFloat = 12
 
-class BouncyHeaderView: UIView{
+protocol BouncyHeaderViewDelegate{
+    
+    //func bouncyView(bouncyView: BouncyView, recommendedContentInsetForOriginTableView: UIEdgeInsets)
+    func imageViewImageDidLoad()
+}
+
+class BouncyHeaderView: UIView {
     
     var headerViewConstraints = Dictionary<String, NSLayoutConstraint>()
     var headerViewHeight: CGFloat = 150
@@ -19,7 +25,7 @@ class BouncyHeaderView: UIView{
     var titleLabel = UILabel()
     var titleLabelHeight:CGFloat = 0
     
-    var delegate: BouncyViewDelegate?
+    var delegate: BouncyHeaderViewDelegate?
     
     func setupHeaderWithOriginView(originView: UIView, originTableView: UITableView){
         
@@ -39,7 +45,7 @@ class BouncyHeaderView: UIView{
         
         originTableView.backgroundColor = UIColor.clearColor()
         
-        backgroundColor = kNavigationBarBarTintColor
+        backgroundColor = UIColor.blackColor()
     }
     
     func setupConstraints() {
@@ -122,10 +128,13 @@ class BouncyHeaderView: UIView{
         heroImageView.loadImageFromURLString(url, placeholderImage: nil) {
             (finished, error) in
             
-            println("heroImage: \(error), \(finished)")
             UIView.animateWithDuration(0.35, animations: { () -> Void in
                 
                 self.heroImageView.layer.opacity = 1
+                
+            }, completion: { (finished) -> Void in
+                
+                self.delegate?.imageViewImageDidLoad()
             })
         }
     }
@@ -143,7 +152,7 @@ class BouncyHeaderView: UIView{
         titleLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
         self.addSubview(titleLabel)
         
-        let font = UIFont(name: "AppleSDGothicNeo-Bold", size: 25)!
+        let font = UIFont(name: "AppleSDGothicNeo-Bold", size: 25)! //"AppleSDGothicNeo-Bold"
         titleLabelHeight = UILabel.heightForLabel(title, font: font, width: originView.frame.width - (kTitlePadding * 2))
         //println("\(titleLabelHeight) - \(self.bounds.width - (kTitlePadding * 2))")
         titleLabel.addHeightConstraint(relation: .Equal, constant: titleLabelHeight)

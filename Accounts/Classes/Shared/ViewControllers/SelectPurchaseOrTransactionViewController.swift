@@ -17,7 +17,7 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     var data = [
         (identifier: "Purchase", textLabelText: "Split a bill"),
         (identifier: "Transaction", textLabelText: "Add an i.o.u"),
-        (identifier: "TransactionPayment", textLabelText: "Add a payback")
+        (identifier: "TransactionPayment", textLabelText: "Add a payment")
     ]
 
     var contextualFriend: User?
@@ -31,15 +31,6 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
         tableView.allowsSelectionDuringEditing = true
         
         addCloseButton()
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        if shouldShowLightTheme() {
-            
-            setLightThemeForTableView(tableView)
-        }
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -58,11 +49,6 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
         super.setupTableView(tableView, delegate: delegate, dataSource: dataSource)
         
         tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-    }
-    
-    override func shouldShowLightTheme() -> Bool {
-        
-        return kDevice == .Pad
     }
 }
 

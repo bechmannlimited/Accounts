@@ -66,6 +66,7 @@ class SavePurchaseViewController: SaveItemViewController {
         
     func save() {
 
+        isSaving = true
         updateUIForSavingOrDeleting()
         
         var copyOfOriginalForIfSaveFails = existingPurchase?.copyWithUsefulValues()
@@ -77,6 +78,8 @@ class SavePurchaseViewController: SaveItemViewController {
             purchase?.setUsefulValuesFromCopy(self.purchase)
         }
         
+        showSavingOverlay()
+        
         purchase?.savePurchase { (success) -> () in
             
             if success {
@@ -86,7 +89,6 @@ class SavePurchaseViewController: SaveItemViewController {
                 
                 NSTimer.schedule(delay: 2){ timer in
                    
-                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
                     self.delegate?.itemDidChange()
                     self.delegate?.purchaseDidChange(purchase!)
                     self.popAll()
@@ -117,7 +119,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         var sections = Array<Array<FormViewConfiguration>>()
         sections.append([
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(purchase.title), identifier: "Title"),
-            FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(purchase.localeAmount), identifier: "Amount", locale: locale),
+            FormViewConfiguration.textFieldCurrency("Bill total", value: Formatter.formatCurrencyAsString(purchase.localeAmount), identifier: "Amount", locale: locale),
             FormViewConfiguration.normalCell("User"),
             
         ])
@@ -131,8 +133,9 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             if transaction.toUser?.objectId == purchase.user.objectId {
                 
-                var verb = User.isCurrentUser(transaction.toUser) ? "'re part cost" : "'s part cost"
-                var textLabelText = "\(transaction.toUser!.appropriateShortDisplayName())\(verb)"
+                var ex = User.isCurrentUser(transaction.toUser) ? "'re" : "'s"
+                var verb = "\(ex) part cost"
+                var textLabelText = "(\(transaction.toUser!.appropriateShortDisplayName())\(verb))"
 
                 
                 transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
@@ -243,6 +246,8 @@ extension SavePurchaseViewController: FormViewDelegate {
                     self.updateUIForSavingOrDeleting()
                     
                     let purchase = self.purchaseObjectId != nil ? self.existingPurchase : self.purchase
+                    
+                    self.showDeletingOverlay()
                     
                     purchase?.deleteInBackgroundWithBlock { (success, error) -> Void in
                         

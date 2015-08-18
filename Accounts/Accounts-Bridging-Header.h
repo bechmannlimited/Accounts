@@ -18,3 +18,5 @@
 #import <SupportKit/SupportKit.h>
 
 #import "UIAppearance+Swift.h"
+
+#import "HDNotificationView.h"

@@ -30,13 +30,19 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>16</string>
+	<string>19</string>
 	<key>FacebookAppID</key>
 	<string>1430365533960104</string>
 	<key>FacebookDisplayName</key>
 	<string>iou</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string></string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>/Assets/Fonts/font_Pronw4.ttc</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

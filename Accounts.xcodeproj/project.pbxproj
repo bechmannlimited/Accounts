@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B62BCCC28F4EFF1A03B754E2 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2FE940505535F01C5055CC8A /* Pods.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		E407B9711B83B5F0001E0183 /* HDNotificationView.m in Sources */ = {isa = PBXBuildFile; fileRef = E407B9701B83B5F0001E0183 /* HDNotificationView.m */; };
 		E40958111B72D32C00B5289A /* UIAppearance+Swift.m in Sources */ = {isa = PBXBuildFile; fileRef = E40958101B72D32C00B5289A /* UIAppearance+Swift.m */; };
 		E411FE211B6E784F00C29D1F /* FriendTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E411FE201B6E784F00C29D1F /* FriendTableViewCell.swift */; };
 		E412F9171B7CC3FC00A30F60 /* ABImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E412F9161B7CC3FC00A30F60 /* ABImageLoader.swift */; };
@@ -49,6 +50,7 @@
 		E442C3501B52BE030061CAE6 /* ParseKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C34F1B52BE030061CAE6 /* ParseKeys.swift */; };
 		E442C3521B52C3150061CAE6 /* FriendRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C3511B52C3150061CAE6 /* FriendRequest.swift */; };
 		E44881F51B7D145900043237 /* IOSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44881F41B7D145900043237 /* IOSession.swift */; };
+		E45F0B4A1B7F3DD8004D59E2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45F0B491B7F3DD8004D59E2 /* Constants.swift */; };
 		E46BCE551B66D4E800CA09BF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE541B66D4E800CA09BF /* AudioToolbox.framework */; };
 		E46BCE571B66D4F100CA09BF /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE561B66D4F100CA09BF /* CFNetwork.framework */; };
 		E46BCE591B66D4F900CA09BF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE581B66D4F900CA09BF /* CoreGraphics.framework */; };
@@ -68,7 +70,9 @@
 		E47FD8191B5FF042004B4C56 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FD8181B5FF042004B4C56 /* Task.swift */; };
 		E48C52381B6970860056A7E3 /* BouncyHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */; };
 		E48C52681B6978CC0056A7E3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48C52671B6978CC0056A7E3 /* ViewController.swift */; };
+		E49BFC8E1B7F8DCA00142AFD /* TransactionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */; };
 		E4E7CAD91B66D24E0027833E /* StartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E7CAD81B66D24E0027833E /* StartViewController.swift */; };
+		E4EBCF041B8275EF00690A60 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EBCF031B8275EF00690A60 /* Font.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +89,8 @@
 		0B90F6D66B71607A5F641724 /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		2FE940505535F01C5055CC8A /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4A5AB94CFB6E6C418E393CB0 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		E407B96F1B83B5F0001E0183 /* HDNotificationView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HDNotificationView.h; path = External/HDNotificationView.h; sourceTree = "<group>"; };
+		E407B9701B83B5F0001E0183 /* HDNotificationView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = HDNotificationView.m; path = External/HDNotificationView.m; sourceTree = "<group>"; };
 		E409580F1B72D32C00B5289A /* UIAppearance+Swift.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIAppearance+Swift.h"; path = "../UIAppearance+Swift.h"; sourceTree = "<group>"; };
 		E40958101B72D32C00B5289A /* UIAppearance+Swift.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIAppearance+Swift.m"; path = "../UIAppearance+Swift.m"; sourceTree = "<group>"; };
 		E411FE201B6E784F00C29D1F /* FriendTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendTableViewCell.swift; sourceTree = "<group>"; };
@@ -131,6 +137,7 @@
 		E442C34F1B52BE030061CAE6 /* ParseKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ParseKeys.swift; path = ../ParseKeys.swift; sourceTree = "<group>"; };
 		E442C3511B52C3150061CAE6 /* FriendRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendRequest.swift; sourceTree = "<group>"; };
 		E44881F41B7D145900043237 /* IOSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IOSession.swift; sourceTree = "<group>"; };
+		E45F0B491B7F3DD8004D59E2 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E46BCE541B66D4E800CA09BF /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E46BCE561B66D4F100CA09BF /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		E46BCE581B66D4F900CA09BF /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -151,8 +158,10 @@
 		E47FD8181B5FF042004B4C56 /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Task.swift; path = ../Task.swift; sourceTree = "<group>"; };
 		E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BouncyHeaderView.swift; sourceTree = "<group>"; };
 		E48C52671B6978CC0056A7E3 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ViewController.swift; path = ../ViewController.swift; sourceTree = "<group>"; };
+		E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionTableViewCell.swift; sourceTree = "<group>"; };
 		E4C2A43B1B68052000730BAB /* ABToolKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ABToolKit.framework; path = "Pods/../build/Debug-iphoneos/Pods/ABToolKit.framework"; sourceTree = "<group>"; };
 		E4E7CAD81B66D24E0027833E /* StartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartViewController.swift; sourceTree = "<group>"; };
+		E4EBCF031B8275EF00690A60 /* Font.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +227,22 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		E407B96B1B83B4DB001E0183 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		E407B96E1B83B5BA001E0183 /* External */ = {
+			isa = PBXGroup;
+			children = (
+				E407B96F1B83B5F0001E0183 /* HDNotificationView.h */,
+				E407B9701B83B5F0001E0183 /* HDNotificationView.m */,
+			);
+			name = External;
+			sourceTree = "<group>";
+		};
 		E442C2BF1B510E610061CAE6 = {
 			isa = PBXGroup;
 			children = (
@@ -280,6 +305,7 @@
 		E442C2ED1B510E940061CAE6 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				E407B96E1B83B5BA001E0183 /* External */,
 				E442C2EE1B510E940061CAE6 /* Friends */,
 				E442C2F61B510E940061CAE6 /* Login */,
 				E442C2FB1B510E940061CAE6 /* Purchases */,
@@ -422,8 +448,10 @@
 		E442C3071B510E940061CAE6 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				E407B96B1B83B4DB001E0183 /* Views */,
 				E46A306E1B7C8A760056EF8F /* Extensions */,
 				E442C3091B510E940061CAE6 /* AppDelegate.swift */,
+				E45F0B491B7F3DD8004D59E2 /* Constants.swift */,
 				E442C30C1B510E940061CAE6 /* Models */,
 				E442C30F1B510E940061CAE6 /* UIView+Extension.swift */,
 				E442C3101B510E940061CAE6 /* ViewControllers */,
@@ -434,20 +462,21 @@
 		E442C30C1B510E940061CAE6 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				E442C34F1B52BE030061CAE6 /* ParseKeys.swift */,
-				E47FD80D1B533B2E004B4C56 /* ParseUtilities.swift */,
-				E47FD8131B5D7EDE004B4C56 /* LocationManager.swift */,
-				E47FD8181B5FF042004B4C56 /* Task.swift */,
-				E48C52671B6978CC0056A7E3 /* ViewController.swift */,
-				E409580F1B72D32C00B5289A /* UIAppearance+Swift.h */,
-				E40958101B72D32C00B5289A /* UIAppearance+Swift.m */,
+				E412F9161B7CC3FC00A30F60 /* ABImageLoader.swift */,
 				E442C3081B510E940061CAE6 /* AccountColor.swift */,
 				E442C30A1B510E940061CAE6 /* AppTools.swift */,
 				E442C30B1B510E940061CAE6 /* Formatter.swift */,
 				E442C30D1B510E940061CAE6 /* Friend.swift */,
-				E442C30E1B510E940061CAE6 /* RelationStatus.swift */,
-				E412F9161B7CC3FC00A30F60 /* ABImageLoader.swift */,
 				E44881F41B7D145900043237 /* IOSession.swift */,
+				E47FD8131B5D7EDE004B4C56 /* LocationManager.swift */,
+				E442C34F1B52BE030061CAE6 /* ParseKeys.swift */,
+				E47FD80D1B533B2E004B4C56 /* ParseUtilities.swift */,
+				E442C30E1B510E940061CAE6 /* RelationStatus.swift */,
+				E47FD8181B5FF042004B4C56 /* Task.swift */,
+				E409580F1B72D32C00B5289A /* UIAppearance+Swift.h */,
+				E40958101B72D32C00B5289A /* UIAppearance+Swift.m */,
+				E48C52671B6978CC0056A7E3 /* ViewController.swift */,
+				E4EBCF031B8275EF00690A60 /* Font.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -498,6 +527,7 @@
 			isa = PBXGroup;
 			children = (
 				E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */,
+				E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -715,6 +745,7 @@
 				E442C3281B510E940061CAE6 /* FindFriendsViewController.swift in Sources */,
 				E47FD80E1B533B2E004B4C56 /* ParseUtilities.swift in Sources */,
 				E442C3441B510E940061CAE6 /* SaveUserViewController.swift in Sources */,
+				E45F0B4A1B7F3DD8004D59E2 /* Constants.swift in Sources */,
 				E48C52381B6970860056A7E3 /* BouncyHeaderView.swift in Sources */,
 				E442C32A1B510E940061CAE6 /* FriendsViewController.swift in Sources */,
 				E442C33A1B510E940061CAE6 /* ACFormViewController.swift in Sources */,
@@ -738,8 +769,10 @@
 				E442C3311B510E940061CAE6 /* SelectCurrencyViewController.swift in Sources */,
 				E442C3391B510E940061CAE6 /* ACBaseViewController.swift in Sources */,
 				E442C3431B510E940061CAE6 /* User.swift in Sources */,
+				E4EBCF041B8275EF00690A60 /* Font.swift in Sources */,
 				E442C3291B510E940061CAE6 /* FriendInvitesViewController.swift in Sources */,
 				E442C3351B510E940061CAE6 /* Formatter.swift in Sources */,
+				E49BFC8E1B7F8DCA00142AFD /* TransactionTableViewCell.swift in Sources */,
 				E442C32E1B510E940061CAE6 /* SavePurchaseViewController.swift in Sources */,
 				E411FE211B6E784F00C29D1F /* FriendTableViewCell.swift in Sources */,
 				E442C33F1B510E940061CAE6 /* VerifyUserViewController.swift in Sources */,
@@ -749,6 +782,7 @@
 				E40958111B72D32C00B5289A /* UIAppearance+Swift.m in Sources */,
 				E47FD8121B5700AF004B4C56 /* Extensions.swift in Sources */,
 				E442C32B1B510E940061CAE6 /* SelectUsersViewController.swift in Sources */,
+				E407B9711B83B5F0001E0183 /* HDNotificationView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

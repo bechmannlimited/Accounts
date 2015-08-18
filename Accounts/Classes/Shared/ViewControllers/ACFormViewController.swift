@@ -26,11 +26,6 @@ class ACFormViewController: FormViewController {
         
         setupView()
         shouldAdjustTableViewInsetsForKeyboard = kDevice != .Pad
-        
-        if shouldShowLightTheme() {
-            
-            showLightTheme()
-        }
     }
     
     func didReceivePushNotification(notification: NSNotification) {
@@ -104,7 +99,7 @@ extension ACFormViewController: UITableViewDelegate {
             
             if cell.config.formCellType == .DatePicker {
                 
-                items.append(UIBarButtonItem(title: "Today", style: .Plain, target: cell, action: "setDateToToday"))
+                items.append(UIBarButtonItem(title: "Now", style: .Plain, target: cell, action: "setDateToToday"))
             }
             
             items.append(UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil))
@@ -121,13 +116,6 @@ extension ACFormViewController: UITableViewDelegate {
     
     override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
         super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
-        
-        setTableViewCellAppearanceForBackgroundGradient(cell)
-        
-        if shouldShowLightTheme() {
-            
-            setupCellForLightTheme(cell)
-        }
         
         if let cell = cell as? FormViewTextFieldCell {
 

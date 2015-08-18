@@ -14,6 +14,7 @@ extension BaseViewController {
     func setupView() {
         
         view.backgroundColor = kViewBackgroundColor
+        navigationController?.view.backgroundColor = .whiteColor()
         setNavigationControllerToDefault()
     }
     
@@ -27,74 +28,12 @@ extension BaseViewController {
         dismissViewControllerFromCurrentContextAnimated(true)
     }
     
-    func setBackgroundGradient() -> CAGradientLayer {
-        
-        var gradient: CAGradientLayer = CAGradientLayer()
-        gradient.frame = view.bounds
-        gradient.colors = [kViewBackgroundGradientTop.CGColor, kViewBackgroundGradientBottom.CGColor]
-        //view.layer.insertSublayer(gradient, atIndex: 0)
-        
-        return gradient
-    }
-    
-    func setTableViewAppearanceForBackgroundGradient(tableView: UITableView) {
-        
-        //tableView.separatorStyle = kTableViewCellSeperatorStyle
-        //tableView.separatorColor = kTableViewCellSeperatorColor
-//        tableView.backgroundColor = kTableViewBackgroundColor
-    }
-    
-    func setLightThemeForTableView(tableView:UITableView) {
-        
-        tableView.backgroundColor = UIColor.clearColor()
-        tableView.separatorColor = UIColor.lightGrayColor()
-    }
-    
-    func showLightTheme() {
-        
-        //navigationController?.popoverPresentationController?.backgroundColor = UIColor.whiteColor()
-        navigationController?.view.backgroundColor = UIColor.groupTableViewBackgroundColor()
-        navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(UIColor.whiteColor().colorWithAlphaComponent(0.95), size: CGSize(width: 10, height: 10)), forBarMetrics: UIBarMetrics.Default)
-        navigationController?.navigationBar.tintColor = AccountColor.greenColor()
-        view.backgroundColor = UIColor.groupTableViewBackgroundColor()
-        navigationController?.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor.blackColor()]
-    }
-    
     func setNavigationControllerToDefault(){
         
         navigationController?.navigationBar.tintColor = kNavigationBarTintColor
         navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(kNavigationBarBarTintColor, size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
         navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
-        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
-    }
-    
-    func setTableViewCellAppearanceForBackgroundGradient(cell:UITableViewCell) {
-    
-        cell.textLabel?.textColor = .whiteColor()
-        
-        if let cell = cell as? FormViewTextFieldCell {
-            
-            cell.label.textColor = .whiteColor()
-        }
-        else if let cell = cell as? FriendTableViewCell {
-            
-            cell.friendNameLabel.textColor = .whiteColor()
-        }
-    }
-    
-    func setupCellForLightTheme(cell: UITableViewCell) {
-        
-        cell.backgroundColor = UIColor.whiteColor()
-        cell.textLabel?.textColor = UIColor.blackColor()
-        cell.detailTextLabel?.textColor = UIColor.lightGrayColor()
-        
-        if let cell = cell as? FormViewTextFieldCell {
-            
-            cell.label.textColor = UIColor.blackColor()
-            cell.textField.textColor = UIColor.lightGrayColor()
-        }
-        
-        cell.tintColor = AccountColor.blueColor()
+        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.Default, animated: true)
     }
     
     func isInsidePopover() -> Bool {
@@ -102,23 +41,23 @@ extension BaseViewController {
         return view.frame != UIScreen.mainScreen().bounds
     }
     
-    func shouldShowLightTheme() -> Bool {
-        
-        return false
-    }
-    
-    func setupNoDataLabel(noDataView:UILabel, text: String) {
+    func setupNoDataLabel(noDataView:UILabel, text: String, originView: UIView) {
         
         noDataView.text = text
-        noDataView.font = UIFont(name: "HelveticaNeue-Light", size: 30)
+        noDataView.font = UIFont.lightFont(30) //HelveticaNeue-Light
         noDataView.textColor = UIColor.lightGrayColor()
         noDataView.lineBreakMode = NSLineBreakMode.ByWordWrapping
         noDataView.numberOfLines = 0
         noDataView.textAlignment = NSTextAlignment.Center
         
         noDataView.setTranslatesAutoresizingMaskIntoConstraints(false)
-        view.addSubview(noDataView)
-        noDataView.fillSuperView(UIEdgeInsets(top: 40, left: 40, bottom: -40, right: -40))
+        originView.addSubview(noDataView)
+        
+        noDataView.addHeightConstraint(relation: .Equal, constant: 400)
+        noDataView.addWidthConstraint(relation: .Equal, constant: 300)
+        noDataView.addCenterXConstraint(toView: originView)
+        noDataView.addTopConstraint(toView: originView, relation: .Equal, constant: 10)
+        
         noDataView.layer.opacity = 0
     }
 }
@@ -149,6 +88,26 @@ extension BaseViewController: UITableViewDelegate {
                 
                 cell.roundCorners(UIRectCorner.AllCorners, cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
             }
+        }
+        
+        if let cell = cell as? FormViewTextFieldCell {
+            
+            cell.label.font = UIFont.normalFont(cell.label.font.pointSize)
+            cell.textField.font = UIFont.lightFont(cell.textField.font.pointSize)
+        }
+        else if let cell = cell as? FriendTableViewCell {
+            
+            cell.friendNameLabel.font = UIFont.normalFont(cell.friendNameLabel.font.pointSize)
+            cell.amountOwedLabel.font =  UIFont.normalFont(cell.amountOwedLabel.font.pointSize)
+        }
+    }
+    
+    public func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        
+        if let view = view as? UITableViewHeaderFooterView {
+
+            view.textLabel.font = UIFont.lightFont(view.textLabel.font.pointSize)
+            view.contentView.backgroundColor = kViewBackgroundColor
         }
     }
 }

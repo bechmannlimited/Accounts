@@ -87,7 +87,11 @@ class Purchase: PFObject {
             
             if transaction.fromUser != transaction.toUser{
                 
-                transaction.saveEventually()
+                transaction.saveEventually({ (success, error) -> Void in
+                    
+                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                })
+
                 completion(success:true)
             }
         }

@@ -12,6 +12,12 @@
 #define COCOAPODS_VERSION_MINOR_ABToolKit 1
 #define COCOAPODS_VERSION_PATCH_ABToolKit 0
 
+// AFDropdownNotification
+#define COCOAPODS_POD_AVAILABLE_AFDropdownNotification
+#define COCOAPODS_VERSION_MAJOR_AFDropdownNotification 1
+#define COCOAPODS_VERSION_MINOR_AFDropdownNotification 1
+#define COCOAPODS_VERSION_PATCH_AFDropdownNotification 0
+
 // Alamofire
 #define COCOAPODS_POD_AVAILABLE_Alamofire
 #define COCOAPODS_VERSION_MAJOR_Alamofire 1
@@ -66,6 +72,12 @@
 #define COCOAPODS_VERSION_MINOR_FBSDKShareKit 1
 #define COCOAPODS_VERSION_PATCH_FBSDKShareKit 0
 
+// GoogleMaps
+#define COCOAPODS_POD_AVAILABLE_GoogleMaps
+#define COCOAPODS_VERSION_MAJOR_GoogleMaps 1
+#define COCOAPODS_VERSION_MINOR_GoogleMaps 10
+#define COCOAPODS_VERSION_PATCH_GoogleMaps 1
+
 // KFSwiftImageLoader
 #define COCOAPODS_POD_AVAILABLE_KFSwiftImageLoader
 #define COCOAPODS_VERSION_MAJOR_KFSwiftImageLoader 1
@@ -110,6 +122,12 @@
 #define COCOAPODS_VERSION_MINOR_SupportKit 9
 #define COCOAPODS_VERSION_PATCH_SupportKit 0
 
+// SwiftOverlays
+#define COCOAPODS_POD_AVAILABLE_SwiftOverlays
+#define COCOAPODS_VERSION_MAJOR_SwiftOverlays 0
+#define COCOAPODS_VERSION_MINOR_SwiftOverlays 14
+#define COCOAPODS_VERSION_PATCH_SwiftOverlays 0
+
 // SwiftyJSON
 #define COCOAPODS_POD_AVAILABLE_SwiftyJSON
 #define COCOAPODS_VERSION_MAJOR_SwiftyJSON 2
@@ -121,4 +139,10 @@
 #define COCOAPODS_VERSION_MAJOR_SwiftyUserDefaults 1
 #define COCOAPODS_VERSION_MINOR_SwiftyUserDefaults 2
 #define COCOAPODS_VERSION_PATCH_SwiftyUserDefaults 0
+
+// TMCache
+#define COCOAPODS_POD_AVAILABLE_TMCache
+#define COCOAPODS_VERSION_MAJOR_TMCache 2
+#define COCOAPODS_VERSION_MINOR_TMCache 1
+#define COCOAPODS_VERSION_PATCH_TMCache 0
 

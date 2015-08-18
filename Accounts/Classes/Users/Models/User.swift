@@ -240,6 +240,7 @@ class User: PFUser {
         }
         else {
             
+            completion(completedRemoteRequest: false)
             execRemoteQuery()
         }
 
