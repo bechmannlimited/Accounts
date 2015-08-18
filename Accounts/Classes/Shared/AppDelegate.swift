@@ -15,6 +15,7 @@ import Bolts
 import ParseFacebookUtilsV4
 import KFSwiftImageLoader
 import GoogleMaps
+import SwiftyJSON
 //import ParseCrashReporting
 
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
@@ -124,9 +125,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 
                 if value == "ItemSaved" {
 
-                    HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfo["alert"] as! String, isAutoHide: true, onTouch: { () -> Void in
-
-                    })
+                    if let currentUserId = userInfo["currentUserId"] as? String {
+                        
+                        println("\(User.currentUser()?.objectId) - \(currentUserId)")
+                        
+                        if User.currentUser()?.objectId != currentUserId {
+                            
+                            if let message = userInfo["message"] as? String {
+                                
+                                HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: message, isAutoHide: true, onTouch: { () -> Void in
+                                    
+                                })
+                            }
+                        }
+                    }
                     
                     NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
                 }
