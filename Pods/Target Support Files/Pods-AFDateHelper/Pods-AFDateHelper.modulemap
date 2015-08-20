@@ -1,0 +1,6 @@
+framework module AFDateHelper {
+  umbrella header "Pods-AFDateHelper-umbrella.h"
+
+  export *
+  module * { export * }
+}

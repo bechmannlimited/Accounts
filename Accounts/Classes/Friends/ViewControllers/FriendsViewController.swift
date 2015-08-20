@@ -13,7 +13,7 @@ import SwiftyJSON
 
 private let kPlusImage = AppTools.iconAssetNamed("746-plus-circle-selected.png")
 private let kMinusImage = AppTools.iconAssetNamed("34-circle.minus.png")
-private let kMenuIcon = AppTools.iconAssetNamed("740-gear-toolbar-selected.png")
+private let kMenuIcon = AppTools.iconAssetNamed("740-gear-toolbar")
 
 private let kPopoverContentSize = CGSize(width: 320, height: 360)
 

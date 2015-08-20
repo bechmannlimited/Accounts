@@ -9,7 +9,7 @@
 import UIKit
 import ABToolKit
 
-//private let kPurchaseImage = AppTools.iconAssetNamed("1007-price-tag-toolbar.png")
+private let kPurchaseImage = AppTools.iconAssetNamed("1007-price-tag-toolbar.png")
 //private let kTransactionImage =AppTools.iconAssetNamed("922-suitcase-toolbar.png")
 private let kPaymentImage = AppTools.iconAssetNamed("826-money-1-toolbar")
 private let kIouImage = AppTools.iconAssetNamed("922-suitcase-toolbar.png")
@@ -35,17 +35,13 @@ class TransactionTableViewCell: UITableViewCell {
         self.transaction = transaction
         
         var amount = transaction.localeAmount
-        
         let dateString:String = transaction.transactionDate.toString(DateFormat.Date.rawValue)
-        
         let tintColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.negativeColor() : AccountColor.positiveColor()
-        
-        detailTextLabel?.textColor = tintColor
-        
         let amountText = Formatter.formatCurrencyAsString(abs(amount))
-        
         var iouText = ""
         
+        detailTextLabel?.textColor = tintColor
+
         if transaction.type == TransactionType.payment {
             
             imageView?.image = kPaymentImage
@@ -57,6 +53,11 @@ class TransactionTableViewCell: UITableViewCell {
             iouText = transaction.fromUser == User.currentUser() ? "\(transaction.toUser!.firstName) owes you \(amountText)" : "You owe \(amountText)"
         }
         
+        if transaction.purchaseTransactionLinkUUID != nil {
+            
+            imageView?.image = kPurchaseImage
+        }
+        
         imageView?.tintWithColor(tintColor)
         textLabel?.text = "\(transaction.title!)"
         detailTextLabel?.text = iouText
@@ -64,7 +65,6 @@ class TransactionTableViewCell: UITableViewCell {
         
         dateLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
         dateLabel.font = UIFont.lightFont(14)
-        //dateLabel.font = UIFont.systemFontOfSize(14)
         dateLabel.textAlignment = .Right
         dateLabel.textColor = UIColor.grayColor()
         dateLabel.text = transaction.transactionDate.readableFormattedStringForDateRange()

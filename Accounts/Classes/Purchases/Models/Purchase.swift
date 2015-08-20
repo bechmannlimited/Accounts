@@ -14,18 +14,13 @@ import Parse
 
 class Purchase: PFObject {
 
-    @NSManaged var amount: Double
-    //@NSManaged var purchaseDescription: String?
     @NSManaged var title: String?
     @NSManaged var user: User
     @NSManaged var purchasedDate:NSDate?
-    //@NSManaged var linkUUID: String?
+    @NSManaged var purchaseTransactionLinkUUID: String?
     
-    var transactions: Array<Transaction> = []
-    //var friends: [User] = []
-    //var billSplitDictionary = Dictionary<User, Double>()
-    
-    var previousTransactions = Array<Transaction>()
+    var amount: Double = 0
+    var transactions: Array<Transaction> = []    
     
     class func withDefaultValues() -> Purchase{
         
@@ -79,7 +74,15 @@ class Purchase: PFObject {
             return
         }
         
-        //var linkUUID = NSUUID().UUIDString
+        if purchaseTransactionLinkUUID == nil {
+            
+            purchaseTransactionLinkUUID = NSUUID().UUIDString
+        }
+
+        saveEventually({ (success, error) -> Void in
+            
+            NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+        })
         
         for transaction in transactions {
             
@@ -87,8 +90,7 @@ class Purchase: PFObject {
             transaction.fromUser = user
             transaction.title = title
             transaction.purchase = self
-            
-            //SET GUID SAME AS PURCHASE
+            transaction.purchaseTransactionLinkUUID = purchaseTransactionLinkUUID
             
             if transaction.fromUser != transaction.toUser{
                 

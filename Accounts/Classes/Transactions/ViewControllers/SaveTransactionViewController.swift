@@ -28,7 +28,7 @@ class SaveTransactionViewController: SaveItemViewController {
         shouldLoadFormOnLoad = false
         super.viewDidLoad()
 
-        allowEditing = true // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
+        allowEditing = transaction.purchaseTransactionLinkUUID == nil // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
         
         showOrHideSaveButton()
         reloadForm()
@@ -45,7 +45,6 @@ class SaveTransactionViewController: SaveItemViewController {
             
             title = "i.o.u"
         }
-        
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
         
@@ -185,7 +184,6 @@ extension SaveTransactionViewController: FormViewDelegate {
             ])
         }
 
-        
         sections.append([
             FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.localeAmount), identifier: "Amount", locale: locale),
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
@@ -193,7 +191,7 @@ extension SaveTransactionViewController: FormViewDelegate {
             //FormViewConfiguration.normalCell("Location")
         ])
         
-        if isExistingTransaction {
+        if isExistingTransaction && allowEditing {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
@@ -313,23 +311,30 @@ extension SaveTransactionViewController: FormViewDelegate {
     
     func formViewDidSelectRow(identifier: String) {
         
-        if identifier == "Friend" {
-
-            let usersToChooseFrom = User.userListExcludingID(nil) // User.userListExcludingID(transaction.fromUser?.objectId)
+        if allowEditing {
             
-            let v = SelectUsersViewController(identifier: identifier, user: transaction.toUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
-            navigationController?.pushViewController(v, animated: true)
+            if identifier == "Friend" {
+                
+                let usersToChooseFrom = User.userListExcludingID(nil) // User.userListExcludingID(transaction.fromUser?.objectId)
+                
+                let v = SelectUsersViewController(identifier: identifier, user: transaction.toUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+                navigationController?.pushViewController(v, animated: true)
+            }
+            else if identifier == "User" {
+                
+                let usersToChooseFrom = User.userListExcludingID(nil)
+                
+                let v = SelectUsersViewController(identifier: identifier, user: transaction.fromUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+                navigationController?.pushViewController(v, animated: true)
+            }
+            else if identifier == "Location" {
+                
+                selectPlace()
+            }
         }
-        else if identifier == "User" {
+        else {
             
-            let usersToChooseFrom = User.userListExcludingID(nil)
-            
-            let v = SelectUsersViewController(identifier: identifier, user: transaction.fromUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
-            navigationController?.pushViewController(v, animated: true)
-        }
-        else if identifier == "Location" {
-            
-            selectPlace()
+            deselectSelectedCell(tableView)
         }
     }
     
@@ -394,18 +399,22 @@ extension SaveTransactionViewController: UITableViewDelegate {
     
     func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         
-        if section == numberOfSectionsInTableView(tableView) - 1 {
+        if !isExistingTransaction {
             
-            if transaction.type == TransactionType.iou {
+            if section == numberOfSectionsInTableView(tableView) - 1 {
                 
-                return "Use this form to log when you owe one of your friends some money, or if they owe you."
+                if transaction.type == TransactionType.iou {
+                    
+                    return "Use this form to log when you owe one of your friends some money, or if they owe you."
+                }
+                else if transaction.type == TransactionType.payment {
+                    
+                    return "Use this form to log when you paid or got paid some money by one of your friends."
+                }
             }
-            else if transaction.type == TransactionType.payment {
-                
-                return "Use this form to log when you paid or got paid some money by one of your friends."
-            }
+            
         }
-        
+
         return nil
     }
 }

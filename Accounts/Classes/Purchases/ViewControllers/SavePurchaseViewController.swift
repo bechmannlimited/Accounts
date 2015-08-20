@@ -117,9 +117,10 @@ extension SavePurchaseViewController: FormViewDelegate {
         let locale: NSLocale? = Settings.getCurrencyLocaleWithIdentifier().locale
         
         var sections = Array<Array<FormViewConfiguration>>()
+
         sections.append([
-            FormViewConfiguration.textField("Title", value: String.emptyIfNull(purchase.title), identifier: "Title"),
             FormViewConfiguration.textFieldCurrency("Bill total", value: Formatter.formatCurrencyAsString(purchase.localeAmount), identifier: "Amount", locale: locale),
+            FormViewConfiguration.textField("Title", value: String.emptyIfNull(purchase.title), identifier: "Title"),
             FormViewConfiguration.normalCell("User"),
             
         ])
@@ -437,6 +438,16 @@ extension SavePurchaseViewController: UITableViewDelegate {
         }
         
         showOrHideSaveButton()
+    }
+    
+    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        
+        if section == numberOfSectionsInTableView(tableView) - 1{ // && not is existing object
+            
+            return "Use this form if someone paid the full price for something, and should be split between multiple people."
+        }
+        
+        return nil
     }
 }
 

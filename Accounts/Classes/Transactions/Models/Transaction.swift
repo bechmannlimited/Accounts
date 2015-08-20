@@ -29,6 +29,7 @@ class Transaction: PFObject {
     @NSManaged var purchaseObjectId: String?
     @NSManaged var transactionDate: NSDate
     @NSManaged private var transactionType: NSNumber?
+    @NSManaged var purchaseTransactionLinkUUID: String?
     
     var purchase: Purchase?
     
@@ -179,6 +180,7 @@ class Transaction: PFObject {
         transaction.transactionDate = transactionDate
         transaction.purchase = purchase
         transaction.type = type
+        transaction.purchaseTransactionLinkUUID = purchaseTransactionLinkUUID
         
         return transaction
     }
