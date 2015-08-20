@@ -2,7 +2,7 @@ PODS:
   - ABToolKit (0.1.0):
     - Alamofire (~> 1.2.1)
     - SwiftyJSON (~> 2.2.0)
-  - AFDropdownNotification (1.1)
+  - AFDateHelper (2.0.4)
   - Alamofire (1.2.3)
   - Bolts (1.2.0):
     - Bolts/AppLinks (= 1.2.0)
@@ -44,7 +44,7 @@ PODS:
 
 DEPENDENCIES:
   - ABToolKit (from `/Users/alexbechmann/Documents/iOS/cocoapods/ABToolKit`)
-  - AFDropdownNotification (~> 1.0)
+  - AFDateHelper
   - FBSDKCoreKit (= 4.1.0)
   - FBSDKLoginKit (= 4.1.0)
   - FBSDKShareKit (= 4.1.0)
@@ -78,7 +78,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   ABToolKit: 355705e90dd72b552de9216f3f638f509b89b7dc
-  AFDropdownNotification: 4125b132cd03a8d6293e09ce000aeef55ced1364
+  AFDateHelper: ea0c7c81dbadcc2585a700f552d323beaf10b98d
   Alamofire: 5550bf0b575ed1a4bf9be572f9463e1015cc169e
   Bolts: d176cb1e0012175589e389a9db49b85e27787576
   FBSDKCoreKit: 469ed167195f860dbd2b4c4bbaa33d2e90598db9

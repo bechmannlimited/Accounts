@@ -12,11 +12,11 @@
 #define COCOAPODS_VERSION_MINOR_ABToolKit 1
 #define COCOAPODS_VERSION_PATCH_ABToolKit 0
 
-// AFDropdownNotification
-#define COCOAPODS_POD_AVAILABLE_AFDropdownNotification
-#define COCOAPODS_VERSION_MAJOR_AFDropdownNotification 1
-#define COCOAPODS_VERSION_MINOR_AFDropdownNotification 1
-#define COCOAPODS_VERSION_PATCH_AFDropdownNotification 0
+// AFDateHelper
+#define COCOAPODS_POD_AVAILABLE_AFDateHelper
+#define COCOAPODS_VERSION_MAJOR_AFDateHelper 2
+#define COCOAPODS_VERSION_MINOR_AFDateHelper 0
+#define COCOAPODS_VERSION_PATCH_AFDateHelper 4
 
 // Alamofire
 #define COCOAPODS_POD_AVAILABLE_Alamofire

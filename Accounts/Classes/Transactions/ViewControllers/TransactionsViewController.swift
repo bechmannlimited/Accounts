@@ -440,6 +440,7 @@ class TransactionsViewController: ACBaseViewController {
                         PFObject.unpinAll(self.query()?.fromLocalDatastore().findObjects())
                         PFObject.pinAll(transactions)
                         
+                        self.reorderTransactions()
                         self.transactions = transactions
                         
                     }, completion: { () -> () in
@@ -485,7 +486,7 @@ class TransactionsViewController: ACBaseViewController {
                 }
                 
                 self.transactions = transactions
-                
+                self.reorderTransactions()
                 self.tableView.reloadData()
                 self.view.hideLoader()
                 self.showOrHideTableOrNoDataView()
@@ -533,6 +534,7 @@ class TransactionsViewController: ACBaseViewController {
                     }
                 }
                 
+                self.reorderTransactions()
                 self.tableView.infiniteScrollingView.stopAnimating()
                 self.tableView.reloadData()
                 self.showOrHideTableOrNoDataView() // just in case
@@ -665,6 +667,11 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
     override func setupTableViewRefreshControl(tableView: UITableView) {
         
         
+    }
+    
+    func reorderTransactions() {
+        
+        transactions.sort { return $0.transactionDate > $1.transactionDate }
     }
 }
 

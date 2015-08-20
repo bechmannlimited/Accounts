@@ -18,5 +18,6 @@ pod 'KFSwiftImageLoader', '~> 1.2'
 pod 'GoogleMaps'
 pod 'TMCache'
 pod 'SwiftOverlays', '~> 0.14'
+pod "AFDateHelper"
 
 use_frameworks!

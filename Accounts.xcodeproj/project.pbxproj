@@ -71,6 +71,7 @@
 		E48C52381B6970860056A7E3 /* BouncyHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */; };
 		E48C52681B6978CC0056A7E3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48C52671B6978CC0056A7E3 /* ViewController.swift */; };
 		E49BFC8E1B7F8DCA00142AFD /* TransactionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */; };
+		E4BA9C5C1B84FD2F00E8DFF6 /* NSDate+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */; };
 		E4E7CAD91B66D24E0027833E /* StartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E7CAD81B66D24E0027833E /* StartViewController.swift */; };
 		E4EBCF041B8275EF00690A60 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EBCF031B8275EF00690A60 /* Font.swift */; };
 /* End PBXBuildFile section */
@@ -159,6 +160,7 @@
 		E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BouncyHeaderView.swift; sourceTree = "<group>"; };
 		E48C52671B6978CC0056A7E3 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ViewController.swift; path = ../ViewController.swift; sourceTree = "<group>"; };
 		E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionTableViewCell.swift; sourceTree = "<group>"; };
+		E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+Extension.swift"; sourceTree = "<group>"; };
 		E4C2A43B1B68052000730BAB /* ABToolKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ABToolKit.framework; path = "Pods/../build/Debug-iphoneos/Pods/ABToolKit.framework"; sourceTree = "<group>"; };
 		E4E7CAD81B66D24E0027833E /* StartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartViewController.swift; sourceTree = "<group>"; };
 		E4EBCF031B8275EF00690A60 /* Font.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
@@ -477,6 +479,7 @@
 				E40958101B72D32C00B5289A /* UIAppearance+Swift.m */,
 				E48C52671B6978CC0056A7E3 /* ViewController.swift */,
 				E4EBCF031B8275EF00690A60 /* Font.swift */,
+				E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -774,6 +777,7 @@
 				E442C3351B510E940061CAE6 /* Formatter.swift in Sources */,
 				E49BFC8E1B7F8DCA00142AFD /* TransactionTableViewCell.swift in Sources */,
 				E442C32E1B510E940061CAE6 /* SavePurchaseViewController.swift in Sources */,
+				E4BA9C5C1B84FD2F00E8DFF6 /* NSDate+Extension.swift in Sources */,
 				E411FE211B6E784F00C29D1F /* FriendTableViewCell.swift in Sources */,
 				E442C33F1B510E940061CAE6 /* VerifyUserViewController.swift in Sources */,
 				E412F9171B7CC3FC00A30F60 /* ABImageLoader.swift in Sources */,

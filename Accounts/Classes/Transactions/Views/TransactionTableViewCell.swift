@@ -9,9 +9,10 @@
 import UIKit
 import ABToolKit
 
-private let kPurchaseImage = AppTools.iconAssetNamed("1007-price-tag-toolbar.png")
-private let kTransactionImage = AppTools.iconAssetNamed("922-suitcase-toolbar.png")
-private let kPaymentImage = AppTools.iconAssetNamed("384-dollar-currency")
+//private let kPurchaseImage = AppTools.iconAssetNamed("1007-price-tag-toolbar.png")
+//private let kTransactionImage =AppTools.iconAssetNamed("922-suitcase-toolbar.png")
+private let kPaymentImage = AppTools.iconAssetNamed("826-money-1-toolbar")
+private let kIouImage = AppTools.iconAssetNamed("922-suitcase-toolbar.png")
 
 class TransactionTableViewCell: UITableViewCell {
 
@@ -47,12 +48,12 @@ class TransactionTableViewCell: UITableViewCell {
         
         if transaction.type == TransactionType.payment {
             
-            imageView?.image = kTransactionImage
+            imageView?.image = kPaymentImage
             iouText = transaction.fromUser == User.currentUser() ? "You paid \(transaction.toUser!.firstName) \(amountText)" : "\(transaction.fromUser!.firstName) paid you \(amountText)"
         }
         else if transaction.type == TransactionType.iou {
             
-            imageView?.image = kTransactionImage
+            imageView?.image = kIouImage
             iouText = transaction.fromUser == User.currentUser() ? "\(transaction.toUser!.firstName) owes you \(amountText)" : "You owe \(amountText)"
         }
         

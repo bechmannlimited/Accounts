@@ -11,6 +11,7 @@ import ABToolKit
 import SwiftyUserDefaults
 import SwiftyJSON
 import Parse
+import AFDateHelper
 
 private let kProfileSection = 2
 private let kShareSection = 1
@@ -43,24 +44,15 @@ class MenuViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        if User.currentUser()?.facebookId == nil {
-//            
-//            data = [
-//                [kProfileIndexPath, kLogoutIndexPath]
-//            ]
-//        }
-        
         setupTableView(tableView, delegate: self, dataSource: self)
-        
         addCloseButton()
-        
         title = "Settings"
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        tableView.reloadData()
+        deselectSelectedCell(tableView)
     }
 }
 
@@ -83,6 +75,8 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "Cell")
         })
         
+        cell.accessoryView = nil
+        
         if indexPath == kCurrencyIndexPath {
             
             cell.textLabel?.text = "Currency"
@@ -100,7 +94,24 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         else if indexPath == kFeedbackIndexPath {
          
             cell.textLabel?.text = "Contact support team"
-            cell.detailTextLabel?.text = "feedback/questions"
+            
+            var date = NSDate()
+            
+            var dateFormatter: NSDateFormatter = NSDateFormatter()
+            dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+1")
+            
+            let localizedDateString = dateFormatter.stringFromDate(date)
+            let localizedDate = NSDate(fromString: localizedDateString, format: .Custom(dateFormatter.dateFormat))
+            let online = localizedDate >= localizedDate.dateAtStartOfDay().dateByAddingHours(9) && localizedDate <= localizedDate.dateAtStartOfDay().dateByAddingHours(21)
+            
+            cell.detailTextLabel?.text = online ? "online" : "offline"
+            
+            let dotColor = online ? AccountColor.greenColor() : AccountColor.redColor()
+            let dot = UIImageView(image: UIImage.imageWithColor(dotColor, size: CGSize(width: 7, height: 7)))
+            dot.clipsToBounds = true
+            dot.layer.cornerRadius = dot.frame.width / 2
+            
+            cell.accessoryView = dot
         }
         else if indexPath == kShareIndexPath {
             
@@ -164,7 +175,6 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         else if indexPath == kFeedbackIndexPath{
             
             SupportKit.show()
-            tableView.deselectRowAtIndexPath(indexPath, animated: true)
         }
         else if indexPath == kShareIndexPath {
             
@@ -172,11 +182,15 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             
             if let myWebsite = NSURL(string: "itms://itunes.apple.com/us/app/iou-shared-expenses/id1024589247?ls=1&mt=8")
             {
-                let objectsToShare = [textToShare, myWebsite]
+                let objectsToShare = [myWebsite] //textToShare
                 let activityVC = UIActivityViewController(activityItems: objectsToShare, applicationActivities: nil)
                 
-                //New Excluded Activities Code
                 activityVC.excludedActivityTypes = [UIActivityTypeAirDrop, UIActivityTypeAddToReadingList]
+                activityVC.completionWithItemsHandler = { items in
+                    
+                    tableView.deselectRowAtIndexPath(indexPath, animated: true)
+                }
+                
                 self.presentViewController(activityVC, animated: true, completion: nil)
             }
         }
@@ -186,10 +200,26 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         
         if section == kProfileSection {
             
-            return "Logged in as \(User.currentUser()!.appropriateDisplayName())"
+            return "Logged in as \(String.emptyIfNull(User.currentUser()?.displayName))"
         }
         
         return ""
+    }
+    
+    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        
+        if section == kFeedbackSection {
+            
+            return "Send a message to our support team at any time and we'll respond asap (online 09:00 - 21:00 GMT+1)"
+        }
+        
+        return nil
+    }
+    
+    override func appDidResume() {
+        super.appDidResume()
+        
+        tableView.reloadData()
     }
 }
 

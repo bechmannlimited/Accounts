@@ -133,8 +133,8 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             if transaction.toUser?.objectId == purchase.user.objectId {
                 
-                var ex = User.isCurrentUser(transaction.toUser) ? "'re" : "'s"
-                var verb = "\(ex) part cost"
+                var ex = User.isCurrentUser(transaction.toUser) ? "r" : "'s"
+                var verb = "\(ex) part"
                 var textLabelText = "(\(transaction.toUser!.appropriateShortDisplayName())\(verb))"
 
                 

@@ -51,7 +51,6 @@ class Transaction: PFObject {
             transactionType = newValue.rawValue
         }
     }
-
     
     var localeAmount: Double {
         
@@ -167,8 +166,6 @@ class Transaction: PFObject {
             
             
         })
-        
-        
     }
     
     func copyWithUsefulValues() -> Transaction {
@@ -203,38 +200,3 @@ extension Transaction: PFSubclassing {
         return Transaction.getClassName()
     }
 }
-
-//
-//    func save() -> JsonRequest? {
-//        
-//        if !modelIsValid() {
-//            
-//            return nil
-//        }
-//        
-//        let url = TransactionID == 0 ? Transaction.webApiUrls().insertUrl()! : Transaction.webApiUrls().updateUrl(TransactionID)!
-//        let httpMethod: Alamofire.Method = TransactionID == 0 ? .POST : .PUT
-//        
-//        
-//        var params: Dictionary<String, AnyObject> = convertToDictionary(nil, includeNestedProperties: false)
-//        params["UserID"] = user.UserID
-//        params["RelationUserID"] = friend.UserID
-//        
-//        return JsonRequest.create(url, parameters: params, method: httpMethod).onDownloadSuccessWithRequestInfo({ (json, request, httpUrlRequest, httpUrlResponse) -> () in
-//            
-//            if httpUrlResponse?.statusCode == 200 || httpUrlResponse?.statusCode == 201 || httpUrlResponse?.statusCode == 204 {
-//                
-//                request.succeedContext()
-//            }
-//            else {
-//                
-//                request.failContext()
-//            }
-//            
-//        }).onDownloadFailure( { (error, alert) in
-//            
-//            alert.show()
-//            
-//        })
-//    }
-//}

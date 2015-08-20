@@ -80,6 +80,11 @@ class FriendsViewController: ACBaseViewController {
         
         refresh(nil)
         setEditing(false, animated: false)
+        
+        if let indexPath = tableView.indexPathForSelectedRow() {
+            
+            tableView.deselectRowAtIndexPath(indexPath, animated: false)
+        }
     }
     
     override func viewDidAppear(animated: Bool) {

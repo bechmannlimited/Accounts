@@ -19,6 +19,7 @@ class Purchase: PFObject {
     @NSManaged var title: String?
     @NSManaged var user: User
     @NSManaged var purchasedDate:NSDate?
+    //@NSManaged var linkUUID: String?
     
     var transactions: Array<Transaction> = []
     //var friends: [User] = []
@@ -78,12 +79,16 @@ class Purchase: PFObject {
             return
         }
         
+        //var linkUUID = NSUUID().UUIDString
+        
         for transaction in transactions {
             
             transaction.transactionDate = purchasedDate!
             transaction.fromUser = user
             transaction.title = title
             transaction.purchase = self
+            
+            //SET GUID SAME AS PURCHASE
             
             if transaction.fromUser != transaction.toUser{
                 
