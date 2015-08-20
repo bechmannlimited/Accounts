@@ -10,14 +10,18 @@
 import UIKit
 import ABToolKit
 import Parse
+import SwiftyJSON
 
 class SavePurchaseViewController: SaveItemViewController {
 
     var purchase = Purchase.withDefaultValues()
     var purchaseObjectId: String?
+    var existingPurchase: Purchase?
     
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
+    
+    //var oldTransactions = [Dictionary<String, AnyObject?>]()
     
     override func viewDidLoad() {
         
@@ -28,7 +32,7 @@ class SavePurchaseViewController: SaveItemViewController {
 
         if allowEditing && purchaseObjectId == nil {
 
-            title = "New purchase"
+            title = "Split a bill"
             purchase.user = User.currentUser()!
             purchase.title = ""
             purchase.purchasedDate = NSDate()
@@ -44,81 +48,59 @@ class SavePurchaseViewController: SaveItemViewController {
         }
         else if allowEditing && purchaseObjectId != nil {
 
-            title = "Edit purchase"
+            title = "Edit purchase" // N/A
         }
         else {
             
-            title = "Purchase"
+            title = "Split a bill"
         }
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
         
         tableView.setEditing(true, animated: false)
-        
-        if purchaseObjectId != nil {
-            
-            view.showLoader()
-            tableView.hidden = true
-            
-            var canContinue = false
-            
-            Task.executeTaskInBackground({ () -> () in
-                
-                if let purchase = Purchase.query()?.getObjectWithId(self.purchaseObjectId!) as? Purchase {
-                    
-                    self.purchase = purchase
-                    
-                    self.purchase.user.fetchIfNeeded()
-                    
-                    for transaction in self.purchase.transactions {
-                        
-                        transaction.fetchIfNeeded()
-                        transaction.fromUser?.fetchIfNeeded()
-                        transaction.toUser?.fetchIfNeeded()
-                    }
-                    
-                    canContinue = true
-                }
-                else{
-                    
-                    self.popAll()
-                }
-                
-            }, completion: { () -> () in
-                
-                if canContinue {
-            
-                    self.updateUIForEditing()
-                    self.reloadForm()
-                }
-            })
-        }
-        else{
-            
-            reloadForm()
-        }
-        
-        askToPopMessage = "Going back delete changes to this purchase! Are you sure?"
+
+        reloadForm()
+
+        askToPopMessage = "Going back will discard any changes, Are you sure?"
     }
         
     func save() {
 
+        isSaving = true
         updateUIForSavingOrDeleting()
         
-        purchase.savePurchase { (success) -> () in
+        var copyOfOriginalForIfSaveFails = existingPurchase?.copyWithUsefulValues()
+        
+        let purchase = purchaseObjectId != nil ? existingPurchase : self.purchase
+        
+        if purchaseObjectId != nil {
+            
+            purchase?.setUsefulValuesFromCopy(self.purchase)
+        }
+        
+        showSavingOverlay()
+        
+        purchase?.savePurchase { (success) -> () in
             
             if success {
                 
-                self.delegate?.purchaseDidChange(self.purchase)
-                self.popAll()
-                self.delegate?.itemDidChange()
-            }
-            else{
+                //self.existingPurchase?.hardUnpin()
+                //PFObject.unpinAll(self.existingPurchase?.transactions)
                 
+                NSTimer.schedule(delay: 2){ timer in
+                   
+                    self.delegate?.itemDidChange()
+                    self.delegate?.purchaseDidChange(purchase!)
+                    self.popAll()
+                }
+            }
+            else{ // not fired (check savepurchase func
+                
+                //self.existingPurchase?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!)
                 println("error saving purchase")
             }
             
-            self.updateUIForEditing()
+            //self.updateUIForEditing()
         }
     }
     
@@ -137,7 +119,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         var sections = Array<Array<FormViewConfiguration>>()
         sections.append([
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(purchase.title), identifier: "Title"),
-            FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(purchase.localeAmount), identifier: "Amount", locale: locale),
+            FormViewConfiguration.textFieldCurrency("Bill total", value: Formatter.formatCurrencyAsString(purchase.localeAmount), identifier: "Amount", locale: locale),
             FormViewConfiguration.normalCell("User"),
             
         ])
@@ -151,7 +133,12 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             if transaction.toUser?.objectId == purchase.user.objectId {
                 
-                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(transaction.toUser!.appropriateDisplayName(), value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
+                var ex = User.isCurrentUser(transaction.toUser) ? "r" : "'s"
+                var verb = "\(ex) part"
+                var textLabelText = "(\(transaction.toUser!.appropriateShortDisplayName())\(verb))"
+
+                
+                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
             }
         }
         
@@ -160,7 +147,10 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             if transaction.toUser?.objectId != purchase.user.objectId {
                 
-                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(transaction.toUser!.appropriateDisplayName(), value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
+                var s: String = transaction.toUser?.objectId == User.currentUser()?.objectId ? "" : "s"
+                var textLabelText = "\(transaction.toUser!.appropriateShortDisplayName()) owe\(s)"
+                
+                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
             }
         }
         
@@ -170,10 +160,10 @@ extension SavePurchaseViewController: FormViewDelegate {
         
         sections.append([
             FormViewConfiguration.datePicker("Date Purchased", date: purchasedDate, identifier: "DatePurchased", format: nil),
-            FormViewConfiguration.normalCell("Location")
+            //FormViewConfiguration.normalCell("Location")
         ])
         
-        if purchase.objectId != nil {
+        if purchaseObjectId != nil {
          
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
@@ -255,19 +245,26 @@ extension SavePurchaseViewController: FormViewDelegate {
                     
                     self.updateUIForSavingOrDeleting()
                     
-                    self.purchase.deleteInBackgroundWithBlock { (success, error) -> Void in
+                    let purchase = self.purchaseObjectId != nil ? self.existingPurchase : self.purchase
+                    
+                    self.showDeletingOverlay()
+                    
+                    purchase?.deleteInBackgroundWithBlock { (success, error) -> Void in
                         
                         if success {
                             
                             self.popAll()
                             self.delegate?.itemDidGetDeleted()
                             
-                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
+                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) (\(Formatter.formatCurrencyAsString(purchase!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                         }
                         else{
                             
                             ParseUtilities.showAlertWithErrorIfExists(error)
                         }
+                        
+                        self.navigationItem.rightBarButtonItem?.enabled = true
+                        self.navigationItem.leftBarButtonItem?.enabled = true
                     }
                 }
             })

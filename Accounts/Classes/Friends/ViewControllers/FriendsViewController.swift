@@ -14,21 +14,18 @@ import SwiftyJSON
 private let kPlusImage = AppTools.iconAssetNamed("746-plus-circle-selected.png")
 private let kMinusImage = AppTools.iconAssetNamed("34-circle.minus.png")
 private let kMenuIcon = AppTools.iconAssetNamed("740-gear-toolbar-selected.png")
-private let kAnimationDuration:NSTimeInterval = 0.5
 
 private let kPopoverContentSize = CGSize(width: 320, height: 360)
 
 class FriendsViewController: ACBaseViewController {
     
-    var tableView = UITableView(frame: CGRectZero, style: UITableViewStyle.Grouped)
+    var tableView = UITableView(frame: CGRectZero, style: kDevice == .Pad ? .Grouped : .Plain)
     
     var addBarButtonItem: UIBarButtonItem?
     var friendInvitesBarButtonItem: UIBarButtonItem?
     var openMenuBarButtonItem: UIBarButtonItem?
-    var noDataView = UILabel()
     
     var popoverViewController: UIViewController?
-    var toolbar = UIToolbar()
     
     var isLoading = false
     var data: Array<Array<User>> = [[],[],[]]
@@ -36,13 +33,10 @@ class FriendsViewController: ACBaseViewController {
     var invitesCount = 0
     var hasCheckedForInvites = false
     
+    var refreshBarButtonItem: UIBarButtonItem?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-//        if kDevice == .Pad {
-//            
-//            tableView = UITableView(frame: CGRectZero, style: .Grouped)
-//        }
         
         setupTableView(tableView, delegate: self, dataSource: self)
         setBarButtonItems()
@@ -55,11 +49,30 @@ class FriendsViewController: ACBaseViewController {
             tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
-        setupNoDataLabel(noDataView, text: "Your Facebook friends who have this app, will appear here!") //To get started, invite some friends!
+        setupNoDataLabel(noDataView, text: "Your Facebook friends who have this app, will appear here!", originView: tableView) //To get started, invite some friends!
+        setupTextLabelForSaveStatusInToolbarWithLabel()
         setupToolbar()
         
-        tableView.layer.opacity = 0
+        //tableView.layer.opacity = 0
         view.showLoader()
+        
+        refreshBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
+        toolbar.items = [
+            UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
+            refreshBarButtonItem!
+        ]
+        
+        if User.currentUser()?.lastSyncedDataInfo == nil {
+            
+            User.currentUser()?.lastSyncedDataInfo = Dictionary<String, NSDate>()
+        }
+        
+        if let lastSyncedDate = User.currentUser()?.lastSyncedDataInfo?["Friends_\(User.currentUser()!.objectId!)"] {
+            
+            self.refreshUpdatedDate = lastSyncedDate
+        }
+        
+        tableView.separatorColor = .clearColor()
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -67,6 +80,11 @@ class FriendsViewController: ACBaseViewController {
         
         refresh(nil)
         setEditing(false, animated: false)
+        
+        if let indexPath = tableView.indexPathForSelectedRow() {
+            
+            tableView.deselectRowAtIndexPath(indexPath, animated: false)
+        }
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -92,6 +110,17 @@ class FriendsViewController: ACBaseViewController {
                 //getInvites()
             }
         }
+    }
+    
+    override func setupView() {
+        super.setupView()
+        
+        view.backgroundColor = colorForViewBackground()
+    }
+    
+    func colorForViewBackground() -> UIColor {
+
+        return kDevice == .Phone ? UIColor.whiteColor() : kViewBackgroundColor
     }
     
     func setupToolbar(){
@@ -155,18 +184,18 @@ class FriendsViewController: ACBaseViewController {
         
         if let addBtn = addBarButtonItem{
             
-            toolbar.items = [
-                UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
-                addBarButtonItem!
+            navigationItem.rightBarButtonItems = [
+                //UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
+                addBtn
                 //UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
             ]
         }
         else{
             
-            toolbar.items = []
+            navigationItem.rightBarButtonItems = []
         }
         
-        toolbar.hidden = User.currentUser()!.friends.count == 0
+        addBarButtonItem?.enabled = User.currentUser()!.friends.count > 0
     }
     
     func friendInvites() {
@@ -227,22 +256,28 @@ class FriendsViewController: ACBaseViewController {
     
     override func refresh(refreshControl: UIRefreshControl?) {
         
-        //toolbar.items = []
+        refreshBarButtonItem?.enabled = false
         
-        User.currentUser()?.getFriends({ () -> () in
+        NSTimer.schedule(delay: 10, handler: { timer in
+            
+            refreshBarButtonItem?.enabled = true
+        })
+        
+        User.currentUser()?.getFriends({ (completedRemoteRequest) -> () in
             
             refreshControl?.endRefreshing()
             self.setDataForTable()
             self.tableView.reloadData()
             self.view.hideLoader()
-            
-            UIView.animateWithDuration(0.5, animations: { () -> Void in
-                
-                //self.tableView.layer.opacity = 1
-            })
-            
             self.showOrHideAddButton()
             self.showOrHideTableOrNoDataView()
+            
+            if completedRemoteRequest {
+                
+                User.currentUser()?.lastSyncedDataInfo?["Friends_\(User.currentUser()!.objectId!)"] = NSDate()
+                self.refreshUpdatedDate = NSDate()
+                self.refreshBarButtonItem?.enabled = true
+            }
         })
         
         //getInvites()
@@ -257,6 +292,11 @@ class FriendsViewController: ACBaseViewController {
 //            //self.setBarButtonItems()
 //        })
 //    }
+    
+    func refreshFromBarButton(){
+        
+        refresh(nil)
+    }
     
     func openMenu() {
         
@@ -297,9 +337,8 @@ class FriendsViewController: ACBaseViewController {
         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
             
             self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
-            self.tableView.layer.opacity = User.currentUser()!.friends.count > 0 ? 1 : 0
-            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : kTableViewSeparatorColor //.clearColor()
-            //self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? .whiteColor() : UIColor.groupTableViewBackgroundColor()
+            self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? self.colorForViewBackground() : kViewBackgroundColor
+            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
         })
     }
 }
@@ -323,7 +362,6 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         let friend = data[indexPath.section][indexPath.row]
         (cell as FriendTableViewCell).setup(friend)
         
-        setTableViewCellAppearanceForBackgroundGradient(cell)
         return cell
     }
 
@@ -356,7 +394,7 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         
         return ""
     }
-    
+        
     func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
         
         return tableView.editing ? .Delete : .None
@@ -432,11 +470,6 @@ extension FriendsViewController: UIPopoverPresentationControllerDelegate {
             return true
         }
     }
-    
-//    func popoverPresentationController(popoverPresentationController: UIPopoverPresentationController, willRepositionPopoverToRect rect: UnsafeMutablePointer<CGRect>, inView view: AutoreleasingUnsafeMutablePointer<UIView?>) {
-//        
-//        popoverPresentationController.backgroundColor = UIColor.clearColor()
-//    }
 }
 
 extension FriendsViewController: FriendInvitesDelegate {
@@ -446,14 +479,6 @@ extension FriendsViewController: FriendInvitesDelegate {
         refresh(nil)
     }
 }
-
-//extension FriendsViewController: MenuDelegate {
-//    
-//    func menuDidClose() {
-//        
-//        refresh(nil)
-//    }
-//}
 
 extension FriendsViewController: SaveItemDelegate {
     

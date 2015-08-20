@@ -15,24 +15,41 @@ class ACBaseViewController: BaseViewController {
     var gradient: CAGradientLayer = CAGradientLayer()
     
     var activeQueries = [PFQuery?]()
+    var toolbar = UIToolbar()
+    
+    var noDataView = UILabel()
+    
+    var refreshUpdatedDate: NSDate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = kViewBackgroundColor
+    }
+    
+    func appDidResume() {
         
-        //NSNotificationCenter.defaultCenter().addObserver(self, selector: "didReceivePushNotification:", name: kNotificationCenterPushNotificationKey, object: nil)
+        refresh(nil)
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
         setupView()
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "appDidResume", name: UIApplicationDidBecomeActiveNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "saveEventuallyItemDidSave", name: kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil)
     }
     
     func didReceivePushNotification(notification: NSNotification) {
         
         //println("hi")
+    }
+    
+    func saveEventuallyItemDidSave() {
+        
+        println("saveEventuallyItemDidSave triggered")
+        appDidResume()
     }
     
     func setupNavigationBarAppearance() {
@@ -78,6 +95,34 @@ class ACBaseViewController: BaseViewController {
             query?.cancel()
         }
     }
+    
+    func setupTextLabelForSaveStatusInToolbarWithLabel() {
+        
+        let label = UILabel()
+        label.setTranslatesAutoresizingMaskIntoConstraints(false)
+        label.numberOfLines = 2
+        toolbar.addSubview(label)
+        
+        label.fillSuperView(UIEdgeInsets(top: 5, left: 15, bottom: -5, right: -40))
+        
+        label.font = UIFont.lightFont(13)
+        label.lineBreakMode = NSLineBreakMode.ByWordWrapping
+        label.textColor = UIColor.grayColor()
+        
+        let setLabelText: () -> () = {
+            
+            if let date = self.refreshUpdatedDate {
+                
+                label.text = "Last synced \(date.readableFormattedStringForDateRange())"
+            }
+        }
+        
+        setLabelText()
+        NSTimer.schedule(repeatInterval: 1, handler: { timer in
+            
+            setLabelText()
+        })
+    }
 }
 
 extension ACBaseViewController: UITableViewDelegate {
@@ -85,11 +130,5 @@ extension ACBaseViewController: UITableViewDelegate {
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         
         return kTableViewCellHeight
-    }
-    
-    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
-        super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
-        
-        setTableViewCellAppearanceForBackgroundGradient(cell)
     }
 }

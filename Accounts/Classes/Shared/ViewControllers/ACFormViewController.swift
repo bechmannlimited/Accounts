@@ -25,7 +25,7 @@ class ACFormViewController: FormViewController {
         super.viewWillAppear(animated)
         
         setupView()
-        shouldAdjustTableViewInsetsForKeyboard = !isInsidePopover()
+        shouldAdjustTableViewInsetsForKeyboard = kDevice != .Pad
     }
     
     func didReceivePushNotification(notification: NSNotification) {
@@ -99,7 +99,7 @@ extension ACFormViewController: UITableViewDelegate {
             
             if cell.config.formCellType == .DatePicker {
                 
-                items.append(UIBarButtonItem(title: "Today", style: .Plain, target: cell, action: "setDateToToday"))
+                items.append(UIBarButtonItem(title: "Now", style: .Plain, target: cell, action: "setDateToToday"))
             }
             
             items.append(UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil))
@@ -117,6 +117,14 @@ extension ACFormViewController: UITableViewDelegate {
     override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
         super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
         
-        setTableViewCellAppearanceForBackgroundGradient(cell)
+        if let cell = cell as? FormViewTextFieldCell {
+
+            cell.textField.addTarget(self, action: "replaceNormalSpacesWithNonBreakingSpaces:", forControlEvents: UIControlEvents.EditingChanged)
+        }
+    }
+    
+    func replaceNormalSpacesWithNonBreakingSpaces(textField: UITextField) {
+        
+        textField.text = textField.text.replaceString(" ", withString: "\u{00a0}")
     }
 }

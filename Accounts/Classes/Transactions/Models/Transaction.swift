@@ -12,6 +12,13 @@ import SwiftyJSON
 import Alamofire
 import Parse
 
+enum TransactionType: NSNumber {
+    
+    case iou = 0
+    case payment = 1
+}
+
+
 class Transaction: PFObject {
    
     @NSManaged var fromUser: User?
@@ -21,8 +28,29 @@ class Transaction: PFObject {
     @NSManaged var title: String?
     @NSManaged var purchaseObjectId: String?
     @NSManaged var transactionDate: NSDate
+    @NSManaged private var transactionType: NSNumber?
     
     var purchase: Purchase?
+    
+    var type: TransactionType {
+        
+        get{
+            
+            if let transactionType = transactionType {
+
+                if let t = TransactionType(rawValue: transactionType) {
+
+                    return t
+                }
+            }
+            
+            return TransactionType.iou
+        }
+        set {
+            
+            transactionType = newValue.rawValue
+        }
+    }
     
     var localeAmount: Double {
         
@@ -53,6 +81,17 @@ class Transaction: PFObject {
                 self.amount = newValue
             }
         }
+    }
+    
+    class func withDefaultValues() -> Transaction{
+        
+        var transaction = Transaction()
+        
+        transaction.fromUser = User.currentUser()
+        transaction.transactionDate = NSDate()
+        transaction.title = ""
+        
+        return transaction
     }
     
     func modelIsValid() -> Bool {
@@ -96,14 +135,7 @@ class Transaction: PFObject {
         
         return errors.count == 0
     }
-    
-    func sendPushNotifications(isNew: Bool) {
         
-        let verb: String = isNew ? "added" : "updated"
-        
-        ParseUtilities.sendPushNotificationsInBackgroundToUsers(pushNotificationTargets(), message: "Transaction \(title) \(verb) by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
-    }
-    
     func pushNotificationTargets() -> [User]{
     
         var targets = [User]()
@@ -118,6 +150,48 @@ class Transaction: PFObject {
         
         return targets
     }
+    
+    func hardUnpin() {
+        
+        Task.executeTaskInBackground({ () -> () in
+            
+            self.unpinInBackground()
+            self.purchase?.unpin()
+            self.fromUser?.unpin()
+            self.toUser?.unpin()
+            PFObject.unpinAll(self.purchase?.transactions)
+            self.purchase?.user.unpin()
+            
+        }, completion: { () -> () in
+            
+            
+        })
+    }
+    
+    func copyWithUsefulValues() -> Transaction {
+        
+        var transaction = Transaction()
+        
+        transaction.fromUser = fromUser
+        transaction.toUser = toUser
+        transaction.amount = amount
+        transaction.title = title
+        transaction.transactionDate = transactionDate
+        transaction.purchase = purchase
+        transaction.type = type
+        
+        return transaction
+    }
+    
+    func setUsefulValuesFromCopy(transaction: Transaction) {
+        
+        fromUser = transaction.fromUser
+        toUser = transaction.toUser
+        amount = transaction.amount
+        title = transaction.title
+        transactionDate = transaction.transactionDate
+        purchase = transaction.purchase
+    }
 }
 
 extension Transaction: PFSubclassing {
@@ -126,38 +200,3 @@ extension Transaction: PFSubclassing {
         return Transaction.getClassName()
     }
 }
-
-//
-//    func save() -> JsonRequest? {
-//        
-//        if !modelIsValid() {
-//            
-//            return nil
-//        }
-//        
-//        let url = TransactionID == 0 ? Transaction.webApiUrls().insertUrl()! : Transaction.webApiUrls().updateUrl(TransactionID)!
-//        let httpMethod: Alamofire.Method = TransactionID == 0 ? .POST : .PUT
-//        
-//        
-//        var params: Dictionary<String, AnyObject> = convertToDictionary(nil, includeNestedProperties: false)
-//        params["UserID"] = user.UserID
-//        params["RelationUserID"] = friend.UserID
-//        
-//        return JsonRequest.create(url, parameters: params, method: httpMethod).onDownloadSuccessWithRequestInfo({ (json, request, httpUrlRequest, httpUrlResponse) -> () in
-//            
-//            if httpUrlResponse?.statusCode == 200 || httpUrlResponse?.statusCode == 201 || httpUrlResponse?.statusCode == 204 {
-//                
-//                request.succeedContext()
-//            }
-//            else {
-//                
-//                request.failContext()
-//            }
-//            
-//        }).onDownloadFailure( { (error, alert) in
-//            
-//            alert.show()
-//            
-//        })
-//    }
-//}

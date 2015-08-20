@@ -8,6 +8,7 @@
 
 import UIKit
 import ABToolKit
+import SwiftOverlays
 
 class SaveItemViewController: ACFormViewController {
 
@@ -17,19 +18,6 @@ class SaveItemViewController: ACFormViewController {
     var askToPopMessage = ""
     
     var delegate: SaveItemDelegate?
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        if kDevice == .Pad { // isInsidePopover() {
-            
-            navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
-            navigationController?.view.backgroundColor = UIColor.darkGrayColor()
-            view.backgroundColor = UIColor.clearColor()
-            println(isInsidePopover())
-            tableView.backgroundColor = UIColor.clearColor()
-        }
-    }
     
     func pop() {
         
@@ -41,16 +29,24 @@ class SaveItemViewController: ACFormViewController {
         
         self.navigationController?.dismissViewControllerAnimated(true, completion: nil)
         navigationController?.popoverPresentationController?.delegate?.popoverPresentationControllerDidDismissPopover?(navigationController!.popoverPresentationController!)
+        
+        removeLoadingViews()
     }
     
     func askToPopIfChanged() {
         
+        if isSaving {
+            
+            return
+        }
+        
         if itemDidChange {
             
-            UIAlertController.showAlertControllerWithButtonTitle("Go back", confirmBtnStyle: UIAlertActionStyle.Destructive, message: askToPopMessage) { (response) -> () in
+            UIAlertController.showAlertControllerWithButtonTitle("Discard", confirmBtnStyle: UIAlertActionStyle.Destructive, message: askToPopMessage) { (response) -> () in
                 
                 if response == AlertResponse.Confirm {
                     
+                    self.onDiscard()
                     self.pop()
                 }
             }
@@ -78,6 +74,14 @@ class SaveItemViewController: ACFormViewController {
         tableView.hidden = false
         view.hideLoader()
         
+        removeLoadingViews()
+        navigationItem.leftBarButtonItem?.enabled = true
+    }
+    
+    func showLoadingOverlayWithText(text: String) {
+        
+        //SwiftOverlays.showBlockingWaitOverlayWithText(text)
+        self.showWaitOverlayWithText(text)
     }
     
     func updateUIForSavingOrDeleting() {
@@ -86,6 +90,7 @@ class SaveItemViewController: ACFormViewController {
         isSaving = true
         showOrHideSaveButton()
         tableView.hidden = false
+        navigationItem.leftBarButtonItem?.enabled = false
     }
     
     func showOrHideSaveButton() {
@@ -103,5 +108,36 @@ class SaveItemViewController: ACFormViewController {
         
         return false
     }
+    
+    func onDiscard() {
+        
+        
+    }
+    
+    func showSavingOverlay() {
+        
+        showLoadingOverlayWithText("Saving...")
+    }
+    
+    func showDeletingOverlay() {
+        
+        showLoadingOverlayWithText("Deleting...")
+    }
 
+    func removeLoadingViews() {
+        
+        SwiftOverlays.removeAllBlockingOverlays()
+        self.removeAllOverlays()
+    }
+}
+
+extension SaveItemViewController: UITableViewDelegate {
+    
+    override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+        
+        super.tableView(tableView, willDisplayCell: cell, forRowAtIndexPath: indexPath)
+    
+        cell.textLabel?.font = UIFont.normalFont(cell.textLabel!.font.pointSize)
+        cell.detailTextLabel?.font = UIFont.lightFont(cell.detailTextLabel!.font.pointSize)
+    }
 }

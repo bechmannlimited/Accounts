@@ -8,6 +8,7 @@
 
 import UIKit
 import ABToolKit
+import KFSwiftImageLoader
 
 private let kContentViewVerticalPadding: CGFloat = 10
 private let kContentViewHorizontalPadding: CGFloat = 15
@@ -32,12 +33,15 @@ class FriendTableViewCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        friendNameLabel.removeConstraints(friendNameLabel.constraints())
-        friendImageView.removeConstraints(friendNameLabel.constraints())
-        amountOwedLabel.removeConstraints(friendNameLabel.constraints())
+        //friendNameLabel.removeConstraints(friendNameLabel.constraints())
+        //friendImageView.removeConstraints(friendNameLabel.constraints())
+        //amountOwedLabel.removeConstraints(friendNameLabel.constraints())
         
         setupImageView()
         setupFriendNameLabel()
+        
+        textLabel?.font = UIFont.normalFont(textLabel!.font.pointSize)
+        detailTextLabel?.font = UIFont.lightFont(detailTextLabel!.font.pointSize)
     }
     
     override func drawRect(rect: CGRect){
@@ -78,13 +82,40 @@ class FriendTableViewCell: UITableViewCell {
                 
                 let url = "https://graph.facebook.com/\(id)/picture?width=\(150)&height=\(150)"
                 
-                ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
+                let completionHandler: () -> () = {
                     
                     self.friendImageView.hideLoader()
                     self.friendImageView.contentMode = UIViewContentMode.ScaleAspectFill
-                    self.friendImageView.image = image
+                    //self.friendImageView.image = image
                     self.friendImageView.layer.cornerRadius = self.friendImageViewWidth() / 2
-                })
+                }
+                
+                friendImageView.loadImageFromURLString(url, placeholderImage: nil) {
+                    (finished, error) in
+                    
+                    completionHandler()
+                }
+                
+//                ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+//                    
+//                    completionHandler(image: image)
+//                })
+                
+//                ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
+//                    
+//                    if let image = image {
+//                        
+//                        completionHandler(image: image)
+//                    }
+//                    
+//                    if image == nil {
+//                        
+//                        ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+//                            
+//                            completionHandler(image: image)
+//                        })
+//                    }
+//                })
             }
         }
     }
@@ -133,7 +164,7 @@ class FriendTableViewCell: UITableViewCell {
         
         friendImageView.addLeftConstraint(toView: contentView, relation: .Equal, constant: kContentViewHorizontalPadding)
         friendImageView.addCenterYConstraint(toView: contentView)
-        friendImageViewConstraints["Width"] = friendImageView.addWidthConstraint(relation: .Equal, constant: friend.facebookId == nil ? 0 : friendImageViewWidth())
+        friendImageViewConstraints["Width"] = friendImageView.addWidthConstraint(relation: .Equal, constant:friend.facebookId == nil ? 0 : friendImageViewWidth())
         friendImageView.addTopConstraint(toView: contentView, attribute: NSLayoutAttribute.Top, relation: NSLayoutRelation.GreaterThanOrEqual, constant: kContentViewVerticalPadding)
         friendImageView.addBottomConstraint(toView: contentView, attribute: NSLayoutAttribute.Bottom, relation: NSLayoutRelation.GreaterThanOrEqual, constant: -kContentViewVerticalPadding)
 
@@ -157,7 +188,8 @@ class FriendTableViewCell: UITableViewCell {
     }
     
     private func friendImageViewWidth() -> CGFloat{
-        
-        return contentView.frame.height - (kContentViewVerticalPadding * 2)
+        //println(contentView.frame.height - (kContentViewVerticalPadding * 2))
+        //return contentView.frame.height - (kContentViewVerticalPadding * 2)
+        return 49.5
     }
 }

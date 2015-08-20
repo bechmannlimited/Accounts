@@ -12,11 +12,8 @@ import SwiftyJSON
 import Parse
 import SVPullToRefresh
 
-private let kPurchaseImage = AppTools.iconAssetNamed("1007-price-tag-toolbar.png")
-private let kTransactionImage = AppTools.iconAssetNamed("922-suitcase-toolbar.png")
 private let kPopoverContentSize = CGSize(width: 390, height: 440)
 private let kLoaderTableFooterViewHeight = 70
-private let kAnimationDuration:NSTimeInterval = 0.5
 
 private let kBounceViewHeight:CGFloat = 146
 
@@ -35,15 +32,7 @@ class TransactionsViewController: ACBaseViewController {
     var tableView = UITableView(frame: CGRectZero, style: UITableViewStyle.Plain)
     var friend = User()
     var transactions:Array<Transaction> = []
-    var noDataView = UILabel()
     var addBarButtonItem: UIBarButtonItem?
-    
-    //var loadMoreView = UIView()
-    //var loadMoreViewHeightConstraint: NSLayoutConstraint?
-    //var hasLoadedFirstTime = false
-
-    //var isLoadingMore = false
-    //var canLoadMore = true
     
     var refreshBarButtonItem: UIBarButtonItem?
     
@@ -52,49 +41,44 @@ class TransactionsViewController: ACBaseViewController {
     var selectedPurchaseID: String?
     var selectedTransactionID: String?
     var didJustDelete: Bool = false
-    
-    var toolbar = UIToolbar()
-    
+
     var headerView: BouncyHeaderView?
-    
-    //var refreshQuery: PFQuery?
-    //var loadMoreQuery: PFQuery?
-    var query: PFQuery?
+    var headerViewScreenShotImage: UIImage?
     
     var bounceViewHeightConstraint: NSLayoutConstraint?
     
     var popoverViewController: UIViewController?
     
+    func clean() {
+        
+        PFObject.unpinAllInBackground(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase])
+        PFObject.unpinAllInBackground(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction])
+        //PFObject.unpinAll(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase], withName: self.pinLabel())
+        //PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction], withName: self.pinLabel())
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setupQuery()
-        
         if kDevice == .Pad {
         
             tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
         setupTableView(tableView, delegate: self, dataSource: self)
-        //title = "Transactions with \(friend.appropriateDisplayName())"
-
-        //setupLoadMoreView()
-        setupNoDataLabel(noDataView, text: "Tap plus to add a purchase or transfer")
+        setupNoDataLabel(noDataView, text: "Tap plus to split a bill, add an i.o.u or a payment", originView: tableView)
         tableView.addSubview(noDataView)
-        
-        executeActualRefreshByHiding(true, refreshControl: nil, take: nil, completion: nil)
+        setupTextLabelForSaveStatusInToolbarWithLabel()
         
         setupToolbar()
         addBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
+        refreshBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
         
         toolbar.items = [
             UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil),
-            addBarButtonItem!
-            //UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
+            refreshBarButtonItem!
         ]
-        
-        refreshBarButtonItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Refresh, target: self, action: "refreshFromBarButton")
-        navigationItem.rightBarButtonItem = refreshBarButtonItem
+        navigationItem.rightBarButtonItem = addBarButtonItem!
         
         if headerView == nil {
             
@@ -107,7 +91,20 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         view.showLoader()
-        self.tableView.separatorColor = UIColor.clearColor()
+        
+        self.tableView.layer.opacity = 0.25
+        
+        if User.currentUser()?.lastSyncedDataInfo == nil { // dont think is needed again...
+            
+            User.currentUser()?.lastSyncedDataInfo = Dictionary<String, NSDate>()
+        }
+        
+        if let lastSyncedDate = User.currentUser()?.lastSyncedDataInfo?["Transactions_\(self.friend.objectId!)"] {
+            
+            self.refreshUpdatedDate = lastSyncedDate
+        }
+        
+        refresh(nil)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -118,17 +115,27 @@ class TransactionsViewController: ACBaseViewController {
             findAndScrollToCalculatedSelectedCellAtIndexPath(true)
         }
         
-        //getDifferenceAndRefreshIfNeccessary(nil)
-        
-        tableView.delegate = self // incase it wwasnt set from viewwilldissapear method
+        tableView.delegate = self // incase it wasnt set due to viewwilldissapear method
         scrollViewDidScroll(tableView)
+    }
+    
+    override func setupView() {
+        super.setupView()
+        
+        view.backgroundColor = colorForViewBackground()
+    }
+    
+    func colorForViewBackground() -> UIColor {
+        
+        return kDevice == .Phone ? UIColor.whiteColor() : kViewBackgroundColor
     }
     
     func setupBouncyHeaderView(){
         
         headerView = BouncyHeaderView()
         headerView?.setupHeaderWithOriginView(view, originTableView: tableView)
-        headerView?.setupTitle("\(friend.appropriateDisplayName())")
+        headerView?.delegate = self
+        setHeaderTitleText()
         
         if let id = friend.facebookId{
             
@@ -136,8 +143,39 @@ class TransactionsViewController: ACBaseViewController {
         }
         else{
             
-            //headerView.getHeroImage("http://www.tvchoicemagazine.co.uk/sites/default/files/imagecache/interview_image/intex/michael_emerson.png")
-            //headerView.getHeroImage("http://img.joke.co.uk/images/webshop/blog/gangster-silhouette.jpg")
+        }
+    }
+    
+    func setHeaderTitleText() {
+        
+        var text = friend.appropriateDisplayName()
+        
+        if friend.localeDifferenceBetweenActiveUser > 0 {
+            
+            text = "\(friend.appropriateDisplayName()) owes \(Formatter.formatCurrencyAsString(abs(friend.localeDifferenceBetweenActiveUser)))"
+        }
+        else if friend.localeDifferenceBetweenActiveUser < 0 {
+            
+            text = "You owe \(friend.appropriateDisplayName()) \(Formatter.formatCurrencyAsString(abs(friend.localeDifferenceBetweenActiveUser)))"
+        }
+        
+        headerView?.setupTitle(text)
+    }
+    
+    func getDifferenceBetweenActiveUser() {
+    
+        PFCloud.callFunctionInBackground("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) { (response, error) -> Void in
+            
+            if let response: AnyObject = response {
+                
+                let responseJson = JSON(response)
+                let difference = responseJson.doubleValue
+                
+                self.friend.localeDifferenceBetweenActiveUser = difference
+                User.currentUser()?.friendsIdsWithDifference?[self.friend.objectId!] = difference
+                
+                self.setHeaderTitleText()
+            }
         }
     }
     
@@ -145,6 +183,7 @@ class TransactionsViewController: ACBaseViewController {
         super.viewDidAppear(animated)
         
         popoverViewController = nil // to make sure
+        setupInfiniteScrolling()
     }
     
     func refreshFromBarButton(){
@@ -152,26 +191,28 @@ class TransactionsViewController: ACBaseViewController {
         refresh(nil)
     }
     
-    override func didReceivePushNotification(notification: NSNotification) {
-        
-        if let object: AnyObject = notification.object{
-            
-            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
-            
-            if PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved{
-                
-                if let userIds = object["userIds"] as? [String] {
-                    
-                    if contains(userIds, friend.objectId!){
-                        
-                        getDifferenceAndRefreshIfNeccessary(nil)
-                    }
-                }
-            }
-        }
-    }
+//    override func didReceivePushNotification(notification: NSNotification) {
+//        
+//        if let object: AnyObject = notification.object{
+//            
+//            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
+//            
+//            if PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved{
+//                
+//                if let userIds = object["userIds"] as? [String] {
+//                    
+//                    if contains(userIds, friend.objectId!){
+//                        
+//                        getDifferenceAndRefreshIfNeccessary(nil)
+//                    }
+//                }
+//            }
+//        }
+//    }
     
-    func setupQuery() {
+    func query() -> PFQuery? {
+        
+        var query: PFQuery?
         
         let queryForFromUser = Transaction.query()
         queryForFromUser?.whereKey("fromUser", equalTo: User.currentUser()!)
@@ -182,36 +223,27 @@ class TransactionsViewController: ACBaseViewController {
         queryForToUser?.whereKey("fromUser", equalTo: friend)
         
         query = PFQuery.orQueryWithSubqueries([queryForFromUser!, queryForToUser!])
-        query?.includeKey("purchase")
         query?.orderByDescending("transactionDate")
+        query?.whereKey("objectId", notContainedIn: IOSession.sharedSession().deletedTransactionIds)
         
         activeQueries.append(query)
+        
+        return query
     }
     
-    func getDifferenceAndRefreshIfNeccessary(refreshControl: UIRefreshControl?) {
+    func transactionIds() -> [String] {
         
-        PFCloud.callFunctionInBackground("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) { (response, error) -> Void in
+        var ids = [String]()
+        
+        for transaction in transactions {
             
-            let responseJson = JSON(response!)
-            let difference = responseJson.doubleValue
-            
-            let previousDifference = self.friend.localeDifferenceBetweenActiveUser
-            self.friend.localeDifferenceBetweenActiveUser = difference
-            
-            self.tableView.beginUpdates()
-            self.tableView.endUpdates()
-
-            if previousDifference != difference {
-
-                println("found difference (transactionscontroller)")
-                self.executeActualRefreshByHiding(true, refreshControl: nil, take: nil, completion: nil)
-            }
-            else {
+            if let id = transaction.objectId{
                 
-                println("found no difference")
-                refreshControl?.endRefreshing()
+                ids.append(id)
             }
         }
+        
+        return ids
     }
     
     func setupToolbar(){
@@ -236,9 +268,14 @@ class TransactionsViewController: ACBaseViewController {
         
         setupTableViewRefreshControl(tableView)
         
+        setupInfiniteScrolling()
+    }
+    
+    func setupInfiniteScrolling() {
+        
         tableView.addInfiniteScrollingWithActionHandler { () -> Void in
             
-            var y: CGFloat = tableView.contentOffset.y + tableView.contentInset.top
+            var y: CGFloat = self.tableView.contentOffset.y + self.tableView.contentInset.top
             
             if y > 0 {
                 
@@ -252,128 +289,31 @@ class TransactionsViewController: ACBaseViewController {
     }
     
     func showOrHideTableOrNoDataView() {
-        
+                
         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
             
             self.noDataView.layer.opacity = self.transactions.count > 0 ? 0 : 1
-            self.tableView.layer.opacity = self.transactions.count > 0 ? 1 : 1
             self.tableView.separatorColor = self.transactions.count > 0 ? kTableViewSeparatorColor : .clearColor()
-            //self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? .whiteColor() : UIColor.groupTableViewBackgroundColor()
+            self.view.backgroundColor = self.transactions.count > 0 ? self.colorForViewBackground() : kViewBackgroundColor
         })
     }
     
-    func executeActualRefreshByHiding(hiding: Bool, refreshControl: UIRefreshControl?, take:Int?, completion: ( ()-> ())?) {
-        
-        refreshBarButtonItem?.enabled = false
-        
-        if hiding {
-            
-            noDataView.layer.opacity = 0 // need to re-check this bit
-        }
-        
-        query?.cancel()
-        query?.skip = 0
-        query?.limit = 16
-        
-        if transactions.count > 16 && transactions.count < 35 {
-            
-            query?.limit = transactions.count
-        }
-        
-        let executeRemoteQuery: () -> () = {
-            
-            self.refreshBarButtonItem?.enabled = false
-            
-            self.query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-                
-                if var transactions = objects as? [Transaction] {
-                    
-                    Task.executeTaskInBackground({ () -> () in
-                        
-                        let unpinQuery = self.query?.copy() as? PFQuery
-                        
-                        if let arr = unpinQuery?.fromLocalDatastore().findObjects() as? [Transaction] { //.whereKey("objectId", notContainedIn: newIds)
-                            
-                            for transaction in arr{
-                                
-                                transaction.unpinInBackground()
-                                transaction.purchase?.unpinInBackground()
-                            }
-                        }
-                        
-                        for transaction in transactions {
-                            
-                            if let id = transaction.purchaseObjectId {
-                                
-                                transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
-                            }
-                            
-                            transaction.pinInBackground()
-                            transaction.purchase?.pinInBackground()
-                        }
-                        
-                        self.transactions = transactions
-                        
-                    }, completion: { () -> () in
-                        
-                        refreshControl?.endRefreshing()
-                        self.tableView.reloadData()
-                        self.view.hideLoader()
-                        self.showOrHideTableOrNoDataView()
-                        self.refreshBarButtonItem?.enabled = true
-                        
-                        completion?()
-                    })
-                }
-            })
-        }
-        
-        let localQuery: PFQuery? = query?.copy() as? PFQuery
-        localQuery?.fromLocalDatastore()
-        localQuery?.limit = 35
-        activeQueries.append(localQuery)
-        
-        localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-            
-            Task.executeTaskInBackground({ () -> () in
-                
-                if var transactions = objects as? [Transaction] {
-                    
-                    for transaction in transactions {
-                        
-                        if let id = transaction.purchaseObjectId {
-                            
-                            let localPurchaseQuery = Purchase.query()
-                            localPurchaseQuery?.fromLocalDatastore()
-                            transaction.purchase = localPurchaseQuery?.getObjectWithId(id) as? Purchase
-                            
-                            if transaction.purchase == nil {
-                                
-                                transaction.purchase = Purchase.query()?.getObjectWithId(id) as? Purchase
-                                transaction.purchase?.pinInBackground()
-                            }
-                        }
-                    }
-                    
-                    self.transactions = transactions
-                }
-                
-            }, completion: { () -> () in
-                
-                refreshControl?.endRefreshing()
-                self.tableView.reloadData()
-                self.view.hideLoader()
-                self.showOrHideTableOrNoDataView()
-                self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
-                self.refreshBarButtonItem?.enabled = true
-                
-                completion?()
-                executeRemoteQuery()
-            })
-        })
-        
-        
-    }
+//    override func setNavigationControllerToDefault(){
+//        
+//        navigationController?.navigationBar.tintColor = .whiteColor()
+//        
+//        if 1 == 2 { //let screenshot = headerViewScreenShotImage {
+//            
+//            //navigationController?.navigationBar.setBackgroundImage(screenshot, forBarMetrics: .Default)
+//        }
+//        else {
+//            
+//            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.blackColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
+//        }
+//        
+//        navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
+//        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
+//    }
     
     func findAndScrollToCalculatedSelectedCellAtIndexPath(shouldDeselect: Bool) {
         
@@ -415,11 +355,11 @@ class TransactionsViewController: ACBaseViewController {
             }
             else if selectedPurchaseID == nil && selectedTransactionID == nil {
                 
-                rowToDeselect = nil // for now (needsto get id from postback)
+                rowToDeselect = nil // for now (needsto get id from postback) / /is this still true?
                 
                 if transactions.count > 0 {
                     
-                    tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 0), atScrollPosition: .Middle, animated: false)
+                    //tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 0), atScrollPosition: .Top, animated: false)
                 }
             }
             if let indexPath = rowToDeselect {
@@ -432,7 +372,7 @@ class TransactionsViewController: ACBaseViewController {
                         
                         var cellRect = self.tableView.rectForRowAtIndexPath(indexPath)
                         
-                        let rectToCheck = CGRect(x: self.tableView.bounds.origin.x, y: self.tableView.bounds.origin.y + 64, width: self.tableView.bounds.width, height: self.tableView.bounds.height - 64)
+                        let rectToCheck = CGRect(x: self.tableView.bounds.origin.x, y: self.tableView.bounds.origin.y + 64, width: self.tableView.bounds.width, height: self.tableView.bounds.height - 64 - 44)
                         
                         var completelyVisible = CGRectContainsRect(rectToCheck, cellRect)
                         
@@ -459,10 +399,13 @@ class TransactionsViewController: ACBaseViewController {
             }
         }
         
-        selectedTransactionID = nil
-        selectedPurchaseID = nil
-        selectedRow = nil
-        didJustDelete = false
+        if shouldDeselect {
+            
+            selectedTransactionID = nil
+            selectedPurchaseID = nil
+            selectedRow = nil
+            didJustDelete = false
+        }
     }
     
     override func refresh(refreshControl: UIRefreshControl?) {
@@ -472,32 +415,135 @@ class TransactionsViewController: ACBaseViewController {
         selectedRow = nil
         didJustDelete = false
         
-        //getDifferenceAndRefreshIfNeccessary(refreshControl)
+        cancelQueries()
         
-        executeActualRefreshByHiding(true, refreshControl: refreshControl, take: nil, completion: nil)
+        getDifferenceBetweenActiveUser()
+        
+        reloadTableViewFromLocalDataSource { () -> () in
+            
+            self.refreshBarButtonItem?.enabled = false
+            
+            NSTimer.schedule(delay: 10, handler: { timer in
+                
+                refreshBarButtonItem?.enabled = true
+            })
+            
+            var remoteQuery = self.query()
+            remoteQuery?.limit = 16
+            
+            remoteQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+                
+                if let transactions = objects as? [Transaction] {
+                    
+                    Task.executeTaskInBackground({ () -> () in
+                        
+                        PFObject.unpinAll(self.query()?.fromLocalDatastore().findObjects())
+                        PFObject.pinAll(transactions)
+                        
+                        self.reorderTransactions()
+                        self.transactions = transactions
+                        
+                    }, completion: { () -> () in
+                        
+                        refreshControl?.endRefreshing()
+                        self.tableView.reloadData()
+                        self.view.hideLoader()
+                        self.showOrHideTableOrNoDataView()
+                        self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
+                        self.refreshBarButtonItem?.enabled = true
+                        
+                        UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                            
+                            self.tableView.layer.opacity = 1
+                        })
+                        
+                        //last synced label
+                        User.currentUser()?.lastSyncedDataInfo?["Transactions_\(self.friend.objectId!)"] = NSDate()
+                        self.refreshUpdatedDate = NSDate()
+                    })
+                }
+            })
+        }
+    }
+    
+    func reloadTableViewFromLocalDataSource(completion: (() -> ())?) {
+        
+        self.refreshBarButtonItem?.enabled = false
+        
+        var localQuery = query()?.fromLocalDatastore()
+        localQuery?.limit = 35
+        
+        localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+            
+            var transactionsNotAvailable = [Transaction]()
+            
+            if var transactions = objects as? [Transaction] {
+                
+                for transaction in transactionsNotAvailable {
+                    
+                    let index = find(transactions, transaction)!
+                    transactions.removeAtIndex(index)
+                }
+                
+                self.transactions = transactions
+                self.reorderTransactions()
+                self.tableView.reloadData()
+                self.view.hideLoader()
+                self.showOrHideTableOrNoDataView()
+                self.refreshBarButtonItem?.enabled = true
+                
+                UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                    
+                    self.tableView.layer.opacity = 1
+                })
+            }
+            
+            completion?()
+        })
+    }
+    
+    func cancelQueries(){
+        
+        for query in activeQueries {
+            
+            query?.cancel()
+        }
     }
     
     func loadMore() {
         
-        query?.cancel()
-        query?.skip = transactions.count 
-        query?.limit = 16
+        cancelQueries()
+        let skip = 16
         
-        query?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+        if transactions.count >= skip {
             
-            if let transactions = objects as? [Transaction] {
+            let loadMoreQuery = query()
+            
+            //loadMoreQuery?.skip = transactions.count
+            loadMoreQuery?.limit = skip
+            loadMoreQuery?.whereKey("objectId", notContainedIn: transactionIds())
+            
+            loadMoreQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
-                for transaction in transactions {
+                if let transactions = objects as? [Transaction] {
                     
-                    self.transactions.append(transaction)
-                    transaction.pinInBackground()
+                    for transaction in transactions {
+                        
+                        self.transactions.append(transaction)
+                        transaction.pinInBackground()
+                    }
                 }
-            }
+                
+                self.reorderTransactions()
+                self.tableView.infiniteScrollingView.stopAnimating()
+                self.tableView.reloadData()
+                self.showOrHideTableOrNoDataView() // just in case
+            })
+        }
+        else{
             
             self.tableView.infiniteScrollingView.stopAnimating()
-            self.tableView.reloadData()
-        })
-
+        }
     }
     
     func add() {
@@ -537,7 +583,7 @@ class TransactionsViewController: ACBaseViewController {
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         
-        query?.cancel()
+        
         tableView.delegate = nil
     }
 }
@@ -556,42 +602,15 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueOrCreateReusableCellWithIdentifier("Cell", requireNewCell: { (identifier) -> (UITableViewCell) in
+        let cell: TransactionTableViewCell = tableView.dequeueOrCreateReusableCellWithIdentifier("Cell", requireNewCell: { (identifier) -> (UITableViewCell) in
             
-            return UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: identifier)
-        })
+            return TransactionTableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: identifier)
+        }) as! TransactionTableViewCell
         
         let transaction = transactions[indexPath.row]
         
-        var amount = transaction.localeAmount
-        
-        if let purchaseObjectId = transaction.purchaseObjectId {
+        cell.setupCell(transaction)
 
-            if let purchase = transaction.purchase {
-                
-                amount = purchase.amount
-            }
-            
-            //let dateString:String = transaction.purchase.purchasedDate!.toString(DateFormat.Date.rawValue)
-            cell.textLabel?.text = "\(transaction.title!)"
-            cell.imageView?.image = kPurchaseImage
-        }
-        else {
-            
-            let dateString:String = transaction.transactionDate.toString(DateFormat.Date.rawValue)
-            cell.textLabel?.text = "\(transaction.title!)"
-            cell.imageView?.image = kTransactionImage
-            
-        }
-        
-        let tintColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.positiveColor() : AccountColor.negativeColor()
-        
-        cell.detailTextLabel?.textColor = tintColor
-        cell.imageView?.tintWithColor(tintColor)
-        cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
-        cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-        //cell.imageView?.tintWithColor(AccountColor.blueColor())
-        
         return cell
     }
     
@@ -611,7 +630,12 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         else {
             
             let v = SaveTransactionViewController()
-            v.transaction = transaction
+            
+            v.transaction = transaction.copyWithUsefulValues()
+            v.transactionObjectId = transaction.objectId
+            v.existingTransaction = transaction
+            v.isExistingTransaction = true
+            
             v.delegate = self
             openView(v, sourceView: cell.contentView)
         }
@@ -635,20 +659,6 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         presentViewController(v, animated: true, completion: nil)
     }
     
-//    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-//        
-//        if friend.localeDifferenceBetweenActiveUser > 0 {
-//            
-//            return "\(friend.appropriateDisplayName()) owes you: \(Formatter.formatCurrencyAsString(abs(friend.localeDifferenceBetweenActiveUser)))"
-//        }
-//        else if friend.localeDifferenceBetweenActiveUser < 0 {
-//            
-//            return "You owe \(friend.appropriateDisplayName()): \(Formatter.formatCurrencyAsString(abs(friend.localeDifferenceBetweenActiveUser)))"
-//        }
-//        
-//        return ""
-//    }
-    
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         
         return 0 // CGFloat.min + (kDevice == .Pad ? 40 : 0)
@@ -657,6 +667,11 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
     override func setupTableViewRefreshControl(tableView: UITableView) {
         
         
+    }
+    
+    func reorderTransactions() {
+        
+        transactions.sort { return $0.transactionDate > $1.transactionDate }
     }
 }
 
@@ -726,7 +741,7 @@ extension TransactionsViewController: SaveItemDelegate {
     
     func itemDidChange() {
         
-        executeActualRefreshByHiding(false, refreshControl: nil, take: transactions.count, completion: nil)
+        refresh(nil)
     }
     
     func transactionDidChange(transaction: Transaction) {
@@ -754,3 +769,32 @@ extension TransactionsViewController: SaveItemDelegate {
     }
 }
 
+extension TransactionsViewController: BouncyHeaderViewDelegate {
+    
+//    override func setNavigationControllerToDefault() {
+//        
+//        if let image = headerViewScreenShotImage {
+//
+//            navigationController?.navigationBar.tintColor = .whiteColor()
+//            
+//            if navigationController?.navigationBar.backgroundImageForBarMetrics(.Default) != image {
+//                
+//                navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
+//            }
+//            
+//            navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
+//            UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
+//        }
+//        else {
+//            
+//            super.setNavigationControllerToDefault()
+//        }
+//    }
+//    
+    func imageViewImageDidLoad() {
+        
+//        self.headerView?.titleLabel.hidden = true
+//        self.headerViewScreenShotImage = self.headerView?.screenShot()
+//        self.headerView?.titleLabel.hidden = false
+    }
+}

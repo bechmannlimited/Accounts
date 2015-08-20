@@ -9,9 +9,15 @@ pod 'FBSDKCoreKit',  '4.1.0'
 pod 'FBSDKLoginKit', '4.1.0'
 pod 'FBSDKShareKit', '4.1.0'
 pod 'ParseUI', '~> 1.1.3'
-pod 'Parse', '~> 1.7.2'
+pod 'Parse'
 pod 'ParseFacebookUtilsV4', '~>1.7.2'
 pod 'SVPullToRefresh'
 pod 'SupportKit'
+pod 'ReachabilitySwift', git: 'https://github.com/ashleymills/Reachability.swift'
+pod 'KFSwiftImageLoader', '~> 1.2'
+pod 'GoogleMaps'
+pod 'TMCache'
+pod 'SwiftOverlays', '~> 0.14'
+pod "AFDateHelper"
 
 use_frameworks!

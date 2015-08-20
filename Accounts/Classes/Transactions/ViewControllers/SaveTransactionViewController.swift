@@ -10,45 +10,46 @@
 import UIKit
 import ABToolKit
 import SwiftyUserDefaults
+import SwiftyJSON
+import GoogleMaps
+//import Reachability
+import SwiftOverlays
 
 class SaveTransactionViewController: SaveItemViewController {
 
-    var transaction = Transaction()
+    var transaction = Transaction.withDefaultValues()
     var isNew = true
+    var transactionObjectId: String?
+    var existingTransaction: Transaction?
+    var isExistingTransaction = false
     
     override func viewDidLoad() {
 
         shouldLoadFormOnLoad = false
         super.viewDidLoad()
-        
-        if transaction.objectId == nil {
-
-            transaction.fromUser = User.currentUser()
-            transaction.transactionDate = NSDate()
-            transaction.title = ""
-            showOrHideSaveButton()
-            reloadForm()
-        }
 
         allowEditing = true // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
         
-        if allowEditing && transaction.objectId == nil {
+        showOrHideSaveButton()
+        reloadForm()
+        
+        if allowEditing && !isExistingTransaction {
             
-            title = "New transfer"
+            title = transaction.type == .iou ? "Add i.o.u" : "Add payment"
         }
-        else if allowEditing && transaction.objectId != nil {
+        else if allowEditing && isExistingTransaction {
             
-            title = "Edit transfer"
+            title = transaction.type == .iou ? "Edit i.o.u" : "Edit payment"
         }
         else {
             
-            title = "Transfer"
+            title = "i.o.u"
         }
         
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
         
-        if transaction.objectId != nil {
+        if transactionObjectId != nil {
             
             updateUIForServerInteraction()
             
@@ -70,67 +71,77 @@ class SaveTransactionViewController: SaveItemViewController {
                 
                 self.updateUIForEditing()
                 self.reloadForm()
+                
+                //self.copyOfItem = ParseUtilities.convertPFObjectToDictionary(self.transaction)
             })
         }
         
-        askToPopMessage = "Going back delete changes to this transaction! Are you sure?"
+        askToPopMessage = "Going back will discard any changes, Are you sure?"
     }
     
     func save() {
 
+        isSaving = true
         updateUIForSavingOrDeleting()
         
-        var isNew = transaction.objectId == nil
+        var copyOfOriginalForIfSaveFails = existingTransaction?.copyWithUsefulValues()
         
-        transaction.saveInBackgroundWithBlock { (success, error) -> Void in
+        let transaction = isExistingTransaction ? existingTransaction : self.transaction
+        
+        if isExistingTransaction {
+            
+            transaction?.setUsefulValuesFromCopy(self.transaction)
+        }
+        
+        var delegateCallbackHasBeenFired = false
+        
+        showSavingOverlay()
+        
+        transaction?.saveEventually { (success, error) -> Void in
 
             if success {
 
-                if isNew {
-                    
-                    self.transaction.pinInBackground()
-                }
+                NSTimer.schedule(delay: 2, handler: { timer in
                 
-                self.popAll()
-                self.delegate?.itemDidChange()
-                self.delegate?.transactionDidChange(self.transaction)
-                self.transaction.sendPushNotifications(self.isNew)
+                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                    
+                    if !delegateCallbackHasBeenFired {
+                    
+                        self.delegate?.itemDidChange()
+                        self.delegate?.transactionDidChange(transaction!)
+                        delegateCallbackHasBeenFired = true
+                    }
+                })
             }
             else{
                 
+                //self.existingTransaction?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!) // remove this again?
                 ParseUtilities.showAlertWithErrorIfExists(error)
             }
-            
-            self.updateUIForEditing()
+
+            //self.updateUIForEditing()
         }
         
-//        updateUIForSavingOrDeleting()
+//        let reachability = Reachability.reachabilityForInternetConnection()
 //        
-//        var isNew = transaction.objectId == nil
-//        
-//        transaction.saveInBackgroundWithBlock { (success, error) -> Void in
+//        reachability.whenUnreachable = { reachability in
 //            
-//            if success {
-//                
-//                if isNew {
-//                    
-//                    self.transaction.pinInBackground()
-//                }
-//                
-//                self.transaction.sendPushNotifications(self.isNew)
-//            }
-//            else{
-//                
-//                self.transaction.saveEventually()
-//                UIAlertView(title: "No internet connection!", message: "We will save this as soon as the internet connection returns!", delegate: nil, cancelButtonTitle: "Ok").show()
-//            }
-//            
-//            self.popAll()
-//            self.delegate?.itemDidChange()
-//            self.delegate?.transactionDidChange(self.transaction)
-//            
-//            self.updateUIForEditing()
+//            UIAlertView(title: "No connection", message: "This item will be saved online as soon as a network connection is available.", delegate: nil, cancelButtonTitle: "Ok", otherButtonTitles: nil, nil).show()
 //        }
+//        
+//        reachability.startNotifier()
+        
+        NSTimer.schedule(delay: 2) { timer in
+            
+            if !delegateCallbackHasBeenFired {
+                
+                self.delegate?.itemDidChange()
+                self.delegate?.transactionDidChange(transaction!)
+                delegateCallbackHasBeenFired = true
+            }
+            
+            self.popAll()
+        }
     }
     
     override func saveButtonEnabled() -> Bool {
@@ -138,7 +149,11 @@ class SaveTransactionViewController: SaveItemViewController {
         return allowEditing && transaction.modelIsValid() && !isSaving
     }
     
-    
+    func selectPlace() {
+        
+        var view = SelectLocationViewController()
+        navigationController?.pushViewController(view, animated: true)
+    }
 }
 
 extension SaveTransactionViewController: FormViewDelegate {
@@ -148,18 +163,37 @@ extension SaveTransactionViewController: FormViewDelegate {
         let locale = Settings.getCurrencyLocaleWithIdentifier().locale
         
         var sections = Array<Array<FormViewConfiguration>>()
+        
+        if transaction.type == TransactionType.iou {
+            
+            sections.append([
+                FormViewConfiguration.normalCell("Friend")
+            ])
+            
+            sections.append([
+                FormViewConfiguration.normalCell("User")
+            ])
+        }
+        else if transaction.type == TransactionType.payment {
+            
+            sections.append([
+                FormViewConfiguration.normalCell("User")
+            ])
+            
+            sections.append([
+                FormViewConfiguration.normalCell("Friend")
+            ])
+        }
+
+        
         sections.append([
+            FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.localeAmount), identifier: "Amount", locale: locale),
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
-            FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.localeAmount), identifier: "Amount", locale: locale)
-        ])
-        
-        sections.append([
-            FormViewConfiguration.normalCell("User"),
-            FormViewConfiguration.normalCell("Friend"),
             FormViewConfiguration.datePicker("Transaction date", date: transaction.transactionDate, identifier: "TransactionDate", format: nil)
+            //FormViewConfiguration.normalCell("Location")
         ])
         
-        if transaction.objectId != nil {
+        if isExistingTransaction {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
@@ -173,38 +207,50 @@ extension SaveTransactionViewController: FormViewDelegate {
         
         let cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "Cell")
         
-        if identifier == "Friend" {
+        if identifier == "Friend" || identifier == "User" {
             
-            cell.textLabel?.text = "Transfer to"
-            if let username = transaction.toUser?.appropriateDisplayName() {
+            var label = UILabel()
+            label.font = UIFont.normalFont(17)
+            label.textAlignment = .Center
+            label.textColor = .blackColor()
+            
+            label.setTranslatesAutoresizingMaskIntoConstraints(false)
+            cell.contentView.addSubview(label)
+            label.fillSuperView(UIEdgeInsetsZero)
+            
+            if identifier == "Friend" {
                 
-                cell.detailTextLabel?.text = "\(username)"
-                cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+                if let username = transaction.toUser?.appropriateDisplayName() {
+                 
+                    label.text = username
+                }
+                else {
+                    
+                    label.text = "Tap to select user"
+                    label.textColor = UIColor.lightGrayColor()
+                }
             }
-            else{
-                
-                cell.detailTextLabel?.text = ""
+            
+            if identifier == "User" {
+             
+                if let username = transaction.fromUser?.appropriateDisplayName() {
+                    
+                    label.text = username
+                }
+                else {
+                    
+                    label.text = "Tap to select user"
+                    label.textColor = UIColor.lightGrayColor()
+                }
             }
-
+            
             return cell
         }
-        
-        if identifier == "User" {
+        else if identifier == "Location" {
             
-            cell.textLabel?.text = "Transfer from"
-            if let username = transaction.fromUser?.appropriateDisplayName() {
-                
-                cell.detailTextLabel?.text = "\(username)"
-                cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-            }
-            else{
-                
-                cell.detailTextLabel?.text = ""
-            }
-            
+            cell.textLabel?.text = "Location"
+            cell.detailTextLabel?.text = "None"
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-            
-            return cell
         }
         
         return UITableViewCell()
@@ -244,21 +290,22 @@ extension SaveTransactionViewController: FormViewDelegate {
                 if response == AlertResponse.Confirm {
                     
                     self.updateUIForSavingOrDeleting()
+                    self.navigationItem.rightBarButtonItem?.enabled = false
                     
-                    self.transaction.deleteInBackgroundWithBlock({ (success, error) -> Void in
+                    let transaction = self.isExistingTransaction ? self.existingTransaction : self.transaction
+                    
+                    IOSession.sharedSession().deletedTransactionIds.append(String.emptyIfNull(transaction?.objectId))
+                    
+                    self.isSaving = true
+                    transaction?.deleteEventually()
+                    
+                    self.showDeletingOverlay()
+                    
+                    NSTimer.schedule(delay: 2.5) { timer in
                         
-                        if success{
-                            
-                            self.popAll()
-                            self.delegate?.itemDidGetDeleted()
-                            
-                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.transaction.pushNotificationTargets(), message: "Transfer: \(self.transaction.title!) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
-                        }
-                        else{
-                            
-                            ParseUtilities.showAlertWithErrorIfExists(error)
-                        }
-                    })
+                        self.popAll()
+                        self.delegate?.itemDidGetDeleted()
+                    }
                 }
             })
         }
@@ -268,18 +315,21 @@ extension SaveTransactionViewController: FormViewDelegate {
         
         if identifier == "Friend" {
 
-            let usersToChooseFrom = User.userListExcludingID(transaction.fromUser?.objectId)
+            let usersToChooseFrom = User.userListExcludingID(nil) // User.userListExcludingID(transaction.fromUser?.objectId)
             
             let v = SelectUsersViewController(identifier: identifier, user: transaction.toUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
             navigationController?.pushViewController(v, animated: true)
         }
-        
-        if identifier == "User" {
+        else if identifier == "User" {
             
             let usersToChooseFrom = User.userListExcludingID(nil)
             
             let v = SelectUsersViewController(identifier: identifier, user: transaction.fromUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
             navigationController?.pushViewController(v, animated: true)
+        }
+        else if identifier == "Location" {
+            
+            selectPlace()
         }
     }
     
@@ -309,6 +359,55 @@ extension SaveTransactionViewController: UITableViewDelegate {
         
         return cell
     }
+    
+    func tableView(tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        
+        if section == 0 {
+            
+            var view = UIView()
+            
+            var label = UILabel()
+            label.font = UIFont(name: "Helvetica-Light", size: 14)
+            label.textAlignment = NSTextAlignment.Center
+            
+            var verb = "owe"
+            var s: String = User.isCurrentUser(transaction.toUser) ? "" : "s"
+            
+            if transaction.type == TransactionType.payment {
+                
+                verb = "paid"
+                s = ""
+            }
+            
+            label.text = "- \(verb)\(s) -"
+            label.textColor = .darkGrayColor()
+            
+            label.setTranslatesAutoresizingMaskIntoConstraints(false)
+            view.addSubview(label)
+            label.fillSuperView(UIEdgeInsets(top: 0, left: 0, bottom: 17, right: 0))
+            
+            return view
+        }
+        
+        return nil
+    }
+    
+    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        
+        if section == numberOfSectionsInTableView(tableView) - 1 {
+            
+            if transaction.type == TransactionType.iou {
+                
+                return "Use this form to log when you owe one of your friends some money, or if they owe you."
+            }
+            else if transaction.type == TransactionType.payment {
+                
+                return "Use this form to log when you paid or got paid some money by one of your friends."
+            }
+        }
+        
+        return nil
+    }
 }
 
 extension SaveTransactionViewController: SelectUserDelegate {
@@ -318,11 +417,20 @@ extension SaveTransactionViewController: SelectUserDelegate {
         if identifier == "Friend" {
             
             transaction.toUser = user
+            
+            if transaction.fromUser?.objectId == user.objectId {
+                
+                transaction.fromUser = nil
+            }
         }
         if identifier == "User" {
         
             transaction.fromUser = user
-            transaction.toUser = nil
+            
+            if transaction.toUser?.objectId == user.objectId {
+                
+                transaction.toUser = nil
+            }
         }
         
         itemDidChange = true

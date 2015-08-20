@@ -98,6 +98,8 @@ class SelectUsersViewController: ACBaseViewController {
         super.viewWillAppear(animated)
         
         refresh(nil)
+        
+        tableView.backgroundColor = UIColor.whiteColor()
     }
     
     override func refresh(refreshControl: UIRefreshControl?) {

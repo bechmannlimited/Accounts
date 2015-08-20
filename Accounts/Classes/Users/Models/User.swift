@@ -15,17 +15,32 @@ import FBSDKCoreKit
 
 class User: PFUser {
     
-    var friends = [User]()
+    //var friends = [User]()
+    var friends: [User] = []
     var localeDifferenceBetweenActiveUser:Double = 0
     var allInvites = [[FriendRequest]]()
     var passwordForVerification = ""
     
+    var firstName: String {
+        get{
+        
+            let pieces = appropriateDisplayNamesAsArray()
+            if pieces.count > 0 {
+                
+                return pieces[0]
+            }
+            else{
+                
+                return appropriateDisplayName()
+            }
+        }
+    }
+    
     @NSManaged var facebookId: String?
     @NSManaged var displayName: String?
-    
     @NSManaged var friendsIdsWithDifference: Dictionary<String, NSNumber>?
     
-    
+    @NSManaged var lastSyncedDataInfo: Dictionary<String, NSDate>?
     
     func modelIsValid() -> Bool {
         
@@ -56,7 +71,11 @@ class User: PFUser {
     
         var rc = ""
         
-        if let name = displayName {
+        if objectId == User.currentUser()?.objectId {
+            
+            rc = "You"
+        }
+        else if let name = displayName {
             
             rc = name
         }
@@ -68,10 +87,55 @@ class User: PFUser {
         return rc
     }
     
-    func getFriends(completion:() -> ()) {
-
-        friends = [User]()
+    func appropriateShortDisplayName() -> String {
         
+        let name = appropriateDisplayName()
+        
+        if objectId == User.currentUser()?.objectId {
+         
+            return name
+        }
+        
+        let names = appropriateDisplayNamesAsArray()
+        
+        var secondName: String = ""
+        
+        if names.count > 1 {
+            
+            secondName = String.emptyIfNull(names[1])
+        }
+        
+        var requiresExtraInfo = false
+        
+        for friend in friends {
+            
+            for f in friends {
+                
+                if f.firstName == friend.firstName {
+                    
+                    requiresExtraInfo = true
+                }
+            }
+        }
+        
+        if requiresExtraInfo {
+            
+            if secondName.length() >= 1 {
+                
+                return "\(firstName) \(String.emptyIfNull(secondName[0]))"
+            }
+        }
+        
+        return firstName
+    }
+    
+    func appropriateDisplayNamesAsArray() -> [String] {
+        
+        return split(appropriateDisplayName()) {$0 == " "}
+    }
+    
+    func getFriends(completion:(completedRemoteRequest:Bool) -> ()) {
+
         let execRemoteQuery: () -> () = {
             
             let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
@@ -81,14 +145,19 @@ class User: PFUser {
                 
                 if error == nil{
                     
+                    var canContinue = true
+                    
                     Task.executeTaskInBackground({ () -> () in
+                        
+//                        User.currentUser()?.relationForKey(kParse_User_Friends_Key).addObject(User.query()!.getObjectWithId("dtQy9phAlR")!)
+//                        User.currentUser()?.save()
                         
                         var friendInfo = Dictionary<String, NSNumber>()
                         
                         var queries = [PFQuery]()
-                        var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query()
+                        var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
                         
-                        if self.facebookId != nil {
+                        if let facebookId = self.facebookId {
                             
                             let friendsJson = JSON(result)["data"]
                             
@@ -100,24 +169,39 @@ class User: PFUser {
                             }
                         }
                         
-                        queries.append(query1!)
+                        queries.append(query1!)  // must add friends relation back to user
                         
                         self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
                         
                         for friend in self.friends {
                             
-                            let responseJson: JSON = JSON(PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!])!)
-                            friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                            
-                            friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
-                            
+                            if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
+                                
+                                let responseJson = JSON(cloudResponse)
+                                friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+                                friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                            }
+                            else {
+                                
+                                canContinue = false
+                            }
                         }
                         
-                        self.friendsIdsWithDifference = friendInfo
+                        if canContinue {
+                            
+                            PFObject.pinAll(self.friends)
+                            
+                            self.friendsIdsWithDifference = friendInfo
+                            self.pinInBackground()
+                            self.saveInBackground()
+                        }
                         
                     }, completion: { () -> () in
                         
-                        completion()
+                        if canContinue {
+                            
+                            completion(completedRemoteRequest: true)
+                        }
                     })
                 }
                 else{
@@ -126,8 +210,6 @@ class User: PFUser {
                 }
             })
         }
-        
-        //
         
         var ids = [String]()
         
@@ -151,15 +233,17 @@ class User: PFUser {
                         friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
                     }
                     
-                    completion()
+                    completion(completedRemoteRequest: false)
                     execRemoteQuery()
                 }
             })
         }
         else {
             
+            completion(completedRemoteRequest: false)
             execRemoteQuery()
         }
+
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {
@@ -284,4 +368,10 @@ class User: PFUser {
 
         return usersToChooseFrom
     }
+    
+    class func isCurrentUser(user: User?) -> Bool {
+        
+        return user?.objectId == User.currentUser()?.objectId
+    }
+
 }

@@ -19,8 +19,9 @@ class Purchase: PFObject {
     @NSManaged var title: String?
     @NSManaged var user: User
     @NSManaged var purchasedDate:NSDate?
+    //@NSManaged var linkUUID: String?
     
-    @NSManaged var transactions: Array<Transaction>
+    var transactions: Array<Transaction> = []
     //var friends: [User] = []
     //var billSplitDictionary = Dictionary<User, Double>()
     
@@ -75,36 +76,29 @@ class Purchase: PFObject {
         if !modelIsValid() {
 
             completion(success: false)
+            return
         }
+        
+        //var linkUUID = NSUUID().UUIDString
         
         for transaction in transactions {
             
             transaction.transactionDate = purchasedDate!
             transaction.fromUser = user
             transaction.title = title
-            transaction.unpinInBackground()
-        }
-        
-        //unpin()
-        
-        self.saveInBackgroundWithBlock { (success, error) -> Void in
+            transaction.purchase = self
             
-            ParseUtilities.showAlertWithErrorIfExists(error)
+            //SET GUID SAME AS PURCHASE
             
-            if success {
+            if transaction.fromUser != transaction.toUser{
                 
-                if isNewPurchase {
+                transaction.saveEventually({ (success, error) -> Void in
                     
-                    self.pinInBackground()
-                }
-                
-                for transaction in self.transactions {
-                    
-                    transaction.pinInBackground()
-                }
+                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                })
+
+                completion(success:true)
             }
-            
-            completion(success:success)
         }
     }
     
@@ -244,6 +238,46 @@ class Purchase: PFObject {
                 transactions.removeAtIndex(index)
             }
         }
+    }
+    
+    func hardUnpin() {
+        
+        Task.executeTaskInBackground({ () -> () in
+            
+            PFObject.unpinAll(self.transactions)
+            self.unpin()
+            
+        }, completion: { () -> () in
+            
+            
+        })
+    }
+    
+    func copyWithUsefulValues() -> Purchase {
+        
+        var purchase = Purchase()
+        
+        purchase.user = user
+        purchase.amount = amount
+        purchase.title = title
+        purchase.purchasedDate = purchasedDate
+        purchase.transactions = []
+        
+        for transaction in transactions {
+            
+            purchase.transactions.append(transaction.copyWithUsefulValues())
+        }
+        
+        return purchase
+    }
+    
+    func setUsefulValuesFromCopy(purchase: Purchase) {
+        
+        user = purchase.user
+        amount = purchase.amount
+        title = purchase.title
+        purchasedDate = purchase.purchasedDate
+        transactions = purchase.transactions
     }
 }
 

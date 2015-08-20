@@ -156,14 +156,14 @@ public class BaseViewController: UIViewController {
                     
                     if keyboardSize.origin.y == UIScreen.mainScreen().bounds.size.height {
                         
-                        tableView.contentInset = UIEdgeInsets(top: originalContentInset.top + navigationBarHeight, left: originalContentInset.left, bottom: originalContentInset.bottom, right: originalContentInset.right)
+                        tableView.contentInset = UIEdgeInsets(top: originalContentInset.top, left: originalContentInset.left, bottom: originalContentInset.bottom, right: originalContentInset.right)
                         tableView.scrollIndicatorInsets = UIEdgeInsets(top: originalScrollIndicatorInsets.top + navigationBarHeight, left: originalScrollIndicatorInsets.left, bottom: originalScrollIndicatorInsets.bottom, right: originalScrollIndicatorInsets.right)
                         
                     } else {
                         
                         let bottomOffset = keyboardSize.height
                         
-                        tableView.contentInset = UIEdgeInsetsMake(originalContentInset.top + navigationBarHeight, originalContentInset.left, bottomOffset, originalContentInset.right)
+                        tableView.contentInset = UIEdgeInsetsMake(originalContentInset.top, originalContentInset.left, bottomOffset, originalContentInset.right)
                         tableView.scrollIndicatorInsets = UIEdgeInsetsMake(originalScrollIndicatorInsets.top + navigationBarHeight, originalScrollIndicatorInsets.left, bottomOffset, originalScrollIndicatorInsets.right)
                     }
                     

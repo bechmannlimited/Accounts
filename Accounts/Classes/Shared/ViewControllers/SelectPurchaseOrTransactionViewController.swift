@@ -13,7 +13,13 @@ import ABToolKit
 class SelectPurchaseOrTransactionViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
-    var data = [(identifier: "Purchase", textLabelText: "Add purchase"), (identifier: "Transaction", textLabelText: "Add transfer")]
+    
+    var data = [
+        (identifier: "Purchase", textLabelText: "Split a bill"),
+        (identifier: "Transaction", textLabelText: "Add an i.o.u"),
+        (identifier: "TransactionPayment", textLabelText: "Add a payment")
+    ]
+
     var contextualFriend: User?
     var saveItemDelegate: SaveItemDelegate?
     
@@ -25,19 +31,6 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
         tableView.allowsSelectionDuringEditing = true
         
         addCloseButton()
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        if kDevice == .Pad { // isInsidePopover() {
-
-            navigationController?.popoverPresentationController?.backgroundColor = UIColor.clearColor()
-            navigationController?.view.backgroundColor = UIColor.darkGrayColor()
-            view.backgroundColor = UIColor.clearColor()
-            println(isInsidePopover())
-            tableView.backgroundColor = UIColor.clearColor()
-        }
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -103,7 +96,8 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
             
             navigationController?.pushViewController(v, animated: true)
         }
-        else if identifier == "Transaction" {
+        else if identifier == "Transaction" || identifier == "TransactionPayment" {
+
             
             let v = SaveTransactionViewController()
             
@@ -112,6 +106,11 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
                 v.transaction.toUser = friend
             }
             
+            if identifier == "TransactionPayment" {
+                
+                v.transaction.type = TransactionType.payment
+            }
+
             v.delegate = saveItemDelegate
             saveItemDelegate?.newItemViewControllerWasPresented(v)
             
