@@ -28,7 +28,7 @@ class SaveTransactionViewController: SaveItemViewController {
         shouldLoadFormOnLoad = false
         super.viewDidLoad()
 
-        allowEditing = transaction.purchaseTransactionLinkUUID == nil // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
+        allowEditing = true // = transaction.purchaseTransactionLinkUUID == nil // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
         
         showOrHideSaveButton()
         reloadForm()

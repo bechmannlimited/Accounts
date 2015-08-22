@@ -28,7 +28,7 @@ class SavePurchaseViewController: SaveItemViewController {
         shouldLoadFormOnLoad = false
         super.viewDidLoad()
         
-        allowEditing = true 
+        allowEditing = true // dont allow editing on existing purchase
 
         if allowEditing && purchaseObjectId == nil {
 

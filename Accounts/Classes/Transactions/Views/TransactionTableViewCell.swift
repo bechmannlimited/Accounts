@@ -55,7 +55,7 @@ class TransactionTableViewCell: UITableViewCell {
         
         if transaction.purchaseTransactionLinkUUID != nil {
             
-            imageView?.image = kPurchaseImage
+            //imageView?.image = kPurchaseImage
         }
         
         imageView?.tintWithColor(tintColor)

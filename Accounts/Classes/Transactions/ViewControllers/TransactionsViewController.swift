@@ -105,6 +105,8 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         refresh(nil)
+        
+        tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top - 64, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -298,22 +300,13 @@ class TransactionsViewController: ACBaseViewController {
         })
     }
     
-//    override func setNavigationControllerToDefault(){
-//        
-//        navigationController?.navigationBar.tintColor = .whiteColor()
-//        
-//        if 1 == 2 { //let screenshot = headerViewScreenShotImage {
-//            
-//            //navigationController?.navigationBar.setBackgroundImage(screenshot, forBarMetrics: .Default)
-//        }
-//        else {
-//            
-//            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.blackColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
-//        }
-//        
-//        navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
-//        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
-//    }
+    override func setNavigationControllerToDefault(){
+        
+        navigationController?.navigationBar.tintColor = .whiteColor()
+        navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
+        navigationController?.navigationBar.shadowImage = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10))
+        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
+    }
     
     func findAndScrollToCalculatedSelectedCellAtIndexPath(shouldDeselect: Bool) {
         
@@ -574,7 +567,7 @@ class TransactionsViewController: ACBaseViewController {
         
         tableView.addWidthConstraint(relation: NSLayoutRelation.LessThanOrEqual, constant: kTableViewMaxWidth)
         
-        tableView.addTopConstraint(toView: view, relation: .Equal, constant: 0)
+        tableView.addTopConstraint(toView: view, relation: .Equal, constant: navigationController!.navigationBar.frame.height + UIApplication.sharedApplication().statusBarFrame.height)
         tableView.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
         
         tableView.addCenterXConstraint(toView: view)
@@ -713,19 +706,19 @@ extension TransactionsViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
         
-        var y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
-
-        if y < 86 {
-
-            navigationController?.navigationBar.tintColor = UIColor.whiteColor()
-            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
-            navigationController?.navigationBar.shadowImage = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
-            UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
-        }
-        else{
-
-            setNavigationControllerToDefault()
-        }
+//        var y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
+//
+//        if y < 86 {
+//
+//            navigationController?.navigationBar.tintColor = UIColor.whiteColor()
+//            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
+//            navigationController?.navigationBar.shadowImage = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
+//            UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
+//        }
+//        else{
+//
+//            setNavigationControllerToDefault()
+//        }
         
         headerView?.scrollViewDidScroll(scrollView)
     }
