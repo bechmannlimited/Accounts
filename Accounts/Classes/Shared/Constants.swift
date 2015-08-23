@@ -10,3 +10,5 @@
 //
 
 let kTestBotObjectId = "soRCUYqg6W"
+let kSaveTimeoutForRemoteUpdate: NSTimeInterval = 10
+let kDeleteTimeoutForRemoteUpdate: NSTimeInterval = 3

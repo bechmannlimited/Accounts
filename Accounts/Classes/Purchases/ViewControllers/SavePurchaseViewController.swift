@@ -80,28 +80,30 @@ class SavePurchaseViewController: SaveItemViewController {
         
         showSavingOverlay()
         
-        purchase?.savePurchase { (success) -> () in
+        let completion: () -> () = {
             
-            if success {
+            self.delegate?.itemDidChange()
+            self.delegate?.purchaseDidChange(purchase!)
+            self.popAll()
+        }
+        
+        var didCompleteRemotely = false
+        
+        purchase?.savePurchase({ (success) -> () in
+            
+            NSTimer.schedule(delay: kSaveTimeoutForRemoteUpdate){ timer in
                 
-                //self.existingPurchase?.hardUnpin()
-                //PFObject.unpinAll(self.existingPurchase?.transactions)
-                
-                NSTimer.schedule(delay: 2){ timer in
-                   
-                    self.delegate?.itemDidChange()
-                    self.delegate?.purchaseDidChange(purchase!)
-                    self.popAll()
+                if !didCompleteRemotely {
+                    
+                    completion()
                 }
             }
-            else{ // not fired (check savepurchase func
-                
-                //self.existingPurchase?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!)
-                println("error saving purchase")
-            }
             
-            //self.updateUIForEditing()
-        }
+        }, remoteCompletion: { () -> () in
+            
+            completion()
+            didCompleteRemotely = true
+        })
     }
     
     override func saveButtonEnabled() -> Bool {

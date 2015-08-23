@@ -100,17 +100,15 @@ class SaveTransactionViewController: SaveItemViewController {
 
             if success {
 
-                NSTimer.schedule(delay: 2, handler: { timer in
+                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
                 
-                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                if !delegateCallbackHasBeenFired {
                     
-                    if !delegateCallbackHasBeenFired {
-                    
-                        self.delegate?.itemDidChange()
-                        self.delegate?.transactionDidChange(transaction!)
-                        delegateCallbackHasBeenFired = true
-                    }
-                })
+                    self.delegate?.itemDidChange()
+                    self.delegate?.transactionDidChange(transaction!)
+                    delegateCallbackHasBeenFired = true
+                    self.popAll()
+                }
             }
             else{
                 
@@ -130,16 +128,15 @@ class SaveTransactionViewController: SaveItemViewController {
 //        
 //        reachability.startNotifier()
         
-        NSTimer.schedule(delay: 2) { timer in
+        NSTimer.schedule(delay: kSaveTimeoutForRemoteUpdate) { timer in
             
             if !delegateCallbackHasBeenFired {
                 
                 self.delegate?.itemDidChange()
                 self.delegate?.transactionDidChange(transaction!)
                 delegateCallbackHasBeenFired = true
+                self.popAll()
             }
-            
-            self.popAll()
         }
     }
     
@@ -299,7 +296,7 @@ extension SaveTransactionViewController: FormViewDelegate {
                     
                     self.showDeletingOverlay()
                     
-                    NSTimer.schedule(delay: 2.5) { timer in
+                    NSTimer.schedule(delay: kDeleteTimeoutForRemoteUpdate) { timer in
                         
                         self.popAll()
                         self.delegate?.itemDidGetDeleted()

@@ -64,13 +64,13 @@ class Purchase: PFObject {
         }
     }
     
-    func savePurchase(completion: (success:Bool) -> ()) {
+    func savePurchase(initialCompletion: (success:Bool) -> (), remoteCompletion: () -> ()) {
         
         var isNewPurchase = objectId == nil
         
         if !modelIsValid() {
 
-            completion(success: false)
+            initialCompletion(success: false)
             return
         }
         
@@ -81,8 +81,10 @@ class Purchase: PFObject {
 
         saveEventually({ (success, error) -> Void in
             
-            NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+            //NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
         })
+        
+        var transactionsCompleted = 0
         
         for transaction in transactions {
             
@@ -96,10 +98,17 @@ class Purchase: PFObject {
                 
                 transaction.saveEventually({ (success, error) -> Void in
                     
+                    transactionsCompleted++
+
+                    if transactionsCompleted == (self.transactions.count - 1) { // - 1 for one to urself
+
+                        remoteCompletion()
+                    }
+                    
                     NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
                 })
 
-                completion(success:true)
+                initialCompletion(success: true)
             }
         }
     }
