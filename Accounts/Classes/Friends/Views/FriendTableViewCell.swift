@@ -76,19 +76,24 @@ class FriendTableViewCell: UITableViewCell {
             friendImageView.tintWithColor(tintColor)
             friendImageView.clipsToBounds = true
             
-            if let id = friend.facebookId {
+            let completionHandler: () -> () = {
+                
+                self.friendImageView.hideLoader()
+                self.friendImageView.contentMode = UIViewContentMode.ScaleAspectFill
+                //self.friendImageView.image = image
+                self.friendImageView.layer.cornerRadius = self.friendImageViewWidth() / 2
+            }
+            
+            if friend.objectId == kTestBotObjectId {
+                
+                friendImageView.image = AppTools.iconAssetNamed("bender.jpg")
+                completionHandler()
+            }
+            else if let id = friend.facebookId {
                 
                 friendImageView.showLoader()
                 
                 let url = "https://graph.facebook.com/\(id)/picture?width=\(150)&height=\(150)"
-                
-                let completionHandler: () -> () = {
-                    
-                    self.friendImageView.hideLoader()
-                    self.friendImageView.contentMode = UIViewContentMode.ScaleAspectFill
-                    //self.friendImageView.image = image
-                    self.friendImageView.layer.cornerRadius = self.friendImageViewWidth() / 2
-                }
                 
                 friendImageView.loadImageFromURLString(url, placeholderImage: nil) {
                     (finished, error) in
@@ -164,7 +169,7 @@ class FriendTableViewCell: UITableViewCell {
         
         friendImageView.addLeftConstraint(toView: contentView, relation: .Equal, constant: kContentViewHorizontalPadding)
         friendImageView.addCenterYConstraint(toView: contentView)
-        friendImageViewConstraints["Width"] = friendImageView.addWidthConstraint(relation: .Equal, constant:friend.facebookId == nil ? 0 : friendImageViewWidth())
+        friendImageViewConstraints["Width"] = friendImageView.addWidthConstraint(relation: .Equal, constant:friend.facebookId != nil || friend.objectId == kTestBotObjectId ? friendImageViewWidth() : 0)
         friendImageView.addTopConstraint(toView: contentView, attribute: NSLayoutAttribute.Top, relation: NSLayoutRelation.GreaterThanOrEqual, constant: kContentViewVerticalPadding)
         friendImageView.addBottomConstraint(toView: contentView, attribute: NSLayoutAttribute.Bottom, relation: NSLayoutRelation.GreaterThanOrEqual, constant: -kContentViewVerticalPadding)
 

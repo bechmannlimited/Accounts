@@ -362,6 +362,8 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         let friend = data[indexPath.section][indexPath.row]
         (cell as FriendTableViewCell).setup(friend)
         
+        //cell.layer.rasterizationScale = UIScreen.mainScreen().scale
+        //cell.layer.shouldRasterize = true
         return cell
     }
 
@@ -394,7 +396,17 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         
         return ""
     }
-        
+    
+//    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+//        
+//        if section == numberOfSectionsInTableView(tableView) - 1 && User.currentUser()?.friends.count > 0 && User.currentUser()?.friends.count < 2 {
+//            
+//            return "Your Facebook friends who have this app, will appear here!"
+//        }
+//        
+//        return nil
+//    }
+    
     func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
         
         return tableView.editing ? .Delete : .None

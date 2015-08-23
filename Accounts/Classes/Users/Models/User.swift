@@ -87,6 +87,20 @@ class User: PFUser {
         return rc
     }
     
+//    func imageUrl() -> String? {
+//        
+//        if objectId == "soRCUYqg6W" {
+//            
+//            return "bender.jpg"
+//        }
+//        else if let id = facebookId{
+//            
+//            return "https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)"
+//        }
+//        
+//        return nil
+//    }
+    
     func appropriateShortDisplayName() -> String {
         
         let name = appropriateDisplayName()
@@ -169,6 +183,13 @@ class User: PFUser {
                             }
                         }
                         
+                        if Settings.shouldShowTestBot() {
+                            
+                            let botQuery = User.query()
+                            botQuery?.whereKey("objectId", equalTo: kTestBotObjectId)
+                            queries.append(botQuery!)
+                        }
+                        
                         queries.append(query1!)  // must add friends relation back to user
                         
                         self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
@@ -221,6 +242,11 @@ class User: PFUser {
             }
             
             let localQuery = User.query()?.whereKey("objectId", containedIn: ids).orderByAscending("objectId").fromLocalDatastore()
+            
+            if !Settings.shouldShowTestBot() {
+                
+                localQuery?.whereKey("objectId", notEqualTo: "soRCUYqg6W")
+            }
             
             localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 

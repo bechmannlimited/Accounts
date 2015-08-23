@@ -106,7 +106,52 @@ class TransactionsViewController: ACBaseViewController {
         
         refresh(nil)
         
-        tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top - 64, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
+        tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top - 64, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom - 60, right: tableView.contentInset.right)
+        
+        test()
+    }
+    
+    func test() {
+        
+        if kDevice == .Phone {
+            
+            if friend.objectId == kTestBotObjectId || friend.facebookId != nil {
+                
+                let imageView = UIImageView()
+                imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
+                view.addSubview(imageView)
+                imageView.fillSuperView(UIEdgeInsetsZero)
+                view.sendSubviewToBack(imageView)
+                
+                if friend.objectId == kTestBotObjectId {
+                    
+                    imageView.image = AppTools.iconAssetNamed("bender.jpg")
+                }
+                else if let id = friend.facebookId{
+                    
+                    let url = "https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)"
+                    
+                    imageView.loadImageFromURLString(url, placeholderImage: nil) {
+                        (finished, error) in
+                        
+                    }
+                }
+                
+                let blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))
+                blurView.setTranslatesAutoresizingMaskIntoConstraints(false)
+                imageView.addSubview(blurView)
+                blurView.fillSuperView(UIEdgeInsetsZero)
+                
+                let cover = UIView()
+                cover.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(kDevice == .Pad ? 0.75 : 0.45)
+                cover.setTranslatesAutoresizingMaskIntoConstraints(false)
+                imageView.addSubview(cover)
+                cover.fillSuperView(UIEdgeInsetsZero)
+                
+                imageView.layer.rasterizationScale = UIScreen.mainScreen().scale
+                imageView.layer.shouldRasterize = true
+            }
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -139,7 +184,11 @@ class TransactionsViewController: ACBaseViewController {
         headerView?.delegate = self
         setHeaderTitleText()
         
-        if let id = friend.facebookId{
+        if friend.objectId == kTestBotObjectId {
+            
+            headerView?.heroImageView.image = AppTools.iconAssetNamed("bender.jpg")
+        }
+        else if let id = friend.facebookId{
             
             headerView?.getHeroImage("https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)")
         }
@@ -604,6 +653,10 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         
         cell.setupCell(transaction)
 
+        cell.backgroundColor = kDevice == .Pad ? UIColor.whiteColor() : UIColor.whiteColor().colorWithAlphaComponent(0.5)
+        cell.layer.rasterizationScale = UIScreen.mainScreen().scale
+        cell.layer.shouldRasterize = true
+        
         return cell
     }
     
@@ -675,7 +728,7 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
         popoverViewController = nil
         deselectSelectedCell(tableView)
         scrollViewDidScroll(tableView)
-        //getDifferenceAndRefreshIfNeccessary(nil)
+        setNavigationControllerToDefault()
     }
     
     func popoverPresentationControllerShouldDismissPopover(popoverPresentationController: UIPopoverPresentationController) -> Bool {
@@ -695,11 +748,6 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
             return true
         }
     }
-    
-//    func popoverPresentationController(popoverPresentationController: UIPopoverPresentationController, willRepositionPopoverToRect rect: UnsafeMutablePointer<CGRect>, inView view: AutoreleasingUnsafeMutablePointer<UIView?>) {
-//        
-//        popoverPresentationController.backgroundColor = UIColor.clearColor()
-//    }
 }
 
 extension TransactionsViewController: UIScrollViewDelegate {

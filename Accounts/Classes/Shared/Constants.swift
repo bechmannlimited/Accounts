@@ -9,3 +9,4 @@
 //import Foundation
 //
 
+let kTestBotObjectId = "soRCUYqg6W"
