@@ -9,42 +9,29 @@
 import UIKit
 import ABToolKit
 import Alamofire
+import AwesomeCache
 
 class ABImageLoader: NSObject {
    
-    class func loadImageFromCacheThenNetwork(imageURL: String, completion: (image: UIImage) -> ()) {
+    class func loadImageFromCacheThenNetwork(imageUrl: String, completion: (image: UIImage) -> ()) {
         
-        //var image: UIImage?
+        var didReceiveRemoteImage = false
         
-        let imageCache = NSCache()
+        let cache = Cache<UIImage>(name: "imageCache")
         
-        if let image = imageCache.objectForKey(imageURL) as? UIImage {
-            println(image)
+        if let image = cache[imageUrl] {
+            
             completion(image: image)
         }
         
-        let request = Alamofire.request(.GET, imageURL).validate(contentType: ["image/*"]).response() {
-            (request, response, data , error) in
+        ImageLoader.sharedLoader().imageForUrl(imageUrl, completionHandler: { (image, url) -> () in
             
-            if error == nil {
+            if let image: UIImage = image {
                 
-                if let data = data as? NSData {
-                    
-                    let image: UIImage = UIImage(data: data, scale: 1.0)!
-                    println(image)
-                    
-                    imageCache.setObject(image, forKey: request.URLString)
-                    
-                    completion(image: image)
-                }
-                
-            } else {
-                /*
-                If the cell went off-screen before the image was downloaded, we cancel it and
-                an NSURLErrorDomain (-999: cancelled) is returned. This is a normal behavior.
-                */
+                cache[imageUrl] = image
+                completion(image: image)
+                didReceiveRemoteImage = true
             }
-        }
+        })
     }
-    
 }

@@ -135,14 +135,24 @@ class TransactionsViewController: ACBaseViewController {
                     
                     let url = "https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)"
                     
-                    imageView.loadImageFromURLString(url, placeholderImage: nil) {
-                        (finished, error) in
+                    ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+                        
+                        imageView.image = image
                         
                         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
                             
                             imageView.layer.opacity = 1
                         })
-                    }
+                    })
+                    
+//                    imageView.loadImageFromURLString(url, placeholderImage: nil) {
+//                        (finished, error) in
+//                        
+//                        UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+//                            
+//                            imageView.layer.opacity = 1
+//                        })
+//                    }
                 }
                 
                 let blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))

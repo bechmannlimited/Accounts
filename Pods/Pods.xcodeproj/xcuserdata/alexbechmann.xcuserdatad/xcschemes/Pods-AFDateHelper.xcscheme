@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "696A7CC9BB3C06B01F4043CD"
+               BlueprintIdentifier = "BC9EB917D6A8ABB48AF87261"
                BuildableName = "AFDateHelper.framework"
                BlueprintName = "Pods-AFDateHelper"
                ReferencedContainer = "container:Pods.xcodeproj">

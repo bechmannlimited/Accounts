@@ -133,18 +133,32 @@ class BouncyHeaderView: UIView {
         
         heroImageView.layer.opacity = 0
         
-        heroImageView.loadImageFromURLString(url, placeholderImage: nil) {
-            (finished, error) in
+        ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+            
+            self.heroImageView.image = image
             
             UIView.animateWithDuration(0.35, animations: { () -> Void in
                 
                 self.heroImageView.layer.opacity = 1
                 
-            }, completion: { (finished) -> Void in
-                
-                self.delegate?.imageViewImageDidLoad()
+                }, completion: { (finished) -> Void in
+                    
+                    self.delegate?.imageViewImageDidLoad()
             })
-        }
+        })
+        
+//        heroImageView.loadImageFromURLString(url, placeholderImage: nil) {
+//            (finished, error) in
+//            
+//            UIView.animateWithDuration(0.35, animations: { () -> Void in
+//                
+//                self.heroImageView.layer.opacity = 1
+//                
+//            }, completion: { (finished) -> Void in
+//                
+//                self.delegate?.imageViewImageDidLoad()
+//            })
+//        }
     }
     
     func setupHeroImageBlurView() {

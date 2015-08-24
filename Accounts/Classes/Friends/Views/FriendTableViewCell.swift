@@ -95,32 +95,17 @@ class FriendTableViewCell: UITableViewCell {
                 
                 let url = "https://graph.facebook.com/\(id)/picture?width=\(150)&height=\(150)"
                 
-                friendImageView.loadImageFromURLString(url, placeholderImage: nil) {
-                    (finished, error) in
+//                friendImageView.loadImageFromURLString(url, placeholderImage: nil) {
+//                    (finished, error) in
+//                    
+//                    completionHandler()
+//                }
+
+                ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
                     
+                    self.friendImageView.image = image
                     completionHandler()
-                }
-                
-//                ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
-//                    
-//                    completionHandler(image: image)
-//                })
-                
-//                ImageLoader.sharedLoader().imageForUrl(url, completionHandler: { (image, url) -> () in
-//                    
-//                    if let image = image {
-//                        
-//                        completionHandler(image: image)
-//                    }
-//                    
-//                    if image == nil {
-//                        
-//                        ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
-//                            
-//                            completionHandler(image: image)
-//                        })
-//                    }
-//                })
+                })
             }
         }
     }
