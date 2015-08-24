@@ -96,6 +96,8 @@ class Purchase: PFObject {
             
             if transaction.fromUser != transaction.toUser{
                 
+                Transaction.calculateOfflineOweValuesWithTransaction(transaction)
+                
                 transaction.saveEventually({ (success, error) -> Void in
                     
                     transactionsCompleted++

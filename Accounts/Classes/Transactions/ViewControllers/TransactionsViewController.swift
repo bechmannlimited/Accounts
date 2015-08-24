@@ -106,18 +106,17 @@ class TransactionsViewController: ACBaseViewController {
         
         refresh(nil)
         
-        tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top - 64, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom - 60, right: tableView.contentInset.right)
-        
-        test()
+        tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top - 64, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
     }
     
-    func test() {
+    func setupBackgroundBlurView() {
         
         if kDevice == .Phone {
             
             if friend.objectId == kTestBotObjectId || friend.facebookId != nil {
                 
                 let imageView = UIImageView()
+                imageView.layer.opacity = 0
                 imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
                 view.addSubview(imageView)
                 imageView.fillSuperView(UIEdgeInsetsZero)
@@ -126,6 +125,11 @@ class TransactionsViewController: ACBaseViewController {
                 if friend.objectId == kTestBotObjectId {
                     
                     imageView.image = AppTools.iconAssetNamed("bender.jpg")
+                    
+                    UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                        
+                        imageView.layer.opacity = 1
+                    })
                 }
                 else if let id = friend.facebookId{
                     
@@ -134,6 +138,10 @@ class TransactionsViewController: ACBaseViewController {
                     imageView.loadImageFromURLString(url, placeholderImage: nil) {
                         (finished, error) in
                         
+                        UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                            
+                            imageView.layer.opacity = 1
+                        })
                     }
                 }
                 
@@ -162,6 +170,7 @@ class TransactionsViewController: ACBaseViewController {
             findAndScrollToCalculatedSelectedCellAtIndexPath(true)
         }
         
+        setHeaderTitleText()
         tableView.delegate = self // incase it wasnt set due to viewwilldissapear method
         scrollViewDidScroll(tableView)
     }
@@ -233,6 +242,7 @@ class TransactionsViewController: ACBaseViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
+        setupBackgroundBlurView()
         popoverViewController = nil // to make sure
         setupInfiniteScrolling()
     }
@@ -241,25 +251,6 @@ class TransactionsViewController: ACBaseViewController {
         
         refresh(nil)
     }
-    
-//    override func didReceivePushNotification(notification: NSNotification) {
-//        
-//        if let object: AnyObject = notification.object{
-//            
-//            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
-//            
-//            if PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved{
-//                
-//                if let userIds = object["userIds"] as? [String] {
-//                    
-//                    if contains(userIds, friend.objectId!){
-//                        
-//                        getDifferenceAndRefreshIfNeccessary(nil)
-//                    }
-//                }
-//            }
-//        }
-//    }
     
     func query() -> PFQuery? {
         
@@ -482,22 +473,9 @@ class TransactionsViewController: ACBaseViewController {
                         PFObject.unpinAll(self.query()?.fromLocalDatastore().findObjects())
                         PFObject.pinAll(transactions)
                         
-                        self.reorderTransactions()
-                        self.transactions = transactions
-                        
                     }, completion: { () -> () in
                         
-                        refreshControl?.endRefreshing()
-                        self.tableView.reloadData()
-                        self.view.hideLoader()
-                        self.showOrHideTableOrNoDataView()
-                        self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
-                        self.refreshBarButtonItem?.enabled = true
-                        
-                        UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
-                            
-                            self.tableView.layer.opacity = 1
-                        })
+                        self.reloadTableViewFromLocalDataSource(nil)
                         
                         //last synced label
                         User.currentUser()?.lastSyncedDataInfo?["Transactions_\(self.friend.objectId!)"] = NSDate()
@@ -513,7 +491,6 @@ class TransactionsViewController: ACBaseViewController {
         self.refreshBarButtonItem?.enabled = false
         
         var localQuery = query()?.fromLocalDatastore()
-        localQuery?.limit = 35
         
         localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             
@@ -569,17 +546,18 @@ class TransactionsViewController: ACBaseViewController {
                 
                 if let transactions = objects as? [Transaction] {
                     
-                    for transaction in transactions {
+                    Task.executeTaskInBackground({ () -> () in
                         
-                        self.transactions.append(transaction)
-                        transaction.pinInBackground()
-                    }
+                    PFObject.pinAll(transactions)
+                    
+                    }, completion: { () -> () in
+                        
+                        self.reloadTableViewFromLocalDataSource({ () -> () in
+                            
+                            self.tableView.infiniteScrollingView.stopAnimating()
+                        })
+                    })
                 }
-                
-                self.reorderTransactions()
-                self.tableView.infiniteScrollingView.stopAnimating()
-                self.tableView.reloadData()
-                self.showOrHideTableOrNoDataView() // just in case
             })
         }
         else{

@@ -85,6 +85,9 @@ class SaveTransactionViewController: SaveItemViewController {
         
         var copyOfOriginalForIfSaveFails = existingTransaction?.copyWithUsefulValues()
         
+        Transaction.calculateOfflineOweValuesByDeletingTransaction(existingTransaction)
+        Transaction.calculateOfflineOweValuesWithTransaction(self.transaction)
+        
         let transaction = isExistingTransaction ? existingTransaction : self.transaction
         
         if isExistingTransaction {
@@ -112,22 +115,10 @@ class SaveTransactionViewController: SaveItemViewController {
             }
             else{
                 
-                //self.existingTransaction?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!) // remove this again?
                 ParseUtilities.showAlertWithErrorIfExists(error)
             }
-
-            //self.updateUIForEditing()
         }
-        
-//        let reachability = Reachability.reachabilityForInternetConnection()
-//        
-//        reachability.whenUnreachable = { reachability in
-//            
-//            UIAlertView(title: "No connection", message: "This item will be saved online as soon as a network connection is available.", delegate: nil, cancelButtonTitle: "Ok", otherButtonTitles: nil, nil).show()
-//        }
-//        
-//        reachability.startNotifier()
-        
+
         NSTimer.schedule(delay: kSaveTimeoutForRemoteUpdate) { timer in
             
             if !delegateCallbackHasBeenFired {
@@ -292,6 +283,9 @@ extension SaveTransactionViewController: FormViewDelegate {
                     IOSession.sharedSession().deletedTransactionIds.append(String.emptyIfNull(transaction?.objectId))
                     
                     self.isSaving = true
+                    
+                    Transaction.calculateOfflineOweValuesByDeletingTransaction(self.existingTransaction)
+                    
                     transaction?.deleteEventually()
                     
                     self.showDeletingOverlay()

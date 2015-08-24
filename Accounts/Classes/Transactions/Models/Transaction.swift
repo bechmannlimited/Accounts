@@ -194,6 +194,40 @@ class Transaction: PFObject {
         transactionDate = transaction.transactionDate
         purchase = transaction.purchase
     }
+    
+    class func calculateOfflineOweValuesWithTransaction(transaction: Transaction?){
+        
+        if let transaction = transaction {
+            
+            if transaction.fromUser?.objectId == User.currentUser()?.objectId  {
+                
+                transaction.toUser?.localeDifferenceBetweenActiveUser += transaction.amount
+                User.currentUser()?.friendsIdsWithDifference?[transaction.toUser!.objectId!] = NSNumber(double: transaction.toUser!.localeDifferenceBetweenActiveUser)
+            }
+            else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
+                
+                transaction.fromUser?.localeDifferenceBetweenActiveUser -= transaction.amount
+                User.currentUser()?.friendsIdsWithDifference?[transaction.fromUser!.objectId!] = NSNumber(double: transaction.fromUser!.localeDifferenceBetweenActiveUser)
+            }
+        }
+    }
+    
+    class func calculateOfflineOweValuesByDeletingTransaction(transaction: Transaction?){
+        
+        if let transaction = transaction {
+            
+            if transaction.fromUser?.objectId == User.currentUser()?.objectId  {
+                
+                transaction.toUser?.localeDifferenceBetweenActiveUser -= transaction.amount
+                User.currentUser()?.friendsIdsWithDifference?[transaction.toUser!.objectId!] = NSNumber(double: transaction.toUser!.localeDifferenceBetweenActiveUser)
+            }
+            else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
+                
+                transaction.fromUser?.localeDifferenceBetweenActiveUser += transaction.amount
+                User.currentUser()?.friendsIdsWithDifference?[transaction.fromUser!.objectId!] = NSNumber(double: transaction.fromUser!.localeDifferenceBetweenActiveUser)
+            }
+        }
+    }
 }
 
 extension Transaction: PFSubclassing {
