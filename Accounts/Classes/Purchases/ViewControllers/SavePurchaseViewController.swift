@@ -20,8 +20,7 @@ class SavePurchaseViewController: SaveItemViewController {
     
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
-    
-    //var oldTransactions = [Dictionary<String, AnyObject?>]()
+    var billSplitChanges = Dictionary<String, String?>()
     
     override func viewDidLoad() {
         
@@ -201,7 +200,8 @@ extension SavePurchaseViewController: FormViewDelegate {
         if identifier == "Amount" {
             
             purchase.localeAmount = value
-            purchase.splitTheBill()
+            billSplitChanges.removeAll(keepCapacity: false)
+            purchase.splitTheBill(billSplitChanges, givePriorityTo: nil)
         }
         
         for transaction in purchase.transactions {
@@ -210,10 +210,13 @@ extension SavePurchaseViewController: FormViewDelegate {
                 
                 transaction.amount = value
                 
-                purchase.calculateTotalFromTransactions()
+                //purchase.calculateTotalFromTransactions()
+                billSplitChanges[transaction.toUser!.objectId!] = transaction.toUser!.objectId!
                 setTextFieldValueAndUpdateConfig(identifier, value: Formatter.formatCurrencyAsString(value), cell: billSplitCells[transaction.toUser!])
             }
         }
+        let id = identifier.replaceString("transactionTo", withString: "").replaceString("Optional(", withString: "").replaceString(")", withString: "").replaceString("\"", withString: "")
+        purchase.splitTheBill(billSplitChanges, givePriorityTo: id)
         
         setFriendAmountTextFields()
     }
@@ -258,8 +261,6 @@ extension SavePurchaseViewController: FormViewDelegate {
                             
                             self.popAll()
                             self.delegate?.itemDidGetDeleted()
-                            
-                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) (\(Formatter.formatCurrencyAsString(purchase!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                         }
                         else{
                             
@@ -425,7 +426,13 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     billSplitCells.removeValueForKey(friend)
                     purchase.removeTransactionForToUser(friend)
                     
-                    purchase.splitTheBill()
+                    if billSplitChanges[friend.objectId!] != nil {
+                        
+                        billSplitChanges.removeValueForKey(friend.objectId!)
+                    }
+                    
+                    //
+                    purchase.splitTheBill(billSplitChanges, givePriorityTo: nil)
                     //purchase.calculateTotalFromBillSplitDictionary()
                     setFriendAmountTextFields()
                     
@@ -467,7 +474,8 @@ extension SavePurchaseViewController: SelectUsersDelegate {
             transaction.amount = 0
             purchase.transactions.append(transaction)
             
-            purchase.splitTheBill()
+            //billSplitChanges.removeAll(keepCapacity: false)
+            purchase.splitTheBill(billSplitChanges, givePriorityTo: nil)
         }
 
         itemDidChange = true
@@ -490,8 +498,8 @@ extension SavePurchaseViewController: SelectUserDelegate {
             transaction.toUser = user
             transaction.amount = 0
             purchase.transactions.append(transaction)
-            
-            purchase.splitTheBill()
+            billSplitChanges = Dictionary<String, String?>()
+            purchase.splitTheBill(billSplitChanges, givePriorityTo: nil)
         }
         
         itemDidChange = true

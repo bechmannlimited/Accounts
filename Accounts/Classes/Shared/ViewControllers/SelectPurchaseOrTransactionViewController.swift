@@ -15,9 +15,9 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     
     var data = [
-        (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, and should be split between multiple people."),
         (identifier: "Transaction", textLabelText: "Add an i.o.u", footer: "Add an iou if you owe one of your friends some money, or if they owe you."),
-        (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid some money by one of your friends.")
+        (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid some money by one of your friends."),
+        (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, and should be split between multiple people.")
     ]
 
     var contextualFriend: User?
