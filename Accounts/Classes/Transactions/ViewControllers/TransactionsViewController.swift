@@ -135,7 +135,7 @@ class TransactionsViewController: ACBaseViewController {
                     
                     let url = "https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)"
                     
-                    ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+                    ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
                         
                         imageView.image = image
                         
@@ -144,15 +144,6 @@ class TransactionsViewController: ACBaseViewController {
                             imageView.layer.opacity = 1
                         })
                     })
-                    
-//                    imageView.loadImageFromURLString(url, placeholderImage: nil) {
-//                        (finished, error) in
-//                        
-//                        UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
-//                            
-//                            imageView.layer.opacity = 1
-//                        })
-//                    }
                 }
                 
                 let blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))
@@ -200,7 +191,6 @@ class TransactionsViewController: ACBaseViewController {
         
         headerView = BouncyHeaderView()
         headerView?.setupHeaderWithOriginView(view, originTableView: tableView)
-        headerView?.delegate = self
         setHeaderTitleText()
         
         if friend.objectId == kTestBotObjectId {
@@ -277,6 +267,7 @@ class TransactionsViewController: ACBaseViewController {
         query = PFQuery.orQueryWithSubqueries([queryForFromUser!, queryForToUser!])
         query?.orderByDescending("transactionDate")
         query?.whereKey("objectId", notContainedIn: IOSession.sharedSession().deletedTransactionIds)
+        query?.whereKey("isDeleted", notEqualTo: true)
         
         activeQueries.append(query)
         
@@ -717,6 +708,7 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
         deselectSelectedCell(tableView)
         scrollViewDidScroll(tableView)
         setNavigationControllerToDefault()
+        setHeaderTitleText()
     }
     
     func popoverPresentationControllerShouldDismissPopover(popoverPresentationController: UIPopoverPresentationController) -> Bool {
@@ -741,20 +733,6 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
 extension TransactionsViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
-        
-//        var y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
-//
-//        if y < 86 {
-//
-//            navigationController?.navigationBar.tintColor = UIColor.whiteColor()
-//            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
-//            navigationController?.navigationBar.shadowImage = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
-//            UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
-//        }
-//        else{
-//
-//            setNavigationControllerToDefault()
-//        }
         
         headerView?.scrollViewDidScroll(scrollView)
     }
@@ -795,35 +773,5 @@ extension TransactionsViewController: SaveItemDelegate {
     func dismissPopover() {
         
         
-    }
-}
-
-extension TransactionsViewController: BouncyHeaderViewDelegate {
-    
-//    override func setNavigationControllerToDefault() {
-//        
-//        if let image = headerViewScreenShotImage {
-//
-//            navigationController?.navigationBar.tintColor = .whiteColor()
-//            
-//            if navigationController?.navigationBar.backgroundImageForBarMetrics(.Default) != image {
-//                
-//                navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
-//            }
-//            
-//            navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
-//            UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
-//        }
-//        else {
-//            
-//            super.setNavigationControllerToDefault()
-//        }
-//    }
-//    
-    func imageViewImageDidLoad() {
-        
-//        self.headerView?.titleLabel.hidden = true
-//        self.headerViewScreenShotImage = self.headerView?.screenShot()
-//        self.headerView?.titleLabel.hidden = false
     }
 }

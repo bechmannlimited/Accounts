@@ -30,6 +30,7 @@ class Transaction: PFObject {
     @NSManaged var transactionDate: NSDate
     @NSManaged private var transactionType: NSNumber?
     @NSManaged var purchaseTransactionLinkUUID: String?
+    @NSManaged var isDeleted: Bool
     
     var purchase: Purchase?
     

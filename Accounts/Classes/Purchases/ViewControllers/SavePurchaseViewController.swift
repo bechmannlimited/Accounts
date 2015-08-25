@@ -441,16 +441,6 @@ extension SavePurchaseViewController: UITableViewDelegate {
         
         showOrHideSaveButton()
     }
-    
-    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        
-        if section == numberOfSectionsInTableView(tableView) - 1{ // && not is existing object
-            
-            return "Use this form if someone paid the full price for something, and should be split between multiple people."
-        }
-        
-        return nil
-    }
 }
 
 extension SavePurchaseViewController: SelectUsersDelegate {

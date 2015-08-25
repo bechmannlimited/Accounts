@@ -94,14 +94,8 @@ class FriendTableViewCell: UITableViewCell {
                 friendImageView.showLoader()
                 
                 let url = "https://graph.facebook.com/\(id)/picture?width=\(150)&height=\(150)"
-                
-//                friendImageView.loadImageFromURLString(url, placeholderImage: nil) {
-//                    (finished, error) in
-//                    
-//                    completionHandler()
-//                }
 
-                ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+                ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
                     
                     self.friendImageView.image = image
                     completionHandler()

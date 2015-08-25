@@ -287,6 +287,7 @@ extension SaveTransactionViewController: FormViewDelegate {
                     Transaction.calculateOfflineOweValuesByDeletingTransaction(self.existingTransaction)
                     
                     transaction?.deleteEventually()
+                    transaction?.isDeleted = true
                     
                     self.showDeletingOverlay()
                     
@@ -385,27 +386,6 @@ extension SaveTransactionViewController: UITableViewDelegate {
             return view
         }
         
-        return nil
-    }
-    
-    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        
-        if !isExistingTransaction {
-            
-            if section == numberOfSectionsInTableView(tableView) - 1 {
-                
-                if transaction.type == TransactionType.iou {
-                    
-                    return "Use this form to log when you owe one of your friends some money, or if they owe you."
-                }
-                else if transaction.type == TransactionType.payment {
-                    
-                    return "Use this form to log when you paid or got paid some money by one of your friends."
-                }
-            }
-            
-        }
-
         return nil
     }
 }

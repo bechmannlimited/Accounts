@@ -4,11 +4,6 @@ import ABToolKit
 
 private let kTitlePadding: CGFloat = 12
 
-protocol BouncyHeaderViewDelegate{
-    
-    //func bouncyView(bouncyView: BouncyView, recommendedContentInsetForOriginTableView: UIEdgeInsets)
-    func imageViewImageDidLoad()
-}
 
 class BouncyHeaderView: UIView {
     
@@ -24,9 +19,7 @@ class BouncyHeaderView: UIView {
     
     var titleLabel = UILabel()
     var titleLabelHeight:CGFloat = 0
-    
-    var delegate: BouncyHeaderViewDelegate?
-    
+
     func setupHeaderWithOriginView(originView: UIView, originTableView: UITableView){
         
         self.originView = originView
@@ -111,8 +104,7 @@ class BouncyHeaderView: UIView {
             titleLabel.layer.opacity = 1
         }
     }
-    
-    
+
     func setupHeroImage() {
         
         heroImageView.setTranslatesAutoresizingMaskIntoConstraints(false)
@@ -129,11 +121,9 @@ class BouncyHeaderView: UIView {
     
     func getHeroImage(url: String) {
         
-        //heroImageView.showLoader()
-        
         heroImageView.layer.opacity = 0
         
-        ABImageLoader.loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+        ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
             
             self.heroImageView.image = image
             
@@ -143,22 +133,9 @@ class BouncyHeaderView: UIView {
                 
                 }, completion: { (finished) -> Void in
                     
-                    self.delegate?.imageViewImageDidLoad()
+                    //self.delegate?.imageViewImageDidLoad()
             })
         })
-        
-//        heroImageView.loadImageFromURLString(url, placeholderImage: nil) {
-//            (finished, error) in
-//            
-//            UIView.animateWithDuration(0.35, animations: { () -> Void in
-//                
-//                self.heroImageView.layer.opacity = 1
-//                
-//            }, completion: { (finished) -> Void in
-//                
-//                self.delegate?.imageViewImageDidLoad()
-//            })
-//        }
     }
     
     func setupHeroImageBlurView() {
