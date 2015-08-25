@@ -115,8 +115,8 @@ class Purchase: PFObject {
         }
     }
     
-    func splitTheBill(var ignoreIdList: Dictionary<String, String?>, givePriorityTo: String?) { //, editingTransaction: Transaction?) {
-        
+    func splitTheBill(inout ignoreIdList: Dictionary<String, String?>, givePriorityTo: String?) { //, editingTransaction: Transaction?) {
+        println(ignoreIdList)
         var debug: () -> () = {
             
             var totalCheck:Double = 0
@@ -158,6 +158,7 @@ class Purchase: PFObject {
                     
                     if priorityTransaction.amount + transaction.amount > self.amount {
                         
+                        transaction.amount = 0
                         ignoreIdList.removeValueForKey(transaction.toUser!.objectId!)
                     }
                     else {
@@ -195,6 +196,8 @@ class Purchase: PFObject {
         
         if let id = givePriorityTo { // attempt 2
 
+            ignoreIdList.removeAll(keepCapacity: false)
+            
             if let transaction = transactionForToUserId(id) {
  
                 transaction.amount = transaction.amount <= self.amount ? transaction.amount : self.amount
@@ -209,7 +212,7 @@ class Purchase: PFObject {
                 for transaction in transactions {
                     
                     transaction.amount = splitAmount > 0 ? splitAmount : 0
-                    ignoreIdList.removeValueForKey(transaction.toUser!.objectId!)
+                    //ignoreIdList.removeValueForKey(transaction.toUser!.objectId!)
                 }
                 
                 didComplete = true

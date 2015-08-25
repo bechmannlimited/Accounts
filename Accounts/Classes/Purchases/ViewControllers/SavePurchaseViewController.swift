@@ -201,7 +201,7 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             purchase.localeAmount = value
             billSplitChanges.removeAll(keepCapacity: false)
-            purchase.splitTheBill(billSplitChanges, givePriorityTo: nil)
+            purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
         }
         
         for transaction in purchase.transactions {
@@ -215,8 +215,9 @@ extension SavePurchaseViewController: FormViewDelegate {
                 setTextFieldValueAndUpdateConfig(identifier, value: Formatter.formatCurrencyAsString(value), cell: billSplitCells[transaction.toUser!])
             }
         }
+        
         let id = identifier.replaceString("transactionTo", withString: "").replaceString("Optional(", withString: "").replaceString(")", withString: "").replaceString("\"", withString: "")
-        purchase.splitTheBill(billSplitChanges, givePriorityTo: id)
+        purchase.splitTheBill(&billSplitChanges, givePriorityTo: id)
         
         setFriendAmountTextFields()
     }
@@ -432,7 +433,7 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     }
                     
                     //
-                    purchase.splitTheBill(billSplitChanges, givePriorityTo: nil)
+                    purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
                     //purchase.calculateTotalFromBillSplitDictionary()
                     setFriendAmountTextFields()
                     
@@ -475,7 +476,7 @@ extension SavePurchaseViewController: SelectUsersDelegate {
             purchase.transactions.append(transaction)
             
             //billSplitChanges.removeAll(keepCapacity: false)
-            purchase.splitTheBill(billSplitChanges, givePriorityTo: nil)
+            purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
         }
 
         itemDidChange = true
@@ -499,7 +500,7 @@ extension SavePurchaseViewController: SelectUserDelegate {
             transaction.amount = 0
             purchase.transactions.append(transaction)
             billSplitChanges = Dictionary<String, String?>()
-            purchase.splitTheBill(billSplitChanges, givePriorityTo: nil)
+            purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
         }
         
         itemDidChange = true
