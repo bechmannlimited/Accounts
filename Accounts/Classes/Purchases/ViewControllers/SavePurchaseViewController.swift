@@ -428,13 +428,12 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     purchase.removeTransactionForToUser(friend)
                     
                     if billSplitChanges[friend.objectId!] != nil {
-                        
+                        println("before: \(billSplitChanges.count)")
                         billSplitChanges.removeValueForKey(friend.objectId!)
+                        println("after: \(billSplitChanges.count)")
                     }
                     
-                    //
                     purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
-                    //purchase.calculateTotalFromBillSplitDictionary()
                     setFriendAmountTextFields()
                     
                     data[indexPath.section].removeAtIndex(indexPath.row)

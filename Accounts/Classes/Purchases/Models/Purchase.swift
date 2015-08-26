@@ -115,122 +115,136 @@ class Purchase: PFObject {
         }
     }
     
-    func splitTheBill(inout ignoreIdList: Dictionary<String, String?>, givePriorityTo: String?) { //, editingTransaction: Transaction?) {
-        println(ignoreIdList)
-        var debug: () -> () = {
+    func transactionTotalsEqualsTotal() -> Bool {
+        
+        var totalCheck:Double = 0
+        
+        for transaction in self.transactions {
             
-            var totalCheck:Double = 0
-            
-            for transaction in self.transactions {
-                
-                totalCheck += transaction.amount
-            }
-            
-            if totalCheck != self.amount {
-                
-                println("ERRORRORRR")
-            }
+            totalCheck += transaction.amount
         }
+        
+        if totalCheck != self.amount {
+            
+            println("ERRORRORRR")
+        }
+        println(totalCheck) ; println(self.amount)
+        return totalCheck == self.amount
+    }
+    
+    func transactionsInChangeList(billSplitChanges: Dictionary<String, String?>) -> [Transaction] {
+        
+        return self.transactions.filter({ (t) -> Bool in
+            
+            var rc = false
+            
+            if let toUser = t.toUser {
+                
+                rc = billSplitChanges[toUser.objectId!] != nil
+            }
+            
+            return rc
+        })
+    }
+    
+    func transactionsNotInChangeList(billSplitChanges: Dictionary<String, String?>) -> [Transaction] {
+        
+        return self.transactions.filter({ (t) -> Bool in
+            
+            var rc = false
+            
+            if let toUser = t.toUser {
+                
+                rc = billSplitChanges[toUser.objectId!] == nil
+            }
+            
+            return rc
+        })
+    }
+    
+    func splitTheBill(inout billSplitChanges: Dictionary<String, String?>, givePriorityTo: String?) { //, editingTransaction: Transaction?) {
         
         var didComplete = false
-        
-        if ignoreIdList.count < self.transactions.count && ignoreIdList.count > 0 { // attempt 1
-            
-            var ignoredTransactionAmounts: Double = self.amount
-            
-            let transactionsInIgnoreList = self.transactions.filter({ (t) -> Bool in
-                
-                var rc = false
-                
-                if let toUser = t.toUser {
-                    
-                    rc = ignoreIdList[toUser.objectId!] != nil
-                }
-                
-                return rc
-            })
-            
-            if let priorityTransaction = transactionForToUserId(givePriorityTo) {
-                
-                priorityTransaction.amount = priorityTransaction.amount <= self.amount ? priorityTransaction.amount : self.amount
-                
-                for transaction in transactionsInIgnoreList {
-                    
-                    if priorityTransaction.amount + transaction.amount > self.amount {
-                        
-                        transaction.amount = 0
-                        ignoreIdList.removeValueForKey(transaction.toUser!.objectId!)
-                    }
-                    else {
-                        
-                        ignoredTransactionAmounts += transaction.amount
-                    }
-                }
-            }
-            
-            let transactionsNotInIgnoreList = self.transactions.filter({ (t) -> Bool in
-                
-                var rc = false
-                
-                if let toUser = t.toUser {
-                    
-                    rc = ignoreIdList[toUser.objectId!] == nil
-                }
-                
-                return rc
-            })
-            
-            var splitAmount = ignoredTransactionAmounts / Double(transactionsNotInIgnoreList.count)
-            
-            for transaction in transactionsNotInIgnoreList {
-
-                transaction.amount = splitAmount > 0 ? splitAmount : 0
-                ignoreIdList.removeValueForKey(transaction.toUser!.objectId!)
-                
-                println("a")
-                didComplete = true
-            }
-        }
-        
-        if didComplete { debug(); return }
-        
-        if let id = givePriorityTo { // attempt 2
-
-            ignoreIdList.removeAll(keepCapacity: false)
-            
-            if let transaction = transactionForToUserId(id) {
- 
-                transaction.amount = transaction.amount <= self.amount ? transaction.amount : self.amount
-                
-                let transactions = self.transactions.filter({ (t) -> Bool in
-                    
-                    return t.toUser?.objectId != id
-                })
-                
-                var splitAmount = (self.amount - transaction.amount) / Double(transactions.count)
-                
-                for transaction in transactions {
-                    
-                    transaction.amount = splitAmount > 0 ? splitAmount : 0
-                    //ignoreIdList.removeValueForKey(transaction.toUser!.objectId!)
-                }
-                
-                didComplete = true
-            }
-        }
-
-        if didComplete { debug(); return }
-        
-        
-        //attempt 3
-        let splitAmount = self.amount / Double(self.transactions.count)
+        let priorityTransaction = transactionForToUserId(givePriorityTo)
         
         for transaction in transactions {
             
-            transaction.amount = splitAmount
+            println(transaction.amount)
         }
         
-        ignoreIdList.removeAll(keepCapacity: false)
+        if billSplitChanges.count >= transactions.count {
+            
+            billSplitChanges.removeAll(keepCapacity: false)
+        }
+        
+        if priorityTransaction != nil && billSplitChanges.count > 0 && billSplitChanges.count < transactions.count {
+
+            priorityTransaction!.amount = priorityTransaction!.amount <= self.amount ? priorityTransaction!.amount : self.amount
+
+            var remainding = self.amount - priorityTransaction!.amount
+            
+            for transaction in transactionsInChangeList(billSplitChanges) {
+                
+                if transaction.toUser?.objectId != priorityTransaction!.toUser?.objectId  {
+                    
+                    if remainding - transaction.amount < 0 { //&&
+                        
+                        billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
+                    }
+                    else {
+                        
+                        remainding -= transaction.amount
+                    }
+                }
+            }
+
+            var splitAmount = remainding / Double(transactionsNotInChangeList(billSplitChanges).count)
+            
+            for transaction in transactionsNotInChangeList(billSplitChanges) {
+                
+                if transaction.toUser?.objectId != priorityTransaction!.toUser?.objectId  {
+                    
+                    transaction.amount = splitAmount > 0 ? splitAmount : 0
+                    billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
+                }
+            }
+        }
+        else if billSplitChanges.count > 0 && billSplitChanges.count < transactions.count {
+            
+            var remainding = self.amount
+            
+            for transaction in transactionsInChangeList(billSplitChanges) {
+                
+                if remainding - transaction.amount < 0 { //&&
+                    
+                    billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
+                }
+                else {
+                    
+                    remainding -= transaction.amount
+                }
+            }
+            
+            var splitAmount = remainding / Double(transactionsNotInChangeList(billSplitChanges).count)
+            
+            for transaction in transactionsNotInChangeList(billSplitChanges) {
+                
+                transaction.amount = splitAmount > 0 ? splitAmount : 0
+                billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
+            }
+        }
+        
+        else {
+            
+            let splitAmount = self.amount / Double(self.transactions.count)
+    
+            for transaction in transactions {
+    
+                transaction.amount = splitAmount
+            }
+    
+            billSplitChanges.removeAll(keepCapacity: false)
+        }
     }
 
     func modelIsValid() -> Bool {
@@ -271,16 +285,17 @@ class Purchase: PFObject {
         
         return errors.count > 0 ? false : true
     }
-
     
-    func calculateTotalFromTransactions() {
+    func calculateTotalFromTransactions(transactions:[Transaction]) -> Double {
         
-        amount = 0
+        var amount: Double = 0
         
         for transaction in transactions {
             
             amount += transaction.amount
         }
+        
+        return amount
     }
     
     func transactionForToUser(toUser: User) -> Transaction? {
