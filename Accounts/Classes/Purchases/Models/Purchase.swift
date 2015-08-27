@@ -203,10 +203,14 @@ class Purchase: PFObject {
         
         //if didComplete { return }
         
+        println("trans: \(transactions.count), bill: \(billSplitChanges.count)")
         if billSplitChanges.count >= transactions.count {
-            
+            println("removing all trans and bill")
             billSplitChanges.removeAll(keepCapacity: false)
+            preferredValues.removeAll(keepCapacity: false)
         }
+        
+        println("trans: \(transactions.count), preferredValues: \(billSplitChanges.count)")
         
         if priorityTransaction != nil && billSplitChanges.count > 0 && billSplitChanges.count < transactions.count {
             
@@ -236,25 +240,39 @@ class Purchase: PFObject {
             }
             
             var transactionsChangedLog = [String]()
-//            
-            if shouldSaveTransactionValuesToPreferredValues {
+            
+            //if shouldSaveTransactionValuesToPreferredValues {
                 
-                for preferredValue in preferredValues {
+            for preferredValue in preferredValues {
+                
+                if preferredValue.0 != givePriorityTo{
                     
-                    if preferredValue.0 != givePriorityTo {
+                   var canContinue = true //contains(billSplitChanges.keys, preferredValue.0)
+                    
+                    if remainding - preferredValue.1 > 0 && canContinue {
                         
-                        if remainding - preferredValue.1 > 0 {
-                            
-                            let transaction = transactionForToUserId(preferredValue.0)!
-                            transaction.amount = preferredValue.1
-                            transactionsChangedLog.append(preferredValue.0)
-                            remainding -= transaction.amount
-                        }
+                        let transaction = transactionForToUserId(preferredValue.0)!
+                        println("changing a value from: \(transaction.amount)")
+                        
+                        transaction.amount = preferredValue.1
+                        println("...to: \(transaction.amount)")
+                        transactionsChangedLog.append(preferredValue.0)
+                        remainding -= transaction.amount
+                        preferredValues.removeValueForKey(preferredValue.0)
                     }
                 }
             }
+            //}
             
-            var splitAmount = remainding / Double(transactionsNotInChangeList(billSplitChanges).count) //- Double(transactionsChangedLog.count)
+            var remaindingTransactionsToChange = transactionsNotInChangeList(billSplitChanges)
+                .filter({ (t) -> Bool in
+                
+                t.toUser?.objectId != priorityTransaction!.toUser?.objectId && !contains(transactionsChangedLog, t.toUser!.objectId!)
+            })
+            
+            //println("left: \(remaindingTransactionsToChange.count) remainding: \(remainding)")
+            
+            var splitAmount = remainding / Double(remaindingTransactionsToChange.count)// - Double(transactionsChangedLog.count)
             
             for transaction in transactionsNotInChangeList(billSplitChanges) {
                 
@@ -265,30 +283,30 @@ class Purchase: PFObject {
                 }
             }
         }
-        else if billSplitChanges.count > 0 && billSplitChanges.count < transactions.count { // never seems to go here
-            println("goes into 2")
-            var remainding = self.amount
-            
-            for transaction in transactionsInChangeList(billSplitChanges) {
-                
-                if remainding - transaction.amount < 0 { //&&
-                    
-                    billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
-                }
-                else {
-                    
-                    remainding -= transaction.amount
-                }
-            }
-            
-            var splitAmount = remainding / Double(transactionsNotInChangeList(billSplitChanges).count)
-            
-            for transaction in transactionsNotInChangeList(billSplitChanges) {
-                
-                transaction.amount = splitAmount > 0 ? splitAmount : 0
-                billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
-            }
-        }
+//        else if billSplitChanges.count > 0 && billSplitChanges.count < transactions.count { // never seems to go here
+//            println("goes into 2")
+//            var remainding = self.amount
+//            
+//            for transaction in transactionsInChangeList(billSplitChanges) {
+//                
+//                if remainding - transaction.amount < 0 { //&&
+//                    
+//                    billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
+//                }
+//                else {
+//                    
+//                    remainding -= transaction.amount
+//                }
+//            }
+//            
+//            var splitAmount = remainding / Double(transactionsNotInChangeList(billSplitChanges).count)
+//            
+//            for transaction in transactionsNotInChangeList(billSplitChanges) {
+//                
+//                transaction.amount = splitAmount > 0 ? splitAmount : 0
+//                billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
+//            }
+//        }
         
         else {
             
