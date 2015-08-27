@@ -201,7 +201,9 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             purchase.localeAmount = value
             billSplitChanges.removeAll(keepCapacity: false)
+            purchase.preferredValues.removeAll(keepCapacity: false)
             purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
+            
         }
         
         for transaction in purchase.transactions {

@@ -20,7 +20,9 @@ class Purchase: PFObject {
     @NSManaged var purchaseTransactionLinkUUID: String?
     
     var amount: Double = 0
-    var transactions: Array<Transaction> = []    
+    var transactions: Array<Transaction> = []
+    var preferredValues = Dictionary<String, Double>()
+    //var shouldGetValuesNextTimeFromPreferredValues = false
     
     class func withDefaultValues() -> Purchase{
         
@@ -165,12 +167,41 @@ class Purchase: PFObject {
     func splitTheBill(inout billSplitChanges: Dictionary<String, String?>, givePriorityTo: String?) { //, editingTransaction: Transaction?) {
         
         var didComplete = false
+        var shouldSaveTransactionValuesToPreferredValues = true
+        
         let priorityTransaction = transactionForToUserId(givePriorityTo)
         
-        for transaction in transactions {
-            
-            println(transaction.amount)
-        }
+//        if shouldGetValuesNextTimeFromPreferredValues && priorityTransaction != nil {
+//            
+//            var canContinue = priorityTransaction?.amount < self.amount
+//            
+//            if canContinue {
+//                
+//                for key in preferredValues.keys {
+//                    
+//                    if canContinue {
+//                        
+//                        if transactionForToUserId(key) == nil {
+//                            
+//                            canContinue = false
+//                        }
+//                    }
+//                }
+//                
+//                if canContinue {
+//                    
+//                    for transaction in transactions {
+//                        
+//                        transaction.amount = preferredValues[transaction.toUser!.objectId!]!
+//                    }
+//                    
+//                    didComplete = true
+//                    shouldGetValuesNextTimeFromPreferredValues = false
+//                }
+//            }
+//        }
+        
+        //if didComplete { return }
         
         if billSplitChanges.count >= transactions.count {
             
@@ -178,7 +209,13 @@ class Purchase: PFObject {
         }
         
         if priorityTransaction != nil && billSplitChanges.count > 0 && billSplitChanges.count < transactions.count {
-
+            
+            if priorityTransaction!.amount >= self.amount {
+                
+                //shouldGetValuesNextTimeFromPreferredValues = true
+                shouldSaveTransactionValuesToPreferredValues = false
+            }
+            
             priorityTransaction!.amount = priorityTransaction!.amount <= self.amount ? priorityTransaction!.amount : self.amount
 
             var remainding = self.amount - priorityTransaction!.amount
@@ -187,7 +224,7 @@ class Purchase: PFObject {
                 
                 if transaction.toUser?.objectId != priorityTransaction!.toUser?.objectId  {
                     
-                    if remainding - transaction.amount < 0 { //&&
+                    if remainding - transaction.amount <= 0 { // &&
                         
                         billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
                     }
@@ -197,20 +234,39 @@ class Purchase: PFObject {
                     }
                 }
             }
-
-            var splitAmount = remainding / Double(transactionsNotInChangeList(billSplitChanges).count)
+            
+            var transactionsChangedLog = [String]()
+//            
+            if shouldSaveTransactionValuesToPreferredValues {
+                
+                for preferredValue in preferredValues {
+                    
+                    if preferredValue.0 != givePriorityTo {
+                        
+                        if remainding - preferredValue.1 > 0 {
+                            
+                            let transaction = transactionForToUserId(preferredValue.0)!
+                            transaction.amount = preferredValue.1
+                            transactionsChangedLog.append(preferredValue.0)
+                            remainding -= transaction.amount
+                        }
+                    }
+                }
+            }
+            
+            var splitAmount = remainding / Double(transactionsNotInChangeList(billSplitChanges).count) //- Double(transactionsChangedLog.count)
             
             for transaction in transactionsNotInChangeList(billSplitChanges) {
                 
-                if transaction.toUser?.objectId != priorityTransaction!.toUser?.objectId  {
+                if transaction.toUser?.objectId != priorityTransaction!.toUser?.objectId && !contains(transactionsChangedLog, transaction.toUser!.objectId!) { // &&
                     
                     transaction.amount = splitAmount > 0 ? splitAmount : 0
                     billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
                 }
             }
         }
-        else if billSplitChanges.count > 0 && billSplitChanges.count < transactions.count {
-            
+        else if billSplitChanges.count > 0 && billSplitChanges.count < transactions.count { // never seems to go here
+            println("goes into 2")
             var remainding = self.amount
             
             for transaction in transactionsInChangeList(billSplitChanges) {
@@ -244,6 +300,18 @@ class Purchase: PFObject {
             }
     
             billSplitChanges.removeAll(keepCapacity: false)
+            //preferredValues.removeAll(keepCapacity: false)
+        }
+        
+        if shouldSaveTransactionValuesToPreferredValues{
+            
+            for transaction in transactions {
+                
+                if billSplitChanges[transaction.toUser!.objectId!] != nil {
+                    
+                    preferredValues[transaction.toUser!.objectId!] = transaction.amount
+                }
+            }
         }
     }
 
