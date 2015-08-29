@@ -20,7 +20,7 @@ class SavePurchaseViewController: SaveItemViewController {
     
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
-    var billSplitChanges = Dictionary<String, String?>()
+    
     
     override func viewDidLoad() {
         
@@ -200,9 +200,9 @@ extension SavePurchaseViewController: FormViewDelegate {
         if identifier == "Amount" {
             
             purchase.localeAmount = value
-            billSplitChanges.removeAll(keepCapacity: false)
+            purchase.billSplitChanges.removeAll(keepCapacity: false)
             purchase.preferredValues.removeAll(keepCapacity: false)
-            purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
+            purchase.splitTheBill(nil)
             
         }
         
@@ -213,13 +213,13 @@ extension SavePurchaseViewController: FormViewDelegate {
                 transaction.amount = value
                 
                 //purchase.calculateTotalFromTransactions()
-                billSplitChanges[transaction.toUser!.objectId!] = transaction.toUser!.objectId!
+                //purchase.billSplitChanges[transaction.toUser!.objectId!] = value
                 setTextFieldValueAndUpdateConfig(identifier, value: Formatter.formatCurrencyAsString(value), cell: billSplitCells[transaction.toUser!])
             }
         }
         
         let id = identifier.replaceString("transactionTo", withString: "").replaceString("Optional(", withString: "").replaceString(")", withString: "").replaceString("\"", withString: "")
-        purchase.splitTheBill(&billSplitChanges, givePriorityTo: id)
+        purchase.splitTheBill(id)
         
         setFriendAmountTextFields()
     }
@@ -429,13 +429,13 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     billSplitCells.removeValueForKey(friend)
                     purchase.removeTransactionForToUser(friend)
                     
-                    if billSplitChanges[friend.objectId!] != nil {
-                        println("before: \(billSplitChanges.count)")
-                        billSplitChanges.removeValueForKey(friend.objectId!)
-                        println("after: \(billSplitChanges.count)")
+                    if purchase.billSplitChanges[friend.objectId!] != nil {
+                        println("before: \(purchase.billSplitChanges.count)")
+                        purchase.billSplitChanges.removeValueForKey(friend.objectId!)
+                        println("after: \(purchase.billSplitChanges.count)")
                     }
                     
-                    purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
+                    purchase.splitTheBill(nil)
                     setFriendAmountTextFields()
                     
                     data[indexPath.section].removeAtIndex(indexPath.row)
@@ -477,7 +477,7 @@ extension SavePurchaseViewController: SelectUsersDelegate {
             purchase.transactions.append(transaction)
             
             //billSplitChanges.removeAll(keepCapacity: false)
-            purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
+            purchase.splitTheBill(nil)
         }
 
         itemDidChange = true
@@ -500,8 +500,8 @@ extension SavePurchaseViewController: SelectUserDelegate {
             transaction.toUser = user
             transaction.amount = 0
             purchase.transactions.append(transaction)
-            billSplitChanges = Dictionary<String, String?>()
-            purchase.splitTheBill(&billSplitChanges, givePriorityTo: nil)
+            purchase.billSplitChanges.removeAll(keepCapacity: false)
+            purchase.splitTheBill(nil)
         }
         
         itemDidChange = true
