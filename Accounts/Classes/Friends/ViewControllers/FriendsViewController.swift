@@ -13,7 +13,7 @@ import SwiftyJSON
 
 private let kPlusImage = AppTools.iconAssetNamed("746-plus-circle-selected.png")
 private let kMinusImage = AppTools.iconAssetNamed("34-circle.minus.png")
-private let kMenuIcon = AppTools.iconAssetNamed("740-gear-toolbar-selected.png")
+private let kMenuIcon = AppTools.iconAssetNamed("740-gear-toolbar")
 
 private let kPopoverContentSize = CGSize(width: 320, height: 360)
 
@@ -219,7 +219,7 @@ class FriendsViewController: ACBaseViewController {
         var friendsWhoOweMoney = Array<User>()
         var friendsWhoYouOweMoney = Array<User>()
         var friendsWhoAreEven = Array<User>()
-        
+            
         //owes you money
         for friend in User.currentUser()!.friends {
             
@@ -265,6 +265,7 @@ class FriendsViewController: ACBaseViewController {
         
         User.currentUser()?.getFriends({ (completedRemoteRequest) -> () in
             
+            println("is in this closure")
             refreshControl?.endRefreshing()
             self.setDataForTable()
             self.tableView.reloadData()
@@ -341,6 +342,12 @@ class FriendsViewController: ACBaseViewController {
             self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
         })
     }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        Task.sharedTasker().cancelTaskForIdentifier("GetFriends")
+    }
 }
 
 extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
@@ -362,6 +369,8 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         let friend = data[indexPath.section][indexPath.row]
         (cell as FriendTableViewCell).setup(friend)
         
+        //cell.layer.rasterizationScale = UIScreen.mainScreen().scale
+        //cell.layer.shouldRasterize = true
         return cell
     }
 
@@ -394,7 +403,17 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         
         return ""
     }
-        
+    
+//    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+//        
+//        if section == numberOfSectionsInTableView(tableView) - 1 && User.currentUser()?.friends.count > 0 && User.currentUser()?.friends.count < 2 {
+//            
+//            return "Your Facebook friends who have this app, will appear here!"
+//        }
+//        
+//        return nil
+//    }
+    
     func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
         
         return tableView.editing ? .Delete : .None

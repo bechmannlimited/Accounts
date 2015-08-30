@@ -4,6 +4,7 @@ PODS:
     - SwiftyJSON (~> 2.2.0)
   - AFDateHelper (2.0.4)
   - Alamofire (1.2.3)
+  - AwesomeCache (1.0.2)
   - Bolts (1.2.0):
     - Bolts/AppLinks (= 1.2.0)
     - Bolts/Tasks (= 1.2.0)
@@ -40,11 +41,11 @@ PODS:
   - SwiftOverlays (0.14)
   - SwiftyJSON (2.2.1)
   - SwiftyUserDefaults (1.2.0)
-  - TMCache (2.1.0)
 
 DEPENDENCIES:
   - ABToolKit (from `/Users/alexbechmann/Documents/iOS/cocoapods/ABToolKit`)
   - AFDateHelper
+  - AwesomeCache (~> 1.0)
   - FBSDKCoreKit (= 4.1.0)
   - FBSDKLoginKit (= 4.1.0)
   - FBSDKShareKit (= 4.1.0)
@@ -58,7 +59,6 @@ DEPENDENCIES:
   - SVPullToRefresh
   - SwiftOverlays (~> 0.14)
   - SwiftyUserDefaults (from `/Users/alexbechmann/Downloads/SwiftyUserDefaults-master`)
-  - TMCache
 
 EXTERNAL SOURCES:
   ABToolKit:
@@ -80,6 +80,7 @@ SPEC CHECKSUMS:
   ABToolKit: 355705e90dd72b552de9216f3f638f509b89b7dc
   AFDateHelper: ea0c7c81dbadcc2585a700f552d323beaf10b98d
   Alamofire: 5550bf0b575ed1a4bf9be572f9463e1015cc169e
+  AwesomeCache: b04d03aa3dea589753a8aa06179df9181c76cb82
   Bolts: d176cb1e0012175589e389a9db49b85e27787576
   FBSDKCoreKit: 469ed167195f860dbd2b4c4bbaa33d2e90598db9
   FBSDKLoginKit: ff6224762732e3698f30942e4544321b8c7a23e6
@@ -95,6 +96,5 @@ SPEC CHECKSUMS:
   SwiftOverlays: 7df1e8cb3bba5e6f292fc231956d427f925fcd4e
   SwiftyJSON: ae2d0a3d68025d136602a33c4ee215091ced3e33
   SwiftyUserDefaults: 3b4413c26f5cc4f4ed114cf75c42dbef189f0c1e
-  TMCache: 95ebcc9b3c7e90fb5fd8fc3036cba3aa781c9bed
 
 COCOAPODS: 0.37.1

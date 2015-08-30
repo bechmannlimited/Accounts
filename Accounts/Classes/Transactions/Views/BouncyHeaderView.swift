@@ -4,11 +4,6 @@ import ABToolKit
 
 private let kTitlePadding: CGFloat = 12
 
-protocol BouncyHeaderViewDelegate{
-    
-    //func bouncyView(bouncyView: BouncyView, recommendedContentInsetForOriginTableView: UIEdgeInsets)
-    func imageViewImageDidLoad()
-}
 
 class BouncyHeaderView: UIView {
     
@@ -24,9 +19,7 @@ class BouncyHeaderView: UIView {
     
     var titleLabel = UILabel()
     var titleLabelHeight:CGFloat = 0
-    
-    var delegate: BouncyHeaderViewDelegate?
-    
+
     func setupHeaderWithOriginView(originView: UIView, originTableView: UITableView){
         
         self.originView = originView
@@ -81,6 +74,14 @@ class BouncyHeaderView: UIView {
             heroImageConstraints["Height"]?.constant = headerViewHeight + (-y)
         }
         
+        let constant = headerViewConstraints["Height"]?.constant
+        
+        if constant < 64 {
+            
+            headerViewConstraints["Height"]?.constant = 64
+            heroImageConstraints["Height"]?.constant = 64
+        }
+        
         //blur view
         if y < 0 {
             
@@ -103,8 +104,7 @@ class BouncyHeaderView: UIView {
             titleLabel.layer.opacity = 1
         }
     }
-    
-    
+
     func setupHeroImage() {
         
         heroImageView.setTranslatesAutoresizingMaskIntoConstraints(false)
@@ -121,22 +121,21 @@ class BouncyHeaderView: UIView {
     
     func getHeroImage(url: String) {
         
-        //heroImageView.showLoader()
-        
         heroImageView.layer.opacity = 0
         
-        heroImageView.loadImageFromURLString(url, placeholderImage: nil) {
-            (finished, error) in
+        ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+            
+            self.heroImageView.image = image
             
             UIView.animateWithDuration(0.35, animations: { () -> Void in
                 
                 self.heroImageView.layer.opacity = 1
                 
-            }, completion: { (finished) -> Void in
-                
-                self.delegate?.imageViewImageDidLoad()
+                }, completion: { (finished) -> Void in
+                    
+                    //self.delegate?.imageViewImageDidLoad()
             })
-        }
+        })
     }
     
     func setupHeroImageBlurView() {

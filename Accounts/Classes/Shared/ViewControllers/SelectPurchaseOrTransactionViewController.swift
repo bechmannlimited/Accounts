@@ -15,9 +15,9 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     
     var data = [
-        (identifier: "Purchase", textLabelText: "Split a bill"),
-        (identifier: "Transaction", textLabelText: "Add an i.o.u"),
-        (identifier: "TransactionPayment", textLabelText: "Add a payment")
+        (identifier: "Transaction", textLabelText: "Add an i.o.u", footer: "Add an iou if you owe one of your friends some money, or if they owe you."),
+        (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, and should be split between multiple people."),
+        (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid by one of your friends.")
     ]
 
     var contextualFriend: User?
@@ -56,26 +56,26 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
-        return 1
+        return data.count
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return data.count
+        return 1
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as! UITableViewCell
         
-        cell.textLabel?.text = data[indexPath.row].textLabelText
+        cell.textLabel?.text = data[indexPath.section].textLabelText
 
         return cell
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
-        let identifier = data[indexPath.row].identifier
+        let identifier = data[indexPath.section].identifier
         
         if identifier == "Purchase" {
             
@@ -97,7 +97,6 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
             navigationController?.pushViewController(v, animated: true)
         }
         else if identifier == "Transaction" || identifier == "TransactionPayment" {
-
             
             let v = SaveTransactionViewController()
             
@@ -131,5 +130,10 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
     func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         
         tableView.delegate?.tableView?(tableView, didSelectRowAtIndexPath: indexPath)
+    }
+    
+    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        
+        return data[section].footer
     }
 }

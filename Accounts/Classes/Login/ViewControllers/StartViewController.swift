@@ -40,7 +40,7 @@ class StartViewController: ACBaseViewController {
             
             view.showLoader()
             //checkForGraphRequestAndGoToAppWithUser(User.currentUser()!)
-            goToApp()
+            goToAppAnimated(false)
             
             NSTimer.schedule(delay: 5) { timer in
              
@@ -84,13 +84,13 @@ class StartViewController: ACBaseViewController {
         return titleView
     }
     
-    func goToApp(){
+    func goToAppAnimated(animated: Bool){
         
         SKTUser.currentUser().firstName = User.currentUser()?.displayName
         SKTUser.currentUser().addProperties([ "objectId" : User.currentUser()!.objectId! ])
         
         var v = UIStoryboard.initialViewControllerFromStoryboardNamed("Main")
-        UIViewController.topMostController().presentViewController(v, animated: false, completion: nil)
+        UIViewController.topMostController().presentViewController(v, animated: animated, completion: nil)
     }
 
     func checkForGraphRequestAndGoToAppWithUser(user: PFUser){
@@ -109,18 +109,18 @@ class StartViewController: ACBaseViewController {
                     user["displayName"] = result["name"].stringValue
                 }
                 
-                Task.executeTaskInBackground({ () -> () in
+                Task.sharedTasker().executeTaskInBackground({ () -> Void in
                     
                     user.save()
                     
                 }, completion: { () -> () in
-                        
-                    self.goToApp()
+                    
+                    self.goToAppAnimated(true)
                 })
             }
             else{
                 
-                self.goToApp()
+                self.goToAppAnimated(true)
             }
         })
     }
@@ -142,7 +142,7 @@ extension StartViewController: PFSignUpViewControllerDelegate {
     
     func signUpViewController(signUpController: PFSignUpViewController, didSignUpUser user: PFUser) {
         println(user)
-        goToApp()
+        goToAppAnimated(true)
     }
     
     func signUpViewController(signUpController: PFSignUpViewController, didFailToSignUpWithError error: NSError?) {

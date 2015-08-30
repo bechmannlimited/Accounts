@@ -10,6 +10,7 @@ import UIKit
 import SwiftyUserDefaults
 
 let kCurrencySettingKey = "Currency"
+private let kShowTestBotSettingKey = "ShowTestBot"
 
 private let kCurrencySettingLocaleDictionary: Dictionary<String, String> = [
     "GBP": "en_GB",
@@ -43,5 +44,22 @@ class Settings: NSObject {
             
             Defaults[key] = value
         }
+    }
+    
+    class func shouldShowTestBot() -> Bool{
+        
+        if !Defaults.hasKey(kShowTestBotSettingKey) {
+            
+            return true
+        }
+        else {
+            
+            return Defaults[kShowTestBotSettingKey].bool!
+        }
+    }
+    
+    class func setShouldShowTestBot(on: Bool) {
+        
+        Defaults[kShowTestBotSettingKey] = on
     }
 }

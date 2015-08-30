@@ -105,6 +105,71 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         refresh(nil)
+        
+        tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top - 64, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
+    }
+    
+    func setupBackgroundBlurView() {
+        
+        if kDevice == .Phone {
+            
+            if friend.objectId == kTestBotObjectId || friend.facebookId != nil {
+                
+                let imageView = UIImageView()
+                imageView.layer.opacity = 0
+                imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
+                view.addSubview(imageView)
+                imageView.fillSuperView(UIEdgeInsetsZero)
+                view.sendSubviewToBack(imageView)
+                
+                if friend.objectId == kTestBotObjectId {
+                    
+                    imageView.image = AppTools.iconAssetNamed("bender.jpg")
+                    
+                    UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                        
+                        imageView.layer.opacity = 1
+                    })
+                }
+                else if let id = friend.facebookId{
+                    
+                    let url = "https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)"
+                    
+                    ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+                        
+                        imageView.image = image
+                        
+                        UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                            
+                            imageView.layer.opacity = 1
+                        })
+                    })
+                }
+                
+                let blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))
+                blurView.setTranslatesAutoresizingMaskIntoConstraints(false)
+                imageView.addSubview(blurView)
+                blurView.fillSuperView(UIEdgeInsetsZero)
+                
+                let cover = UIView()
+                cover.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(kDevice == .Pad ? 0.75 : 0.45)
+                cover.setTranslatesAutoresizingMaskIntoConstraints(false)
+                imageView.addSubview(cover)
+                cover.fillSuperView(UIEdgeInsetsZero)
+                
+//                imageView.layer.rasterizationScale = UIScreen.mainScreen().scale
+//                imageView.layer.shouldRasterize = true
+                
+                // convert to image
+                
+                if let  image = imageView.screenShot() {
+                    
+                    imageView.removeFromSuperview()
+                    view.addSubview(UIImageView(image: image))
+                }
+                
+            }
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -115,6 +180,7 @@ class TransactionsViewController: ACBaseViewController {
             findAndScrollToCalculatedSelectedCellAtIndexPath(true)
         }
         
+        setHeaderTitleText()
         tableView.delegate = self // incase it wasnt set due to viewwilldissapear method
         scrollViewDidScroll(tableView)
     }
@@ -134,10 +200,13 @@ class TransactionsViewController: ACBaseViewController {
         
         headerView = BouncyHeaderView()
         headerView?.setupHeaderWithOriginView(view, originTableView: tableView)
-        headerView?.delegate = self
         setHeaderTitleText()
         
-        if let id = friend.facebookId{
+        if friend.objectId == kTestBotObjectId {
+            
+            headerView?.heroImageView.image = AppTools.iconAssetNamed("bender.jpg")
+        }
+        else if let id = friend.facebookId{
             
             headerView?.getHeroImage("https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)")
         }
@@ -182,6 +251,7 @@ class TransactionsViewController: ACBaseViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
+        setupBackgroundBlurView()
         popoverViewController = nil // to make sure
         setupInfiniteScrolling()
     }
@@ -190,25 +260,6 @@ class TransactionsViewController: ACBaseViewController {
         
         refresh(nil)
     }
-    
-//    override func didReceivePushNotification(notification: NSNotification) {
-//        
-//        if let object: AnyObject = notification.object{
-//            
-//            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
-//            
-//            if PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved{
-//                
-//                if let userIds = object["userIds"] as? [String] {
-//                    
-//                    if contains(userIds, friend.objectId!){
-//                        
-//                        getDifferenceAndRefreshIfNeccessary(nil)
-//                    }
-//                }
-//            }
-//        }
-//    }
     
     func query() -> PFQuery? {
         
@@ -225,6 +276,7 @@ class TransactionsViewController: ACBaseViewController {
         query = PFQuery.orQueryWithSubqueries([queryForFromUser!, queryForToUser!])
         query?.orderByDescending("transactionDate")
         query?.whereKey("objectId", notContainedIn: IOSession.sharedSession().deletedTransactionIds)
+        query?.whereKey("isDeleted", notEqualTo: true)
         
         activeQueries.append(query)
         
@@ -298,22 +350,13 @@ class TransactionsViewController: ACBaseViewController {
         })
     }
     
-//    override func setNavigationControllerToDefault(){
-//        
-//        navigationController?.navigationBar.tintColor = .whiteColor()
-//        
-//        if 1 == 2 { //let screenshot = headerViewScreenShotImage {
-//            
-//            //navigationController?.navigationBar.setBackgroundImage(screenshot, forBarMetrics: .Default)
-//        }
-//        else {
-//            
-//            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.blackColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
-//        }
-//        
-//        navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
-//        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
-//    }
+    override func setNavigationControllerToDefault(){
+        
+        navigationController?.navigationBar.tintColor = .whiteColor()
+        navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
+        navigationController?.navigationBar.shadowImage = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10))
+        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
+    }
     
     func findAndScrollToCalculatedSelectedCellAtIndexPath(shouldDeselect: Bool) {
         
@@ -435,27 +478,14 @@ class TransactionsViewController: ACBaseViewController {
                 
                 if let transactions = objects as? [Transaction] {
                     
-                    Task.executeTaskInBackground({ () -> () in
+                    Task.sharedTasker().executeTaskInBackground({ () -> Void in
                         
                         PFObject.unpinAll(self.query()?.fromLocalDatastore().findObjects())
                         PFObject.pinAll(transactions)
                         
-                        self.reorderTransactions()
-                        self.transactions = transactions
-                        
                     }, completion: { () -> () in
                         
-                        refreshControl?.endRefreshing()
-                        self.tableView.reloadData()
-                        self.view.hideLoader()
-                        self.showOrHideTableOrNoDataView()
-                        self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
-                        self.refreshBarButtonItem?.enabled = true
-                        
-                        UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
-                            
-                            self.tableView.layer.opacity = 1
-                        })
+                        self.reloadTableViewFromLocalDataSource(nil)
                         
                         //last synced label
                         User.currentUser()?.lastSyncedDataInfo?["Transactions_\(self.friend.objectId!)"] = NSDate()
@@ -471,7 +501,6 @@ class TransactionsViewController: ACBaseViewController {
         self.refreshBarButtonItem?.enabled = false
         
         var localQuery = query()?.fromLocalDatastore()
-        localQuery?.limit = 35
         
         localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             
@@ -527,17 +556,18 @@ class TransactionsViewController: ACBaseViewController {
                 
                 if let transactions = objects as? [Transaction] {
                     
-                    for transaction in transactions {
+                    Task.sharedTasker().executeTaskInBackground({ () -> Void in
                         
-                        self.transactions.append(transaction)
-                        transaction.pinInBackground()
-                    }
+                        PFObject.pinAll(transactions)
+                        
+                    }, completion: { () -> () in
+                        
+                        self.reloadTableViewFromLocalDataSource({ () -> () in
+                            
+                            self.tableView.infiniteScrollingView.stopAnimating()
+                        })
+                    })
                 }
-                
-                self.reorderTransactions()
-                self.tableView.infiniteScrollingView.stopAnimating()
-                self.tableView.reloadData()
-                self.showOrHideTableOrNoDataView() // just in case
             })
         }
         else{
@@ -574,7 +604,7 @@ class TransactionsViewController: ACBaseViewController {
         
         tableView.addWidthConstraint(relation: NSLayoutRelation.LessThanOrEqual, constant: kTableViewMaxWidth)
         
-        tableView.addTopConstraint(toView: view, relation: .Equal, constant: 0)
+        tableView.addTopConstraint(toView: view, relation: .Equal, constant: navigationController!.navigationBar.frame.height + UIApplication.sharedApplication().statusBarFrame.height)
         tableView.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
         
         tableView.addCenterXConstraint(toView: view)
@@ -611,6 +641,10 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
         
         cell.setupCell(transaction)
 
+        cell.backgroundColor = kDevice == .Pad ? UIColor.whiteColor() : UIColor.whiteColor().colorWithAlphaComponent(0.5)
+        cell.layer.rasterizationScale = UIScreen.mainScreen().scale
+        cell.layer.shouldRasterize = true
+        
         return cell
     }
     
@@ -682,7 +716,8 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
         popoverViewController = nil
         deselectSelectedCell(tableView)
         scrollViewDidScroll(tableView)
-        //getDifferenceAndRefreshIfNeccessary(nil)
+        setNavigationControllerToDefault()
+        setHeaderTitleText()
     }
     
     func popoverPresentationControllerShouldDismissPopover(popoverPresentationController: UIPopoverPresentationController) -> Bool {
@@ -702,30 +737,11 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
             return true
         }
     }
-    
-//    func popoverPresentationController(popoverPresentationController: UIPopoverPresentationController, willRepositionPopoverToRect rect: UnsafeMutablePointer<CGRect>, inView view: AutoreleasingUnsafeMutablePointer<UIView?>) {
-//        
-//        popoverPresentationController.backgroundColor = UIColor.clearColor()
-//    }
 }
 
 extension TransactionsViewController: UIScrollViewDelegate {
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
-        
-        var y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
-
-        if y < 86 {
-
-            navigationController?.navigationBar.tintColor = UIColor.whiteColor()
-            navigationController?.navigationBar.setBackgroundImage(UIImage.imageWithColor(.clearColor(), size: CGSize(width: 10, height: 10)), forBarMetrics: .Default)
-            navigationController?.navigationBar.shadowImage = UIImage.imageWithColor(.clearColor(), size: CGSize(width: 1, height: 1))
-            UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
-        }
-        else{
-
-            setNavigationControllerToDefault()
-        }
         
         headerView?.scrollViewDidScroll(scrollView)
     }
@@ -766,35 +782,5 @@ extension TransactionsViewController: SaveItemDelegate {
     func dismissPopover() {
         
         
-    }
-}
-
-extension TransactionsViewController: BouncyHeaderViewDelegate {
-    
-//    override func setNavigationControllerToDefault() {
-//        
-//        if let image = headerViewScreenShotImage {
-//
-//            navigationController?.navigationBar.tintColor = .whiteColor()
-//            
-//            if navigationController?.navigationBar.backgroundImageForBarMetrics(.Default) != image {
-//                
-//                navigationController?.navigationBar.setBackgroundImage(image, forBarMetrics: .Default)
-//            }
-//            
-//            navigationController?.navigationBar.shadowImage = kDefaultNavigationBarShadowImage
-//            UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
-//        }
-//        else {
-//            
-//            super.setNavigationControllerToDefault()
-//        }
-//    }
-//    
-    func imageViewImageDidLoad() {
-        
-//        self.headerView?.titleLabel.hidden = true
-//        self.headerViewScreenShotImage = self.headerView?.screenShot()
-//        self.headerView?.titleLabel.hidden = false
     }
 }

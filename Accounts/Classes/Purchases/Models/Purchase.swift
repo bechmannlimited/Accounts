@@ -14,18 +14,15 @@ import Parse
 
 class Purchase: PFObject {
 
-    @NSManaged var amount: Double
-    //@NSManaged var purchaseDescription: String?
     @NSManaged var title: String?
     @NSManaged var user: User
     @NSManaged var purchasedDate:NSDate?
-    //@NSManaged var linkUUID: String?
+    @NSManaged var purchaseTransactionLinkUUID: String?
     
+    var amount: Double = 0
     var transactions: Array<Transaction> = []
-    //var friends: [User] = []
-    //var billSplitDictionary = Dictionary<User, Double>()
-    
-    var previousTransactions = Array<Transaction>()
+    var preferredValues = Dictionary<String, Double>()
+    //var shouldGetValuesNextTimeFromPreferredValues = false
     
     class func withDefaultValues() -> Purchase{
         
@@ -69,17 +66,27 @@ class Purchase: PFObject {
         }
     }
     
-    func savePurchase(completion: (success:Bool) -> ()) {
+    func savePurchase(initialCompletion: (success:Bool) -> (), remoteCompletion: () -> ()) {
         
         var isNewPurchase = objectId == nil
         
         if !modelIsValid() {
 
-            completion(success: false)
+            initialCompletion(success: false)
             return
         }
         
-        //var linkUUID = NSUUID().UUIDString
+        if purchaseTransactionLinkUUID == nil {
+            
+            purchaseTransactionLinkUUID = NSUUID().UUIDString
+        }
+
+        saveEventually({ (success, error) -> Void in
+            
+            //NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+        })
+        
+        var transactionsCompleted = 0
         
         for transaction in transactions {
             
@@ -87,59 +94,246 @@ class Purchase: PFObject {
             transaction.fromUser = user
             transaction.title = title
             transaction.purchase = self
-            
-            //SET GUID SAME AS PURCHASE
+            transaction.purchaseTransactionLinkUUID = purchaseTransactionLinkUUID
             
             if transaction.fromUser != transaction.toUser{
                 
+                Transaction.calculateOfflineOweValuesWithTransaction(transaction)
+                
                 transaction.saveEventually({ (success, error) -> Void in
+                    
+                    transactionsCompleted++
+
+                    if transactionsCompleted == (self.transactions.count - 1) { // - 1 for one to urself
+
+                        remoteCompletion()
+                    }
                     
                     NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
                 })
 
-                completion(success:true)
+                initialCompletion(success: true)
             }
         }
     }
     
-    func splitTheBill() {
+    func transactionTotalsEqualsTotal() -> Bool {
         
-        let splitAmount = self.amount / Double(self.transactions.count)
+        var totalCheck:Double = 0
+        
+        for transaction in self.transactions {
+            
+            totalCheck += transaction.amount
+        }
+        
+        if totalCheck != self.amount {
+            
+            println("ERRORRORRR")
+        }
+        println(totalCheck) ; println(self.amount)
+        return totalCheck.toStringWithDecimalPlaces(2) == self.amount.toStringWithDecimalPlaces(2)
+    }
+    
+    func transactionsInChangeList() -> [Transaction] {
+        
+        return self.transactions.filter({ (t) -> Bool in
+            
+            var rc = false
+            
+            if let toUser = t.toUser {
+                
+                rc = self.billSplitChanges[toUser.objectId!] != nil
+            }
+            
+            return rc
+        })
+    }
+    
+    func transactionsNotInChangeList() -> [Transaction] {
+        
+        return self.transactions.filter({ (t) -> Bool in
+            
+            var rc = false
+            
+            if let toUser = t.toUser {
+                
+                rc = self.billSplitChanges[toUser.objectId!] == nil
+            }
+            
+            return rc
+        })
+    }
+    
+    var billSplitChanges = Dictionary<String, Double>()
+    var setValuesNextTimeValueIsBelowPurchase = false
+    var previousTransactionValuesForToUsers = Dictionary<String, Double>()
+    var previousBillSplitChanges = Dictionary<String, Double>()
+    
+    func splitTheBill(currentFieldToUserId: String?) { //, editingTransaction: Transaction?) {
+        
+       if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
+        
+            if setValuesNextTimeValueIsBelowPurchase && currentTransaction.amount <= self.amount {
+
+                if previousTransactionValuesForToUsers.count == transactions.count {
+                    
+                    for previousValue in previousTransactionValuesForToUsers {
+                        
+                        var toUserId: String = previousValue.0
+                        var amount: Double = previousValue.1
+                        
+                        transactionForToUserId(toUserId)!.amount = amount
+
+                        if contains(previousBillSplitChanges.keys, toUserId) {
+                            
+                            billSplitChanges[toUserId] = amount
+                        }
+                    }
+                    
+                    setValuesNextTimeValueIsBelowPurchase = false
+                    if !transactionTotalsEqualsTotal() {
+                        
+                        splitEqually()
+                    }
+                    return
+               }
+            }
+        }
+        
+        if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
+            
+            if currentTransaction.amount > self.amount {
+                
+                setValuesNextTimeValueIsBelowPurchase = true
+                
+                currentTransaction.amount = currentTransaction.amount > self.amount ? self.amount : currentTransaction.amount
+                billSplitChanges[currentFieldToUserId!] = currentTransaction.amount
+            }
+            else if !setValuesNextTimeValueIsBelowPurchase { // used to see that purchase was above the amount
+                
+                currentTransaction.amount = currentTransaction.amount > self.amount ? self.amount : currentTransaction.amount
+                billSplitChanges[currentFieldToUserId!] = currentTransaction.amount
+            }
+        }
+        
+        if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
+            
+            currentTransaction.amount = currentTransaction.amount > self.amount ? self.amount : currentTransaction.amount
+            billSplitChanges[currentFieldToUserId!] = currentTransaction.amount
+        }
+        
+        if billSplitChanges.count < self.transactions.count {
+            
+            var extraUnprocessedIds = [String]()
+            var remainding = self.amount
+            
+            if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
+                
+                remainding -= currentTransaction.amount
+            }
+            
+            for change in billSplitChanges {
+                
+                var toUserId: String = change.0
+                var amount: Double = change.1
+                
+                if toUserId != currentFieldToUserId {
+                    
+                    if remainding - amount >= 0 {
+                        
+                        remainding -= amount
+                    }
+                    else {
+                        
+                        extraUnprocessedIds.append(toUserId)
+                    }
+                }
+            }
+            
+            var transactionsToChange = transactionsNotInChangeList()
+            
+            for id in extraUnprocessedIds {
+                
+                transactionsToChange.append(transactionForToUserId(id)!)
+            }
+            
+            for transaction in transactionsToChange {
+                
+                if transaction.toUser?.objectId == currentFieldToUserId {
+                    
+                    transactionsToChange.removeAtIndex(
+                        find(transactionsToChange, transaction)!
+                    )
+                }
+            }
+            
+            let splitAmount = remainding / Double(transactionsToChange.count)
+            
+            for transaction in transactionsToChange {
+
+                transaction.amount = splitAmount
+                billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
+            }
+        }
+        else {
+            
+            // split equally
+            splitEqually()
+        }
+        
+        // save values
+        if !setValuesNextTimeValueIsBelowPurchase {
+            
+            for transaction in transactions {
+                
+                previousTransactionValuesForToUsers[transaction.toUser!.objectId!] = transaction.amount
+            }
+            
+            previousBillSplitChanges.removeAll(keepCapacity: false)
+            
+            for change in billSplitChanges {
+                
+                previousBillSplitChanges[change.0] = change.1
+            }
+        }
+        
+        if !transactionTotalsEqualsTotal() {
+            
+            splitEqually()
+        }
+    }
+
+    func billSplitChangesNotIncluding(id: String?) -> Dictionary<String, Double> {
+        
+        var billSplitChanges = Dictionary<String, Double>()
+        
+        for change in self.billSplitChanges {
+            
+            billSplitChanges[change.0] = change.1
+        }
+        
+        if let id = id {
+            
+            billSplitChanges.removeValueForKey(id)
+        }
+        
+        return billSplitChanges
+    }
+    
+    func splitEqually() {
+        
+        let splitAmount = self.amount / Double(transactions.count)
         
         for transaction in transactions {
             
             transaction.amount = splitAmount
         }
+        
+        billSplitChanges.removeAll(keepCapacity: false)
+        previousBillSplitChanges.removeAll(keepCapacity: false)
+        setValuesNextTimeValueIsBelowPurchase = false
     }
     
-    func sendPushNotificationsToAllUniqueUsersInTransactionsAsNewPurchase(isNewPurchase: Bool){
-        
-        let noun: String = isNewPurchase ? "added" : "updated"
-        let message = "Purchase: \(self.title!) \(noun) by \(User.currentUser()!.appropriateDisplayName())!"
-        
-        ParseUtilities.sendPushNotificationsInBackgroundToUsers(pushNotificationTargets(), message: message, data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
-    }
-    
-    func pushNotificationTargets() -> [User]{
-        
-        var pushNotificationTargets = [User]()
-        
-        for transaction in self.transactions {
-            
-            if transaction.toUser?.objectId != User.currentUser()?.objectId {
-                
-                pushNotificationTargets.append(transaction.toUser!)
-            }
-            if transaction.fromUser?.objectId != User.currentUser()?.objectId {
-                
-                pushNotificationTargets.append(transaction.fromUser!)
-            }
-        }
-        
-        return pushNotificationTargets
-    }
-    
-
     func modelIsValid() -> Bool {
 
         var errors:Array<String> = []
@@ -178,16 +372,17 @@ class Purchase: PFObject {
         
         return errors.count > 0 ? false : true
     }
-
     
-    func calculateTotalFromTransactions() {
+    func calculateTotalFromTransactions(transactions:[Transaction]) -> Double {
         
-        amount = 0
+        var amount: Double = 0
         
         for transaction in transactions {
             
             amount += transaction.amount
         }
+        
+        return amount
     }
     
     func transactionForToUser(toUser: User) -> Transaction? {
@@ -195,6 +390,19 @@ class Purchase: PFObject {
         for transaction in transactions {
             
             if transaction.toUser == toUser {
+                
+                return transaction
+            }
+        }
+        
+        return nil
+    }
+    
+    func transactionForToUserId(id: String?) -> Transaction? {
+        
+        for transaction in transactions {
+            
+            if transaction.toUser?.objectId == id {
                 
                 return transaction
             }
@@ -240,18 +448,18 @@ class Purchase: PFObject {
         }
     }
     
-    func hardUnpin() {
-        
-        Task.executeTaskInBackground({ () -> () in
-            
-            PFObject.unpinAll(self.transactions)
-            self.unpin()
-            
-        }, completion: { () -> () in
-            
-            
-        })
-    }
+//    func hardUnpin() {
+//        
+//        Task.executeTaskInBackground({ () -> () in
+//            
+//            PFObject.unpinAll(self.transactions)
+//            self.unpin()
+//            
+//        }, completion: { () -> () in
+//            
+//            
+//        })
+//    }
     
     func copyWithUsefulValues() -> Purchase {
         

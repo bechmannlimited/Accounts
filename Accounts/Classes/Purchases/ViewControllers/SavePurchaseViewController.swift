@@ -21,14 +21,13 @@ class SavePurchaseViewController: SaveItemViewController {
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
     
-    //var oldTransactions = [Dictionary<String, AnyObject?>]()
     
     override func viewDidLoad() {
         
         shouldLoadFormOnLoad = false
         super.viewDidLoad()
         
-        allowEditing = true 
+        allowEditing = true // dont allow editing on existing purchase
 
         if allowEditing && purchaseObjectId == nil {
 
@@ -80,28 +79,30 @@ class SavePurchaseViewController: SaveItemViewController {
         
         showSavingOverlay()
         
-        purchase?.savePurchase { (success) -> () in
+        let completion: () -> () = {
             
-            if success {
+            self.delegate?.itemDidChange()
+            self.delegate?.purchaseDidChange(purchase!)
+            self.popAll()
+        }
+        
+        var didCompleteRemotely = false
+        
+        purchase?.savePurchase({ (success) -> () in
+            
+            NSTimer.schedule(delay: kSaveTimeoutForRemoteUpdate){ timer in
                 
-                //self.existingPurchase?.hardUnpin()
-                //PFObject.unpinAll(self.existingPurchase?.transactions)
-                
-                NSTimer.schedule(delay: 2){ timer in
-                   
-                    self.delegate?.itemDidChange()
-                    self.delegate?.purchaseDidChange(purchase!)
-                    self.popAll()
+                if !didCompleteRemotely {
+                    
+                    completion()
                 }
             }
-            else{ // not fired (check savepurchase func
-                
-                //self.existingPurchase?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!)
-                println("error saving purchase")
-            }
             
-            //self.updateUIForEditing()
-        }
+        }, remoteCompletion: { () -> () in
+            
+            completion()
+            didCompleteRemotely = true
+        })
     }
     
     override func saveButtonEnabled() -> Bool {
@@ -117,9 +118,10 @@ extension SavePurchaseViewController: FormViewDelegate {
         let locale: NSLocale? = Settings.getCurrencyLocaleWithIdentifier().locale
         
         var sections = Array<Array<FormViewConfiguration>>()
+
         sections.append([
-            FormViewConfiguration.textField("Title", value: String.emptyIfNull(purchase.title), identifier: "Title"),
             FormViewConfiguration.textFieldCurrency("Bill total", value: Formatter.formatCurrencyAsString(purchase.localeAmount), identifier: "Amount", locale: locale),
+            FormViewConfiguration.textField("Title", value: String.emptyIfNull(purchase.title), identifier: "Title"),
             FormViewConfiguration.normalCell("User"),
             
         ])
@@ -198,7 +200,10 @@ extension SavePurchaseViewController: FormViewDelegate {
         if identifier == "Amount" {
             
             purchase.localeAmount = value
-            purchase.splitTheBill()
+            purchase.billSplitChanges.removeAll(keepCapacity: false)
+            purchase.preferredValues.removeAll(keepCapacity: false)
+            purchase.splitTheBill(nil)
+            
         }
         
         for transaction in purchase.transactions {
@@ -207,10 +212,14 @@ extension SavePurchaseViewController: FormViewDelegate {
                 
                 transaction.amount = value
                 
-                purchase.calculateTotalFromTransactions()
+                //purchase.calculateTotalFromTransactions()
+                //purchase.billSplitChanges[transaction.toUser!.objectId!] = value
                 setTextFieldValueAndUpdateConfig(identifier, value: Formatter.formatCurrencyAsString(value), cell: billSplitCells[transaction.toUser!])
             }
         }
+        
+        let id = identifier.replaceString("transactionTo", withString: "").replaceString("Optional(", withString: "").replaceString(")", withString: "").replaceString("\"", withString: "")
+        purchase.splitTheBill(id)
         
         setFriendAmountTextFields()
     }
@@ -255,8 +264,6 @@ extension SavePurchaseViewController: FormViewDelegate {
                             
                             self.popAll()
                             self.delegate?.itemDidGetDeleted()
-                            
-                            ParseUtilities.sendPushNotificationsInBackgroundToUsers(self.purchase.pushNotificationTargets(), message: "Purchase: \(self.purchase.title!) (\(Formatter.formatCurrencyAsString(purchase!.localeAmount))) was deleted by \(User.currentUser()!.appropriateDisplayName())!", data: [kPushNotificationTypeKey : PushNotificationType.ItemSaved.rawValue])
                         }
                         else{
                             
@@ -422,8 +429,13 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     billSplitCells.removeValueForKey(friend)
                     purchase.removeTransactionForToUser(friend)
                     
-                    purchase.splitTheBill()
-                    //purchase.calculateTotalFromBillSplitDictionary()
+                    if purchase.billSplitChanges[friend.objectId!] != nil {
+                        println("before: \(purchase.billSplitChanges.count)")
+                        purchase.billSplitChanges.removeValueForKey(friend.objectId!)
+                        println("after: \(purchase.billSplitChanges.count)")
+                    }
+                    
+                    purchase.splitTheBill(nil)
                     setFriendAmountTextFields()
                     
                     data[indexPath.section].removeAtIndex(indexPath.row)
@@ -464,7 +476,8 @@ extension SavePurchaseViewController: SelectUsersDelegate {
             transaction.amount = 0
             purchase.transactions.append(transaction)
             
-            purchase.splitTheBill()
+            //billSplitChanges.removeAll(keepCapacity: false)
+            purchase.splitTheBill(nil)
         }
 
         itemDidChange = true
@@ -487,8 +500,8 @@ extension SavePurchaseViewController: SelectUserDelegate {
             transaction.toUser = user
             transaction.amount = 0
             purchase.transactions.append(transaction)
-            
-            purchase.splitTheBill()
+            purchase.billSplitChanges.removeAll(keepCapacity: false)
+            purchase.splitTheBill(nil)
         }
         
         itemDidChange = true

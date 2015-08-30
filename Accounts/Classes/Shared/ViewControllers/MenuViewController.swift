@@ -12,8 +12,10 @@ import SwiftyUserDefaults
 import SwiftyJSON
 import Parse
 import AFDateHelper
+import SwiftOverlays
 
-private let kProfileSection = 2
+private let kProfileSection = 3
+private let kTestBotSection = 2
 private let kShareSection = 1
 private let kFeedbackSection = 0
 
@@ -25,6 +27,8 @@ private let kCurrencyIndexPath = NSIndexPath(forRow: 999, inSection: 9999)
 private let kFeedbackIndexPath = NSIndexPath(forRow: 0, inSection: kFeedbackSection)
 private let kShareIndexPath = NSIndexPath(forRow: 0, inSection: kShareSection)
 
+private let kTestBotIndexPath = NSIndexPath(forRow: 0, inSection: kTestBotSection)
+
 //protocol MenuDelegate {
 //    
 //    func menuDidClose()
@@ -34,8 +38,9 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
-        [kShareIndexPath],
         [kFeedbackIndexPath],
+        [kShareIndexPath],
+        [kTestBotIndexPath],
         [kLogoutIndexPath]
     ]
     
@@ -53,6 +58,11 @@ class MenuViewController: ACBaseViewController {
         super.viewWillAppear(animated)
         
         deselectSelectedCell(tableView)
+    }
+    
+    func testBotSwitchIsChanged(testBotSwitch: UISwitch) {
+        
+        Settings.setShouldShowTestBot(testBotSwitch.on)
     }
 }
 
@@ -115,7 +125,18 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         else if indexPath == kShareIndexPath {
             
-            cell.textLabel?.text = "Send app link to a friend"
+            cell.textLabel?.text = "Share app link with a friend"
+        }
+        else if indexPath == kTestBotIndexPath {
+            
+            cell.textLabel?.text = "Enable TestBot"
+            
+            let testBotSwitch = UISwitch(frame: CGRect(x: 0, y: 0, width: 100, height: 40))
+            testBotSwitch.on = Settings.shouldShowTestBot()
+            testBotSwitch.addTarget(self, action: Selector("testBotSwitchIsChanged:"), forControlEvents: UIControlEvents.ValueChanged)
+
+            
+            cell.accessoryView = testBotSwitch
         }
         
         return cell
@@ -134,21 +155,39 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 
                 if response == AlertResponse.Confirm {
                     
+                    Task.sharedTasker().cancelAllTasks()
+                    
                     //remove user from installation
                     let installation = PFInstallation.currentInstallation()
                     installation.removeObjectForKey(kParseInstallationUserKey)
-                    installation.save()
                     
-                    User.logOutInBackgroundWithBlock({ (error) -> Void in
+                    SwiftOverlays.showBlockingWaitOverlayWithText("Logging out...")
+                    
+                    installation.saveInBackgroundWithBlock({ (success, error) -> Void in
                         
-                        if let error = error {
+                        if success {
                             
-                            ParseUtilities.showAlertWithErrorIfExists(error)
+                            User.logOutInBackgroundWithBlock({ (error) -> Void in
+                                
+                                SwiftOverlays.removeAllBlockingOverlays()
+                                
+                                if let error = error {
+                                    
+                                    ParseUtilities.showAlertWithErrorIfExists(error)
+                                    self.deselectSelectedCell(tableView)
+                                }
+                                else {
+                                    
+                                    let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Login")
+                                    self.presentViewController(v, animated: true, completion: nil)
+                                }
+                            })
                         }
                         else {
-
-                            let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Login")
-                            self.presentViewController(v, animated: true, completion: nil)
+                            
+                            SwiftOverlays.removeAllBlockingOverlays()
+                            UIAlertView(title: "Error", message: "You need to be connected to the internet to logout, so that we can stop you receiving push notifications.", delegate: nil, cancelButtonTitle: "Ok").show()
+                            self.deselectSelectedCell(tableView)
                         }
                     })
                 }
@@ -194,6 +233,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 self.presentViewController(activityVC, animated: true, completion: nil)
             }
         }
+        else if indexPath == kTestBotIndexPath {
+            
+            tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            
+        }
     }
     
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -211,6 +255,10 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         if section == kFeedbackSection {
             
             return "Send a message to our support team at any time and we'll respond asap (online 09:00 - 21:00 GMT+1)"
+        }
+        else if section == kShareSection {
+            
+            return "Your Facebook friends who have this app, will appear in your friends list!"
         }
         
         return nil

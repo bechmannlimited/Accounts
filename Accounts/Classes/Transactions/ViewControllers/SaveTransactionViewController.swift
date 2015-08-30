@@ -28,7 +28,7 @@ class SaveTransactionViewController: SaveItemViewController {
         shouldLoadFormOnLoad = false
         super.viewDidLoad()
 
-        allowEditing = true // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
+        allowEditing = true // = transaction.purchaseTransactionLinkUUID == nil // transaction.TransactionID == 0 || transaction.user.UserID == kActiveUser.UserID
         
         showOrHideSaveButton()
         reloadForm()
@@ -46,22 +46,14 @@ class SaveTransactionViewController: SaveItemViewController {
             title = "i.o.u"
         }
         
-        
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
         
         if transactionObjectId != nil {
             
             updateUIForServerInteraction()
             
-            Task.executeTaskInBackground({ () -> () in
+            Task.sharedTasker().executeTaskInBackground({ () -> Void in
                 
-//                var error = NSErrorPointer()
-//                self.transaction.fetch(error)
-//                
-//                if error != nil {
-//                    
-//                    self.pop()
-//                }
                 self.transaction.fetchIfNeeded()
                 self.transaction.toUser?.fetchIfNeeded()
                 self.transaction.fromUser?.fetchIfNeeded()
@@ -71,8 +63,6 @@ class SaveTransactionViewController: SaveItemViewController {
                 
                 self.updateUIForEditing()
                 self.reloadForm()
-                
-                //self.copyOfItem = ParseUtilities.convertPFObjectToDictionary(self.transaction)
             })
         }
         
@@ -85,6 +75,9 @@ class SaveTransactionViewController: SaveItemViewController {
         updateUIForSavingOrDeleting()
         
         var copyOfOriginalForIfSaveFails = existingTransaction?.copyWithUsefulValues()
+        
+        Transaction.calculateOfflineOweValuesByDeletingTransaction(existingTransaction)
+        Transaction.calculateOfflineOweValuesWithTransaction(self.transaction)
         
         let transaction = isExistingTransaction ? existingTransaction : self.transaction
         
@@ -101,46 +94,31 @@ class SaveTransactionViewController: SaveItemViewController {
 
             if success {
 
-                NSTimer.schedule(delay: 2, handler: { timer in
+                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
                 
-                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                if !delegateCallbackHasBeenFired {
                     
-                    if !delegateCallbackHasBeenFired {
-                    
-                        self.delegate?.itemDidChange()
-                        self.delegate?.transactionDidChange(transaction!)
-                        delegateCallbackHasBeenFired = true
-                    }
-                })
+                    self.delegate?.itemDidChange()
+                    self.delegate?.transactionDidChange(transaction!)
+                    delegateCallbackHasBeenFired = true
+                    self.popAll()
+                }
             }
             else{
                 
-                //self.existingTransaction?.setUsefulValuesFromCopy(copyOfOriginalForIfSaveFails!) // remove this again?
                 ParseUtilities.showAlertWithErrorIfExists(error)
             }
-
-            //self.updateUIForEditing()
         }
-        
-//        let reachability = Reachability.reachabilityForInternetConnection()
-//        
-//        reachability.whenUnreachable = { reachability in
-//            
-//            UIAlertView(title: "No connection", message: "This item will be saved online as soon as a network connection is available.", delegate: nil, cancelButtonTitle: "Ok", otherButtonTitles: nil, nil).show()
-//        }
-//        
-//        reachability.startNotifier()
-        
-        NSTimer.schedule(delay: 2) { timer in
+
+        NSTimer.schedule(delay: kSaveTimeoutForRemoteUpdate) { timer in
             
             if !delegateCallbackHasBeenFired {
                 
                 self.delegate?.itemDidChange()
                 self.delegate?.transactionDidChange(transaction!)
                 delegateCallbackHasBeenFired = true
+                self.popAll()
             }
-            
-            self.popAll()
         }
     }
     
@@ -185,7 +163,6 @@ extension SaveTransactionViewController: FormViewDelegate {
             ])
         }
 
-        
         sections.append([
             FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.localeAmount), identifier: "Amount", locale: locale),
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
@@ -193,7 +170,7 @@ extension SaveTransactionViewController: FormViewDelegate {
             //FormViewConfiguration.normalCell("Location")
         ])
         
-        if isExistingTransaction {
+        if isExistingTransaction && allowEditing {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
@@ -297,11 +274,15 @@ extension SaveTransactionViewController: FormViewDelegate {
                     IOSession.sharedSession().deletedTransactionIds.append(String.emptyIfNull(transaction?.objectId))
                     
                     self.isSaving = true
+                    
+                    Transaction.calculateOfflineOweValuesByDeletingTransaction(self.existingTransaction)
+                    
                     transaction?.deleteEventually()
+                    transaction?.isDeleted = true
                     
                     self.showDeletingOverlay()
                     
-                    NSTimer.schedule(delay: 2.5) { timer in
+                    NSTimer.schedule(delay: kDeleteTimeoutForRemoteUpdate) { timer in
                         
                         self.popAll()
                         self.delegate?.itemDidGetDeleted()
@@ -313,23 +294,30 @@ extension SaveTransactionViewController: FormViewDelegate {
     
     func formViewDidSelectRow(identifier: String) {
         
-        if identifier == "Friend" {
-
-            let usersToChooseFrom = User.userListExcludingID(nil) // User.userListExcludingID(transaction.fromUser?.objectId)
+        if allowEditing {
             
-            let v = SelectUsersViewController(identifier: identifier, user: transaction.toUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
-            navigationController?.pushViewController(v, animated: true)
+            if identifier == "Friend" {
+                
+                let usersToChooseFrom = User.userListExcludingID(nil) // User.userListExcludingID(transaction.fromUser?.objectId)
+                
+                let v = SelectUsersViewController(identifier: identifier, user: transaction.toUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+                navigationController?.pushViewController(v, animated: true)
+            }
+            else if identifier == "User" {
+                
+                let usersToChooseFrom = User.userListExcludingID(nil)
+                
+                let v = SelectUsersViewController(identifier: identifier, user: transaction.fromUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+                navigationController?.pushViewController(v, animated: true)
+            }
+            else if identifier == "Location" {
+                
+                selectPlace()
+            }
         }
-        else if identifier == "User" {
+        else {
             
-            let usersToChooseFrom = User.userListExcludingID(nil)
-            
-            let v = SelectUsersViewController(identifier: identifier, user: transaction.fromUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
-            navigationController?.pushViewController(v, animated: true)
-        }
-        else if identifier == "Location" {
-            
-            selectPlace()
+            deselectSelectedCell(tableView)
         }
     }
     
@@ -387,23 +375,6 @@ extension SaveTransactionViewController: UITableViewDelegate {
             label.fillSuperView(UIEdgeInsets(top: 0, left: 0, bottom: 17, right: 0))
             
             return view
-        }
-        
-        return nil
-    }
-    
-    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-        
-        if section == numberOfSectionsInTableView(tableView) - 1 {
-            
-            if transaction.type == TransactionType.iou {
-                
-                return "Use this form to log when you owe one of your friends some money, or if they owe you."
-            }
-            else if transaction.type == TransactionType.payment {
-                
-                return "Use this form to log when you paid or got paid some money by one of your friends."
-            }
         }
         
         return nil

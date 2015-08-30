@@ -29,6 +29,8 @@ class Transaction: PFObject {
     @NSManaged var purchaseObjectId: String?
     @NSManaged var transactionDate: NSDate
     @NSManaged private var transactionType: NSNumber?
+    @NSManaged var purchaseTransactionLinkUUID: String?
+    @NSManaged var isDeleted: Bool
     
     var purchase: Purchase?
     
@@ -151,22 +153,24 @@ class Transaction: PFObject {
         return targets
     }
     
-    func hardUnpin() {
-        
-        Task.executeTaskInBackground({ () -> () in
-            
-            self.unpinInBackground()
-            self.purchase?.unpin()
-            self.fromUser?.unpin()
-            self.toUser?.unpin()
-            PFObject.unpinAll(self.purchase?.transactions)
-            self.purchase?.user.unpin()
-            
-        }, completion: { () -> () in
-            
-            
-        })
-    }
+//    func hardUnpin() {
+//        
+//        
+//        
+//        Task.executeTaskInBackground({ () -> () in
+//            
+//            self.unpinInBackground()
+//            self.purchase?.unpin()
+//            self.fromUser?.unpin()
+//            self.toUser?.unpin()
+//            PFObject.unpinAll(self.purchase?.transactions)
+//            self.purchase?.user.unpin()
+//            
+//        }, completion: { () -> () in
+//            
+//            
+//        })
+//    }
     
     func copyWithUsefulValues() -> Transaction {
         
@@ -179,6 +183,7 @@ class Transaction: PFObject {
         transaction.transactionDate = transactionDate
         transaction.purchase = purchase
         transaction.type = type
+        transaction.purchaseTransactionLinkUUID = purchaseTransactionLinkUUID
         
         return transaction
     }
@@ -191,6 +196,40 @@ class Transaction: PFObject {
         title = transaction.title
         transactionDate = transaction.transactionDate
         purchase = transaction.purchase
+    }
+    
+    class func calculateOfflineOweValuesWithTransaction(transaction: Transaction?){
+        
+        if let transaction = transaction {
+            
+            if transaction.fromUser?.objectId == User.currentUser()?.objectId  {
+                
+                transaction.toUser?.localeDifferenceBetweenActiveUser += transaction.amount
+                User.currentUser()?.friendsIdsWithDifference?[transaction.toUser!.objectId!] = NSNumber(double: transaction.toUser!.localeDifferenceBetweenActiveUser)
+            }
+            else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
+                
+                transaction.fromUser?.localeDifferenceBetweenActiveUser -= transaction.amount
+                User.currentUser()?.friendsIdsWithDifference?[transaction.fromUser!.objectId!] = NSNumber(double: transaction.fromUser!.localeDifferenceBetweenActiveUser)
+            }
+        }
+    }
+    
+    class func calculateOfflineOweValuesByDeletingTransaction(transaction: Transaction?){
+        
+        if let transaction = transaction {
+            
+            if transaction.fromUser?.objectId == User.currentUser()?.objectId  {
+                
+                transaction.toUser?.localeDifferenceBetweenActiveUser -= transaction.amount
+                User.currentUser()?.friendsIdsWithDifference?[transaction.toUser!.objectId!] = NSNumber(double: transaction.toUser!.localeDifferenceBetweenActiveUser)
+            }
+            else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
+                
+                transaction.fromUser?.localeDifferenceBetweenActiveUser += transaction.amount
+                User.currentUser()?.friendsIdsWithDifference?[transaction.fromUser!.objectId!] = NSNumber(double: transaction.fromUser!.localeDifferenceBetweenActiveUser)
+            }
+        }
     }
 }
 

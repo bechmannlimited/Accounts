@@ -24,6 +24,12 @@
 #define COCOAPODS_VERSION_MINOR_Alamofire 2
 #define COCOAPODS_VERSION_PATCH_Alamofire 3
 
+// AwesomeCache
+#define COCOAPODS_POD_AVAILABLE_AwesomeCache
+#define COCOAPODS_VERSION_MAJOR_AwesomeCache 1
+#define COCOAPODS_VERSION_MINOR_AwesomeCache 0
+#define COCOAPODS_VERSION_PATCH_AwesomeCache 2
+
 // Bolts
 #define COCOAPODS_POD_AVAILABLE_Bolts
 #define COCOAPODS_VERSION_MAJOR_Bolts 1
@@ -139,10 +145,4 @@
 #define COCOAPODS_VERSION_MAJOR_SwiftyUserDefaults 1
 #define COCOAPODS_VERSION_MINOR_SwiftyUserDefaults 2
 #define COCOAPODS_VERSION_PATCH_SwiftyUserDefaults 0
-
-// TMCache
-#define COCOAPODS_POD_AVAILABLE_TMCache
-#define COCOAPODS_VERSION_MAJOR_TMCache 2
-#define COCOAPODS_VERSION_MINOR_TMCache 1
-#define COCOAPODS_VERSION_PATCH_TMCache 0
 

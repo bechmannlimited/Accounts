@@ -9,42 +9,56 @@
 import UIKit
 import ABToolKit
 import Alamofire
+import AwesomeCache
+
+private let kABImageLoaderSharedInstance = ABImageLoader()
 
 class ABImageLoader: NSObject {
    
-    class func loadImageFromCacheThenNetwork(imageURL: String, completion: (image: UIImage) -> ()) {
+    var requestTimes = Dictionary<String, NSDate>()
+    
+    class func sharedLoader() -> ABImageLoader {
         
-        //var image: UIImage?
-        
-        let imageCache = NSCache()
-        
-        if let image = imageCache.objectForKey(imageURL) as? UIImage {
-            println(image)
-            completion(image: image)
-        }
-        
-        let request = Alamofire.request(.GET, imageURL).validate(contentType: ["image/*"]).response() {
-            (request, response, data , error) in
-            
-            if error == nil {
-                
-                if let data = data as? NSData {
-                    
-                    let image: UIImage = UIImage(data: data, scale: 1.0)!
-                    println(image)
-                    
-                    imageCache.setObject(image, forKey: request.URLString)
-                    
-                    completion(image: image)
-                }
-                
-            } else {
-                /*
-                If the cell went off-screen before the image was downloaded, we cancel it and
-                an NSURLErrorDomain (-999: cancelled) is returned. This is a normal behavior.
-                */
-            }
-        }
+        return kABImageLoaderSharedInstance
     }
     
+    func loadImageFromCacheThenNetwork(imageUrl: String, completion: (image: UIImage) -> ()) {
+        
+        var didReceiveRemoteImage = false
+        var didReceiveCachedImage = false
+        
+        let cache = Cache<UIImage>(name: "imageCache")
+        
+        if let image = cache[imageUrl] {
+            
+            completion(image: image)
+            didReceiveCachedImage = true
+        }
+        
+        let getRemoteImage: () -> () = {
+            
+            ImageLoader.sharedLoader().imageForUrl(imageUrl, completionHandler: { (image, url) -> () in
+                
+                if let image: UIImage = image {
+                    
+                    cache[imageUrl] = image
+                    completion(image: image)
+                    didReceiveRemoteImage = true
+                    self.requestTimes[imageUrl] = NSDate()
+                }
+            })
+        }
+        
+        if let timeForRequestWithUrl = requestTimes[imageUrl] {
+            
+            if (NSDate() - timeForRequestWithUrl).minutes == 15 {
+                
+                getRemoteImage()
+            }
+        }
+        else {
+            
+            getRemoteImage()
+        }
+    }
 }

@@ -87,6 +87,20 @@ class User: PFUser {
         return rc
     }
     
+//    func imageUrl() -> String? {
+//        
+//        if objectId == "soRCUYqg6W" {
+//            
+//            return "bender.jpg"
+//        }
+//        else if let id = facebookId{
+//            
+//            return "https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)"
+//        }
+//        
+//        return nil
+//    }
+    
     func appropriateShortDisplayName() -> String {
         
         let name = appropriateDisplayName()
@@ -147,10 +161,7 @@ class User: PFUser {
                     
                     var canContinue = true
                     
-                    Task.executeTaskInBackground({ () -> () in
-                        
-//                        User.currentUser()?.relationForKey(kParse_User_Friends_Key).addObject(User.query()!.getObjectWithId("dtQy9phAlR")!)
-//                        User.currentUser()?.save()
+                    Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
                         
                         var friendInfo = Dictionary<String, NSNumber>()
                         
@@ -167,6 +178,13 @@ class User: PFUser {
                                 friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
                                 queries.append(friendQuery!)
                             }
+                        }
+                        println("hi")
+                        if Settings.shouldShowTestBot() {
+                            
+                            let botQuery = User.query()
+                            botQuery?.whereKey("objectId", equalTo: kTestBotObjectId)
+                            queries.append(botQuery!)
                         }
                         
                         queries.append(query1!)  // must add friends relation back to user
@@ -195,6 +213,7 @@ class User: PFUser {
                             self.pinInBackground()
                             self.saveInBackground()
                         }
+
                         
                     }, completion: { () -> () in
                         
@@ -222,6 +241,11 @@ class User: PFUser {
             
             let localQuery = User.query()?.whereKey("objectId", containedIn: ids).orderByAscending("objectId").fromLocalDatastore()
             
+            if !Settings.shouldShowTestBot() {
+                
+                localQuery?.whereKey("objectId", notEqualTo: "soRCUYqg6W")
+            }
+            
             localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
                 if let friends = objects as? [User] {
@@ -247,8 +271,8 @@ class User: PFUser {
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {
-        
-        Task.executeTaskInBackground({ () -> () in
+                
+        Task.sharedTasker().executeTaskInBackground({ () -> () in
             
             let friendRequest = FriendRequest()
             friendRequest.fromUser = User.currentUser()
@@ -272,7 +296,7 @@ class User: PFUser {
                     ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
                 }
             }
-
+            
             if !acceptedFriendRequest {
                 
                 friendRequest.friendRequestStatus = FriendRequestStatus.Pending.rawValue
@@ -281,6 +305,7 @@ class User: PFUser {
                 ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "New friend request from \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestSent.rawValue])
             }
 
+            
         }, completion: { () -> () in
             
             completion(success:true)

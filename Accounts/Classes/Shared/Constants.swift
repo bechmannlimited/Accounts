@@ -9,3 +9,6 @@
 //import Foundation
 //
 
+let kTestBotObjectId = "soRCUYqg6W"
+let kSaveTimeoutForRemoteUpdate: NSTimeInterval = 6
+let kDeleteTimeoutForRemoteUpdate: NSTimeInterval = 3
