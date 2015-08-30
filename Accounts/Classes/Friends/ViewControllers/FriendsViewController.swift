@@ -219,7 +219,7 @@ class FriendsViewController: ACBaseViewController {
         var friendsWhoOweMoney = Array<User>()
         var friendsWhoYouOweMoney = Array<User>()
         var friendsWhoAreEven = Array<User>()
-        
+            
         //owes you money
         for friend in User.currentUser()!.friends {
             
@@ -265,6 +265,7 @@ class FriendsViewController: ACBaseViewController {
         
         User.currentUser()?.getFriends({ (completedRemoteRequest) -> () in
             
+            println("is in this closure")
             refreshControl?.endRefreshing()
             self.setDataForTable()
             self.tableView.reloadData()

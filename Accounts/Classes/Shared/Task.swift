@@ -8,55 +8,103 @@
 
 import UIKit
 
-private let kSharedTasker = Task().setup()
+private let kSharedTasker = Task()
 
 class Task: NSObject {
    
-    var operationQueue = NSOperationQueue.new()
-    var operations = Dictionary<String, NSOperation>()
+    var operationBlocks = Dictionary<String, NSBlockOperation>()
     
     class func sharedTasker() -> Task {
         
         return kSharedTasker
     }
     
-    private func setup() -> Task {
-        
-        operationQueue.qualityOfService = .Background
-        return self
-    }
+//    private func setup() -> Task {
+//        
+//        operationQueue.qualityOfService = .Background
+//        return self
+//    }
     
     func cancelAllTasks() {
         
-        operationQueue.cancelAllOperations()
+        for queue in operationBlocks {
+            
+            queue.1.cancel()
+        }
     }
     
     func cancelTaskForIdentifier(identifier: String) {
         
-        if let operation = operations[identifier] {
+        if let block = operationBlocks[identifier] {
             
-            operation.cancel()
+            println("cancelling: \(identifier))")
+            block.cancel()
+            println("from inside canceltaskforidentifier:  cancelled \(block.cancelled)")
         }
     }
     
-    func executeTaskInBackground(task: () -> (), completion: () -> ()) {
+    func executeTaskInBackground(task: () -> (), completion: (() -> ())?) {
         
         executeTaskInBackgroundWithIdentifier(nil, task: task, completion: completion)
     }
     
-    func executeTaskInBackgroundWithIdentifier(identifier: String?, task: () -> (), completion: () -> ()) {
+    func executeTaskInBackgroundWithIdentifier(identifier: String?, task: () -> (), completion: (() -> ())?) {
         
-        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+//        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
+//        
+//        dispatch_async(dispatch_get_global_queue(priority, 0)) {
+//            
+//            task()
+//            
+//            dispatch_async(dispatch_get_main_queue()) {
+//                
+//                completion()
+//            }
+//        }
         
-        dispatch_async(dispatch_get_global_queue(priority, 0)) {
+        var cancelTimer: NSTimer?
+        
+        var backgroundQueue = NSOperationQueue()
+        
+        var block = NSBlockOperation()
+        
+        if let identifier = identifier {
+            
+            println("starting: \(identifier))")
+            operationBlocks[identifier] = block
+        }
+        
+        block.addExecutionBlock { () -> Void in
+         
+            var hasFiredCompletionHandler = false
             
             task()
             
-            dispatch_async(dispatch_get_main_queue()) {
+            NSOperationQueue.mainQueue().addOperationWithBlock() {
                 
-                completion()
+                if !block.cancelled {
+                    println("executing closure")
+                    hasFiredCompletionHandler = true
+                    completion?()
+                }
+            }
+            
+            while !hasFiredCompletionHandler {
+                
+                println("checking \(NSDate()) - cancelled: \(block.cancelled)")
+                if block.cancelled {
+                    
+                    println("returning from while loop")
+                    return
+                }
+                
+                sleep(1 / 2)
             }
         }
+        
+        backgroundQueue.addOperation(block)
+        
+        
         
 //        let operation: NSOperation = NSBlockOperation { () -> Void in
 //            

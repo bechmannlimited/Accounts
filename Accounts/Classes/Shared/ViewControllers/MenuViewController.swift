@@ -12,6 +12,7 @@ import SwiftyUserDefaults
 import SwiftyJSON
 import Parse
 import AFDateHelper
+import SwiftOverlays
 
 private let kProfileSection = 3
 private let kTestBotSection = 2
@@ -159,18 +160,34 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                     //remove user from installation
                     let installation = PFInstallation.currentInstallation()
                     installation.removeObjectForKey(kParseInstallationUserKey)
-                    installation.saveEventually()
                     
-                    User.logOutInBackgroundWithBlock({ (error) -> Void in
+                    SwiftOverlays.showBlockingWaitOverlayWithText("Logging out...")
+                    
+                    installation.saveInBackgroundWithBlock({ (success, error) -> Void in
                         
-                        if let error = error {
+                        if success {
                             
-                            ParseUtilities.showAlertWithErrorIfExists(error)
+                            User.logOutInBackgroundWithBlock({ (error) -> Void in
+                                
+                                SwiftOverlays.removeAllBlockingOverlays()
+                                
+                                if let error = error {
+                                    
+                                    ParseUtilities.showAlertWithErrorIfExists(error)
+                                    self.deselectSelectedCell(tableView)
+                                }
+                                else {
+                                    
+                                    let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Login")
+                                    self.presentViewController(v, animated: true, completion: nil)
+                                }
+                            })
                         }
                         else {
-
-                            let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Login")
-                            self.presentViewController(v, animated: true, completion: nil)
+                            
+                            SwiftOverlays.removeAllBlockingOverlays()
+                            UIAlertView(title: "Error", message: "You need to be connected to the internet to logout, so that we can stop you receiving push notifications.", delegate: nil, cancelButtonTitle: "Ok").show()
+                            self.deselectSelectedCell(tableView)
                         }
                     })
                 }
