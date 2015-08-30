@@ -154,10 +154,12 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 
                 if response == AlertResponse.Confirm {
                     
+                    Task.sharedTasker().cancelAllTasks()
+                    
                     //remove user from installation
                     let installation = PFInstallation.currentInstallation()
                     installation.removeObjectForKey(kParseInstallationUserKey)
-                    installation.save()
+                    installation.saveEventually()
                     
                     User.logOutInBackgroundWithBlock({ (error) -> Void in
                         

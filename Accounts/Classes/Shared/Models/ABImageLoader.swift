@@ -45,7 +45,6 @@ class ABImageLoader: NSObject {
                     completion(image: image)
                     didReceiveRemoteImage = true
                     self.requestTimes[imageUrl] = NSDate()
-                    println("received remote image \(NSDate()))")
                 }
             })
         }

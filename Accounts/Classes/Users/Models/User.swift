@@ -161,10 +161,7 @@ class User: PFUser {
                     
                     var canContinue = true
                     
-                    Task.executeTaskInBackground({ () -> () in
-                        
-//                        User.currentUser()?.relationForKey(kParse_User_Friends_Key).addObject(User.query()!.getObjectWithId("dtQy9phAlR")!)
-//                        User.currentUser()?.save()
+                    Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
                         
                         var friendInfo = Dictionary<String, NSNumber>()
                         
@@ -182,7 +179,7 @@ class User: PFUser {
                                 queries.append(friendQuery!)
                             }
                         }
-                        
+                        println("hi")
                         if Settings.shouldShowTestBot() {
                             
                             let botQuery = User.query()
@@ -216,6 +213,7 @@ class User: PFUser {
                             self.pinInBackground()
                             self.saveInBackground()
                         }
+
                         
                     }, completion: { () -> () in
                         
@@ -273,8 +271,8 @@ class User: PFUser {
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {
-        
-        Task.executeTaskInBackground({ () -> () in
+                
+        Task.sharedTasker().executeTaskInBackground({ () -> () in
             
             let friendRequest = FriendRequest()
             friendRequest.fromUser = User.currentUser()
@@ -298,7 +296,7 @@ class User: PFUser {
                     ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
                 }
             }
-
+            
             if !acceptedFriendRequest {
                 
                 friendRequest.friendRequestStatus = FriendRequestStatus.Pending.rawValue
@@ -307,6 +305,7 @@ class User: PFUser {
                 ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "New friend request from \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestSent.rawValue])
             }
 
+            
         }, completion: { () -> () in
             
             completion(success:true)

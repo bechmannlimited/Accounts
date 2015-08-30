@@ -52,15 +52,8 @@ class SaveTransactionViewController: SaveItemViewController {
             
             updateUIForServerInteraction()
             
-            Task.executeTaskInBackground({ () -> () in
+            Task.sharedTasker().executeTaskInBackground({ () -> Void in
                 
-//                var error = NSErrorPointer()
-//                self.transaction.fetch(error)
-//                
-//                if error != nil {
-//                    
-//                    self.pop()
-//                }
                 self.transaction.fetchIfNeeded()
                 self.transaction.toUser?.fetchIfNeeded()
                 self.transaction.fromUser?.fetchIfNeeded()
@@ -70,8 +63,6 @@ class SaveTransactionViewController: SaveItemViewController {
                 
                 self.updateUIForEditing()
                 self.reloadForm()
-                
-                //self.copyOfItem = ParseUtilities.convertPFObjectToDictionary(self.transaction)
             })
         }
         

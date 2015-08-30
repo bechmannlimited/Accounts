@@ -131,7 +131,7 @@ class Purchase: PFObject {
             println("ERRORRORRR")
         }
         println(totalCheck) ; println(self.amount)
-        return totalCheck == self.amount
+        return totalCheck.toStringWithDecimalPlaces(2) == self.amount.toStringWithDecimalPlaces(2)
     }
     
     func transactionsInChangeList() -> [Transaction] {
@@ -191,7 +191,10 @@ class Purchase: PFObject {
                     }
                     
                     setValuesNextTimeValueIsBelowPurchase = false
-                    transactionTotalsEqualsTotal()
+                    if !transactionTotalsEqualsTotal() {
+                        
+                        splitEqually()
+                    }
                     return
                }
             }
@@ -275,14 +278,7 @@ class Purchase: PFObject {
         else {
             
             // split equally
-            let splitAmount = self.amount / Double(transactions.count)
-            
-            for transaction in transactions {
-                
-                transaction.amount = splitAmount
-            }
-            
-            billSplitChanges.removeAll(keepCapacity: false)
+            splitEqually()
         }
         
         // save values
@@ -301,7 +297,10 @@ class Purchase: PFObject {
             }
         }
         
-        transactionTotalsEqualsTotal()
+        if !transactionTotalsEqualsTotal() {
+            
+            splitEqually()
+        }
     }
 
     func billSplitChangesNotIncluding(id: String?) -> Dictionary<String, Double> {
@@ -319,6 +318,20 @@ class Purchase: PFObject {
         }
         
         return billSplitChanges
+    }
+    
+    func splitEqually() {
+        
+        let splitAmount = self.amount / Double(transactions.count)
+        
+        for transaction in transactions {
+            
+            transaction.amount = splitAmount
+        }
+        
+        billSplitChanges.removeAll(keepCapacity: false)
+        previousBillSplitChanges.removeAll(keepCapacity: false)
+        setValuesNextTimeValueIsBelowPurchase = false
     }
     
     func modelIsValid() -> Bool {
@@ -435,18 +448,18 @@ class Purchase: PFObject {
         }
     }
     
-    func hardUnpin() {
-        
-        Task.executeTaskInBackground({ () -> () in
-            
-            PFObject.unpinAll(self.transactions)
-            self.unpin()
-            
-        }, completion: { () -> () in
-            
-            
-        })
-    }
+//    func hardUnpin() {
+//        
+//        Task.executeTaskInBackground({ () -> () in
+//            
+//            PFObject.unpinAll(self.transactions)
+//            self.unpin()
+//            
+//        }, completion: { () -> () in
+//            
+//            
+//        })
+//    }
     
     func copyWithUsefulValues() -> Purchase {
         

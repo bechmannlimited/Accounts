@@ -341,6 +341,12 @@ class FriendsViewController: ACBaseViewController {
             self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
         })
     }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        Task.sharedTasker().cancelTaskForIdentifier("GetFriends")
+    }
 }
 
 extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {

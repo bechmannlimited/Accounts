@@ -157,8 +157,17 @@ class TransactionsViewController: ACBaseViewController {
                 imageView.addSubview(cover)
                 cover.fillSuperView(UIEdgeInsetsZero)
                 
-                imageView.layer.rasterizationScale = UIScreen.mainScreen().scale
-                imageView.layer.shouldRasterize = true
+//                imageView.layer.rasterizationScale = UIScreen.mainScreen().scale
+//                imageView.layer.shouldRasterize = true
+                
+                // convert to image
+                
+                if let  image = imageView.screenShot() {
+                    
+                    imageView.removeFromSuperview()
+                    view.addSubview(UIImageView(image: image))
+                }
+                
             }
         }
     }
@@ -469,7 +478,7 @@ class TransactionsViewController: ACBaseViewController {
                 
                 if let transactions = objects as? [Transaction] {
                     
-                    Task.executeTaskInBackground({ () -> () in
+                    Task.sharedTasker().executeTaskInBackground({ () -> Void in
                         
                         PFObject.unpinAll(self.query()?.fromLocalDatastore().findObjects())
                         PFObject.pinAll(transactions)
@@ -547,10 +556,10 @@ class TransactionsViewController: ACBaseViewController {
                 
                 if let transactions = objects as? [Transaction] {
                     
-                    Task.executeTaskInBackground({ () -> () in
+                    Task.sharedTasker().executeTaskInBackground({ () -> Void in
                         
-                    PFObject.pinAll(transactions)
-                    
+                        PFObject.pinAll(transactions)
+                        
                     }, completion: { () -> () in
                         
                         self.reloadTableViewFromLocalDataSource({ () -> () in
