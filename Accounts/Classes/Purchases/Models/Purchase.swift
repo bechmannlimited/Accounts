@@ -170,25 +170,20 @@ class Purchase: PFObject {
     var previousBillSplitChanges = Dictionary<String, Double>()
     
     func splitTheBill(currentFieldToUserId: String?) { //, editingTransaction: Transaction?) {
-
-        println(billSplitChanges.count)
         
        if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
-//            
+        
             if setValuesNextTimeValueIsBelowPurchase && currentTransaction.amount <= self.amount {
-//
+
                 if previousTransactionValuesForToUsers.count == transactions.count {
-//                    
+                    
                     for previousValue in previousTransactionValuesForToUsers {
                         
                         var toUserId: String = previousValue.0
                         var amount: Double = previousValue.1
                         
                         transactionForToUserId(toUserId)!.amount = amount
-                        
-                        //println("\(transactionForToUserId(toUserId)!.toUser?.appropriateDisplayName()) - \(transactionForToUserId(toUserId)!.amount)")
-                        //println(contains(billSplitChanges.keys, toUserId))
-                        
+
                         if contains(previousBillSplitChanges.keys, toUserId) {
                             
                             billSplitChanges[toUserId] = amount
@@ -196,6 +191,7 @@ class Purchase: PFObject {
                     }
                     
                     setValuesNextTimeValueIsBelowPurchase = false
+                    transactionTotalsEqualsTotal()
                     return
                }
             }
@@ -279,7 +275,6 @@ class Purchase: PFObject {
         else {
             
             // split equally
-            println("splitting equally")
             let splitAmount = self.amount / Double(transactions.count)
             
             for transaction in transactions {
@@ -295,7 +290,6 @@ class Purchase: PFObject {
             
             for transaction in transactions {
                 
-                //println("setting trans for \(transaction.toUser!.appropriateDisplayName()): amount: \(transaction.amount)")
                 previousTransactionValuesForToUsers[transaction.toUser!.objectId!] = transaction.amount
             }
             
@@ -306,6 +300,8 @@ class Purchase: PFObject {
                 previousBillSplitChanges[change.0] = change.1
             }
         }
+        
+        transactionTotalsEqualsTotal()
     }
 
     func billSplitChangesNotIncluding(id: String?) -> Dictionary<String, Double> {
