@@ -165,8 +165,57 @@ class Purchase: PFObject {
     }
     
     var billSplitChanges = Dictionary<String, Double>()
+    var setValuesNextTimeValueIsBelowPurchase = false
+    var previousTransactionValuesForToUsers = Dictionary<String, Double>()
+    var previousBillSplitChanges = Dictionary<String, Double>()
     
     func splitTheBill(currentFieldToUserId: String?) { //, editingTransaction: Transaction?) {
+
+        println(billSplitChanges.count)
+        
+       if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
+//            
+            if setValuesNextTimeValueIsBelowPurchase && currentTransaction.amount <= self.amount {
+//
+                if previousTransactionValuesForToUsers.count == transactions.count {
+//                    
+                    for previousValue in previousTransactionValuesForToUsers {
+                        
+                        var toUserId: String = previousValue.0
+                        var amount: Double = previousValue.1
+                        
+                        transactionForToUserId(toUserId)!.amount = amount
+                        
+                        //println("\(transactionForToUserId(toUserId)!.toUser?.appropriateDisplayName()) - \(transactionForToUserId(toUserId)!.amount)")
+                        //println(contains(billSplitChanges.keys, toUserId))
+                        
+                        if contains(previousBillSplitChanges.keys, toUserId) {
+                            
+                            billSplitChanges[toUserId] = amount
+                        }
+                    }
+                    
+                    setValuesNextTimeValueIsBelowPurchase = false
+                    return
+               }
+            }
+        }
+        
+        if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
+            
+            if currentTransaction.amount > self.amount {
+                
+                setValuesNextTimeValueIsBelowPurchase = true
+                
+                currentTransaction.amount = currentTransaction.amount > self.amount ? self.amount : currentTransaction.amount
+                billSplitChanges[currentFieldToUserId!] = currentTransaction.amount
+            }
+            else if !setValuesNextTimeValueIsBelowPurchase { // used to see that purchase was above the amount
+                
+                currentTransaction.amount = currentTransaction.amount > self.amount ? self.amount : currentTransaction.amount
+                billSplitChanges[currentFieldToUserId!] = currentTransaction.amount
+            }
+        }
         
         if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
             
@@ -174,16 +223,14 @@ class Purchase: PFObject {
             billSplitChanges[currentFieldToUserId!] = currentTransaction.amount
         }
         
-        if billSplitChanges.count < self.transactions.count{
+        if billSplitChanges.count < self.transactions.count {
             
             var extraUnprocessedIds = [String]()
             var remainding = self.amount
             
             if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
                 
-                println("current transaction: \(currentTransaction.amount) ")
                 remainding -= currentTransaction.amount
-                println("remainder: \(remainding)")
             }
             
             for change in billSplitChanges {
@@ -202,8 +249,6 @@ class Purchase: PFObject {
                         extraUnprocessedIds.append(toUserId)
                     }
                 }
-                
-                println("remainder #2: \(remainding)")
             }
             
             var transactionsToChange = transactionsNotInChangeList()
@@ -234,6 +279,7 @@ class Purchase: PFObject {
         else {
             
             // split equally
+            println("splitting equally")
             let splitAmount = self.amount / Double(transactions.count)
             
             for transaction in transactions {
@@ -242,6 +288,23 @@ class Purchase: PFObject {
             }
             
             billSplitChanges.removeAll(keepCapacity: false)
+        }
+        
+        // save values
+        if !setValuesNextTimeValueIsBelowPurchase {
+            
+            for transaction in transactions {
+                
+                //println("setting trans for \(transaction.toUser!.appropriateDisplayName()): amount: \(transaction.amount)")
+                previousTransactionValuesForToUsers[transaction.toUser!.objectId!] = transaction.amount
+            }
+            
+            previousBillSplitChanges.removeAll(keepCapacity: false)
+            
+            for change in billSplitChanges {
+                
+                previousBillSplitChanges[change.0] = change.1
+            }
         }
     }
 
