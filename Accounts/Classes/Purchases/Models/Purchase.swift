@@ -13,7 +13,7 @@ import SwiftyJSON
 import Parse
 
 class Purchase: PFObject {
-
+    
     @NSManaged var title: String?
     @NSManaged var user: User
     @NSManaged var purchasedDate:NSDate?
@@ -71,7 +71,7 @@ class Purchase: PFObject {
         var isNewPurchase = objectId == nil
         
         if !modelIsValid() {
-
+            
             initialCompletion(success: false)
             return
         }
@@ -80,7 +80,7 @@ class Purchase: PFObject {
             
             purchaseTransactionLinkUUID = NSUUID().UUIDString
         }
-
+        
         saveEventually({ (success, error) -> Void in
             
             //NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
@@ -103,15 +103,15 @@ class Purchase: PFObject {
                 transaction.saveEventually({ (success, error) -> Void in
                     
                     transactionsCompleted++
-
+                    
                     if transactionsCompleted == (self.transactions.count - 1) { // - 1 for one to urself
-
+                        
                         remoteCompletion()
                     }
                     
                     NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
                 })
-
+                
                 initialCompletion(success: true)
             }
         }
@@ -128,9 +128,9 @@ class Purchase: PFObject {
         
         if totalCheck != self.amount {
             
-            println("ERRORRORRR")
+            println("ERROR bill doesnt match amount")
         }
-        println(totalCheck) ; println(self.amount)
+
         return totalCheck.toStringWithDecimalPlaces(2) == self.amount.toStringWithDecimalPlaces(2)
     }
     
@@ -149,6 +149,24 @@ class Purchase: PFObject {
         })
     }
     
+    func removeOldestBillSplitChange() {
+        
+        var idsInChangeTimes = [String]()
+        
+        for change in billSplitChangeTimes {
+            
+            idsInChangeTimes.append(change.0)
+        }
+        
+        idsInChangeTimes.sort { return NSDate().timeIntervalSinceDate(self.billSplitChangeTimes[$0]!) > NSDate().timeIntervalSinceDate(self.billSplitChangeTimes[$1]!) }
+        
+        if idsInChangeTimes.count > 0 {
+            
+            var id = idsInChangeTimes[0]
+            billSplitChanges.removeValueForKey(id)
+        }
+    }
+    
     func transactionsNotInChangeList() -> [Transaction] {
         
         return self.transactions.filter({ (t) -> Bool in
@@ -164,17 +182,92 @@ class Purchase: PFObject {
         })
     }
     
-    var billSplitChanges = Dictionary<String, Double>()
+    func resetBillSplitChanges() {
+        
+        billSplitChanges.removeAll(keepCapacity: false)
+        billSplitChangeTimes.removeAll(keepCapacity: false)
+        previousTransactionValuesForToUsers.removeAll(keepCapacity: false)
+    }
+    
+    func removeBillSplitChange(toUserId: String?) {
+        
+        if let id = toUserId {
+            
+            billSplitChanges.removeValueForKey(id)
+            billSplitChangeTimes.removeValueForKey(id)
+            previousTransactionValuesForToUsers.removeValueForKey(id)
+        }
+    }
+    
+    private var billSplitChanges = Dictionary<String, Double>()
+    private var billSplitChangeTimes = Dictionary<String, NSDate>()
     var setValuesNextTimeValueIsBelowPurchase = false
-    var previousTransactionValuesForToUsers = Dictionary<String, Double>()
+    private var previousTransactionValuesForToUsers = Dictionary<String, Double>()
     var previousBillSplitChanges = Dictionary<String, Double>()
+    
+    func splitBillByPrioritizingCurrentFieldThenBillSplitChanges(currentFieldToUserId: String?) {
+        
+        var extraUnprocessedIds = [String]()
+        var remainding = self.amount
+        
+        if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
+            
+            remainding -= currentTransaction.amount
+        }
+        
+        for change in billSplitChanges {
+            
+            var toUserId: String = change.0
+            var amount: Double = change.1
+            
+            if toUserId != currentFieldToUserId {
+                
+                if remainding - amount >= 0 {
+                    
+                    remainding -= amount
+                }
+                else {
+                    
+                    extraUnprocessedIds.append(toUserId)
+                }
+            }
+        }
+        
+        var transactionsToChange = transactionsNotInChangeList()
+        
+        for id in extraUnprocessedIds {
+            
+            transactionsToChange.append(transactionForToUserId(id)!)
+        }
+        
+        for transaction in transactionsToChange {
+            
+            if transaction.toUser?.objectId == currentFieldToUserId {
+                
+                transactionsToChange.removeAtIndex(
+                    find(transactionsToChange, transaction)!
+                )
+            }
+        }
+        
+        let splitAmount = remainding / Double(transactionsToChange.count)
+        
+        for transaction in transactionsToChange {
+            
+            transaction.amount = splitAmount
+            removeBillSplitChange(transaction.toUser!.objectId!)
+        }
+
+    }
     
     func splitTheBill(currentFieldToUserId: String?) { //, editingTransaction: Transaction?) {
         
-       if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
-        
+        if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
+            
+            billSplitChanges[currentFieldToUserId!] = transactionForToUserId(currentFieldToUserId!)!.amount
+            
             if setValuesNextTimeValueIsBelowPurchase && currentTransaction.amount <= self.amount {
-
+                
                 if previousTransactionValuesForToUsers.count == transactions.count {
                     
                     for previousValue in previousTransactionValuesForToUsers {
@@ -183,7 +276,7 @@ class Purchase: PFObject {
                         var amount: Double = previousValue.1
                         
                         transactionForToUserId(toUserId)!.amount = amount
-
+                        
                         if contains(previousBillSplitChanges.keys, toUserId) {
                             
                             billSplitChanges[toUserId] = amount
@@ -192,11 +285,11 @@ class Purchase: PFObject {
                     
                     setValuesNextTimeValueIsBelowPurchase = false
                     if !transactionTotalsEqualsTotal() {
-                        
+                        println("error a")
                         splitEqually()
                     }
                     return
-               }
+                }
             }
         }
         
@@ -213,6 +306,7 @@ class Purchase: PFObject {
                 
                 currentTransaction.amount = currentTransaction.amount > self.amount ? self.amount : currentTransaction.amount
                 billSplitChanges[currentFieldToUserId!] = currentTransaction.amount
+                billSplitChangeTimes[currentFieldToUserId!] = NSDate()
             }
         }
         
@@ -224,61 +318,13 @@ class Purchase: PFObject {
         
         if billSplitChanges.count < self.transactions.count {
             
-            var extraUnprocessedIds = [String]()
-            var remainding = self.amount
-            
-            if let currentTransaction = transactionForToUserId(currentFieldToUserId) {
-                
-                remainding -= currentTransaction.amount
-            }
-            
-            for change in billSplitChanges {
-                
-                var toUserId: String = change.0
-                var amount: Double = change.1
-                
-                if toUserId != currentFieldToUserId {
-                    
-                    if remainding - amount >= 0 {
-                        
-                        remainding -= amount
-                    }
-                    else {
-                        
-                        extraUnprocessedIds.append(toUserId)
-                    }
-                }
-            }
-            
-            var transactionsToChange = transactionsNotInChangeList()
-            
-            for id in extraUnprocessedIds {
-                
-                transactionsToChange.append(transactionForToUserId(id)!)
-            }
-            
-            for transaction in transactionsToChange {
-                
-                if transaction.toUser?.objectId == currentFieldToUserId {
-                    
-                    transactionsToChange.removeAtIndex(
-                        find(transactionsToChange, transaction)!
-                    )
-                }
-            }
-            
-            let splitAmount = remainding / Double(transactionsToChange.count)
-            
-            for transaction in transactionsToChange {
-
-                transaction.amount = splitAmount
-                billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
-            }
+            splitBillByPrioritizingCurrentFieldThenBillSplitChanges(currentFieldToUserId)
         }
         else {
             
             // split equally
-            splitEqually()
+            removeOldestBillSplitChange()
+            splitBillByPrioritizingCurrentFieldThenBillSplitChanges(currentFieldToUserId)
         }
         
         // save values
@@ -298,11 +344,11 @@ class Purchase: PFObject {
         }
         
         if !transactionTotalsEqualsTotal() {
-            
+            println("error b")
             splitEqually()
         }
     }
-
+    
     func billSplitChangesNotIncluding(id: String?) -> Dictionary<String, Double> {
         
         var billSplitChanges = Dictionary<String, Double>()
@@ -335,11 +381,11 @@ class Purchase: PFObject {
     }
     
     func modelIsValid() -> Bool {
-
+        
         var errors:Array<String> = []
         
         if amount == 0 {
-         
+            
             errors.append("Amount is 0")
         }
         
@@ -448,18 +494,18 @@ class Purchase: PFObject {
         }
     }
     
-//    func hardUnpin() {
-//        
-//        Task.executeTaskInBackground({ () -> () in
-//            
-//            PFObject.unpinAll(self.transactions)
-//            self.unpin()
-//            
-//        }, completion: { () -> () in
-//            
-//            
-//        })
-//    }
+    //    func hardUnpin() {
+    //
+    //        Task.executeTaskInBackground({ () -> () in
+    //
+    //            PFObject.unpinAll(self.transactions)
+    //            self.unpin()
+    //
+    //        }, completion: { () -> () in
+    //
+    //
+    //        })
+    //    }
     
     func copyWithUsefulValues() -> Purchase {
         

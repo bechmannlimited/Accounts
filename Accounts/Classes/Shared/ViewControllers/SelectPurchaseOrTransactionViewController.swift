@@ -16,7 +16,7 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     
     var data = [
         (identifier: "Transaction", textLabelText: "Add an i.o.u", footer: "Add an iou if you owe one of your friends some money, or if they owe you."),
-        (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, and should be split between multiple people."),
+        (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, on behalf of multiple others."),
         (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid by one of your friends.")
     ]
 
