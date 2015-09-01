@@ -242,6 +242,8 @@ extension SaveTransactionViewController: FormViewDelegate {
             loadingView.showLoader()
             cell.textLabel?.text = "Retrieving purchase details..."
             cell.accessoryView = loadingView
+            cell.imageView?.image = kPurchaseImage
+            cell.imageView?.tintWithColor(AccountColor.blueColor())
             
             Transaction.query()?.whereKey("purchaseTransactionLinkUUID", equalTo: transaction.purchaseTransactionLinkUUID!).findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
@@ -256,7 +258,7 @@ extension SaveTransactionViewController: FormViewDelegate {
                     }
                 }
                 
-                cell.textLabel?.text = "Original bill total (read only)"
+                cell.textLabel?.text = "Original bill total"
                 cell.accessoryView = nil
                 
                 if error == nil {
@@ -265,7 +267,7 @@ extension SaveTransactionViewController: FormViewDelegate {
                 }
                 else {
                     
-                    cell.detailTextLabel?.text = "Load failed"
+                    cell.detailTextLabel?.text = "load failed"
                 }
             })
             
@@ -430,7 +432,7 @@ extension SaveTransactionViewController: UITableViewDelegate {
                 
                 if indexPath.section == section {
                     
-                    return "This transaction is linked with a bill that was split. The total of that bill is shown here."
+                    return "This transaction is linked with a bill that was split. The total of that bill is shown here. (read only)"
                 }
             }
         }

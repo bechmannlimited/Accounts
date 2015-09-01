@@ -164,13 +164,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         UITextField.appearance().tintColor = kNavigationBarTintColor
         
-//        for familyName in UIFont.familyNames() {
-//            
-//            for font in UIFont.fontNamesForFamilyName(familyName as! String) {
-//                
-//                println(font)
-//            }
-//        }
+        UISwitch.appearance().onTintColor = AccountColor.greenColor()
     }
     
     private func setWindowToLogin() {

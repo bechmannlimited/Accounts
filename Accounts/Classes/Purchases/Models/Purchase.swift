@@ -96,7 +96,7 @@ class Purchase: PFObject {
             transaction.purchase = self
             transaction.purchaseTransactionLinkUUID = purchaseTransactionLinkUUID
             
-            if transaction.fromUser != transaction.toUser{
+            if transaction.fromUser != transaction.toUser {
                 
                 Transaction.calculateOfflineOweValuesWithTransaction(transaction)
             }

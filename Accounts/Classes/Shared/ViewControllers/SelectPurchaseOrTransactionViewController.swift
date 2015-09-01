@@ -15,9 +15,9 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     
     var data = [
-        (identifier: "Transaction", textLabelText: "Add an i.o.u", footer: "Add an iou if you owe one of your friends some money, or if they owe you."),
-        (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, on behalf of multiple others."),
-        (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid by one of your friends.")
+        (identifier: "Transaction", textLabelText: "Add an i.o.u", footer: "Add an iou if you owe one of your friends some money, or if they owe you.", image: kIouImage),
+        (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, on behalf of multiple others.", image: kPurchaseImage),
+        (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid by one of your friends.", image: kPaymentImage)
     ]
 
     var contextualFriend: User?
@@ -69,6 +69,8 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
         let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as! UITableViewCell
         
         cell.textLabel?.text = data[indexPath.section].textLabelText
+        cell.imageView?.image = data[indexPath.section].image
+        cell.imageView?.tintWithColor(AccountColor.blueColor())
 
         return cell
     }
