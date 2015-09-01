@@ -455,7 +455,6 @@
 				E442C3091B510E940061CAE6 /* AppDelegate.swift */,
 				E45F0B491B7F3DD8004D59E2 /* Constants.swift */,
 				E442C30C1B510E940061CAE6 /* Models */,
-				E442C30F1B510E940061CAE6 /* UIView+Extension.swift */,
 				E442C3101B510E940061CAE6 /* ViewControllers */,
 			);
 			path = Shared;
@@ -580,6 +579,7 @@
 		E46A306E1B7C8A760056EF8F /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				E442C30F1B510E940061CAE6 /* UIView+Extension.swift */,
 				E47FD8111B5700AF004B4C56 /* Extensions.swift */,
 			);
 			name = Extensions;

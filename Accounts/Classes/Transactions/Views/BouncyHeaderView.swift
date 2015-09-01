@@ -104,6 +104,31 @@ class BouncyHeaderView: UIView {
             titleLabel.layer.opacity = 1
         }
     }
+    
+    func bounceHeaderFromPushTransition() {
+        
+        var transforms:[CGAffineTransform] = [
+            CGAffineTransformMakeTranslation(15, 0),
+            CGAffineTransformMakeTranslation(0, 0)
+        ]
+        
+        // animation 1
+        UIView.animateWithDuration(0.2, animations: { () -> Void in
+            
+            self.titleLabel.transform = transforms[0]
+            
+        }) { (finished) -> Void in
+            
+            UIView.animateWithDuration(0.75, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 5, options: UIViewAnimationOptions.CurveEaseInOut, animations: { () -> Void in
+                
+                self.titleLabel.transform = transforms[1]
+                
+                }, completion: { (finished) -> Void in
+                    
+                    
+            })
+        }
+    }
 
     func setupHeroImage() {
         
