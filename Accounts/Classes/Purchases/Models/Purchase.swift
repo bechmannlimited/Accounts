@@ -99,21 +99,21 @@ class Purchase: PFObject {
             if transaction.fromUser != transaction.toUser{
                 
                 Transaction.calculateOfflineOweValuesWithTransaction(transaction)
-                
-                transaction.saveEventually({ (success, error) -> Void in
-                    
-                    transactionsCompleted++
-                    
-                    if transactionsCompleted == (self.transactions.count - 1) { // - 1 for one to urself
-                        
-                        remoteCompletion()
-                    }
-                    
-                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
-                })
-                
-                initialCompletion(success: true)
             }
+            
+            transaction.saveEventually({ (success, error) -> Void in
+                
+                transactionsCompleted++
+                
+                if transactionsCompleted == (self.transactions.count - 1) { // - 1 for one to urself
+                    
+                    remoteCompletion()
+                }
+                
+                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+            })
+            
+            initialCompletion(success: true)
         }
     }
     
@@ -286,7 +286,7 @@ class Purchase: PFObject {
                     
                     setValuesNextTimeValueIsBelowPurchase = false
                     if !transactionTotalsEqualsTotal() {
-                        println("error a")
+                        
                         splitEqually()
                     }
                     return
@@ -345,7 +345,7 @@ class Purchase: PFObject {
         }
         
         if !transactionTotalsEqualsTotal() {
-            println("error b")
+            
             splitEqually()
         }
     }

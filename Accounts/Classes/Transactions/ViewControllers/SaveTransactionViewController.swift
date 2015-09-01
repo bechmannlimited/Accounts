@@ -170,6 +170,13 @@ extension SaveTransactionViewController: FormViewDelegate {
             //FormViewConfiguration.normalCell("Location")
         ])
         
+        if transaction.purchaseTransactionLinkUUID != nil {
+            
+            sections.append([
+                FormViewConfiguration.normalCell("PurchaseInfo")
+            ])
+        }
+        
         if isExistingTransaction && allowEditing {
             
             sections.append([
@@ -223,11 +230,46 @@ extension SaveTransactionViewController: FormViewDelegate {
             
             return cell
         }
-        else if identifier == "Location" {
+//        else if identifier == "Location" {
+//            
+//            cell.textLabel?.text = "Location"
+//            cell.detailTextLabel?.text = "None"
+//            cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+//        }
+        else if identifier == "PurchaseInfo" {
             
-            cell.textLabel?.text = "Location"
-            cell.detailTextLabel?.text = "None"
-            cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+            var loadingView = UIView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
+            loadingView.showLoader()
+            cell.textLabel?.text = "Retrieving purchase details..."
+            cell.accessoryView = loadingView
+            
+            Transaction.query()?.whereKey("purchaseTransactionLinkUUID", equalTo: transaction.purchaseTransactionLinkUUID!).findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+                
+                loadingView.hideLoader()
+                var total: Double = 0
+                
+                if let transactions = objects as? [Transaction] {
+                    
+                    for transaction in transactions {
+                        
+                        total += transaction.amount
+                    }
+                }
+                
+                cell.textLabel?.text = "Original bill total (read only)"
+                cell.accessoryView = nil
+                
+                if error == nil {
+                    
+                    cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(total)
+                }
+                else {
+                    
+                    cell.detailTextLabel?.text = "Load failed"
+                }
+            })
+            
+            return cell
         }
         
         return UITableViewCell()
@@ -375,6 +417,22 @@ extension SaveTransactionViewController: UITableViewDelegate {
             label.fillSuperView(UIEdgeInsets(top: 0, left: 0, bottom: 17, right: 0))
             
             return view
+        }
+        
+        return nil
+    }
+    
+    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        
+        if transaction.purchaseTransactionLinkUUID != nil {
+            
+            if let indexPath = indexPathForFormViewCellIdentifier("PurchaseInfo") {
+                
+                if indexPath.section == section {
+                    
+                    return "This transaction is linked with a bill that was split. The total of that bill is shown here."
+                }
+            }
         }
         
         return nil

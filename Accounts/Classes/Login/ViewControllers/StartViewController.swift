@@ -101,7 +101,7 @@ class StartViewController: ACBaseViewController {
             if let json: AnyObject = result {
                 
                 let result = JSON(json)
-                println(result)
+                
                 user["facebookId"] = result["id"].stringValue
                 
                 if user["displayName"] == nil {

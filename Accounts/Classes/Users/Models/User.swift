@@ -155,8 +155,6 @@ class User: PFUser {
             let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
             graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
                 
-                println("error: \(error?.code)")
-                
                 if error == nil{
                     
                     var canContinue = true
@@ -179,7 +177,7 @@ class User: PFUser {
                                 queries.append(friendQuery!)
                             }
                         }
-                        println("hi")
+                     
                         if Settings.shouldShowTestBot() {
                             
                             let botQuery = User.query()
@@ -236,7 +234,10 @@ class User: PFUser {
             
             for friend in friendInfos{
                 
-                ids.append(friend.0)
+                if friend.0 != User.currentUser()?.objectId {
+                    
+                    ids.append(friend.0)
+                }
             }
             
             let localQuery = User.query()?.whereKey("objectId", containedIn: ids).orderByAscending("objectId").fromLocalDatastore()

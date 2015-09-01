@@ -19,12 +19,6 @@ class Task: NSObject {
         return kSharedTasker
     }
     
-//    private func setup() -> Task {
-//        
-//        operationQueue.qualityOfService = .Background
-//        return self
-//    }
-    
     func cancelAllTasks() {
         
         for queue in operationBlocks {
@@ -36,10 +30,8 @@ class Task: NSObject {
     func cancelTaskForIdentifier(identifier: String) {
         
         if let block = operationBlocks[identifier] {
-            
-            println("cancelling: \(identifier))")
+
             block.cancel()
-            println("from inside canceltaskforidentifier:  cancelled \(block.cancelled)")
         }
     }
     
@@ -50,18 +42,6 @@ class Task: NSObject {
     
     func executeTaskInBackgroundWithIdentifier(identifier: String?, task: () -> (), completion: (() -> ())?) {
         
-//        let priority = DISPATCH_QUEUE_PRIORITY_DEFAULT
-//        
-//        dispatch_async(dispatch_get_global_queue(priority, 0)) {
-//            
-//            task()
-//            
-//            dispatch_async(dispatch_get_main_queue()) {
-//                
-//                completion()
-//            }
-//        }
-        
         var cancelTimer: NSTimer?
         
         var backgroundQueue = NSOperationQueue()
@@ -70,7 +50,6 @@ class Task: NSObject {
         
         if let identifier = identifier {
             
-            println("starting: \(identifier))")
             operationBlocks[identifier] = block
         }
         
@@ -83,7 +62,7 @@ class Task: NSObject {
             NSOperationQueue.mainQueue().addOperationWithBlock() {
                 
                 if !block.cancelled {
-                    println("executing closure")
+                    
                     hasFiredCompletionHandler = true
                     completion?()
                 }
@@ -91,10 +70,8 @@ class Task: NSObject {
             
             while !hasFiredCompletionHandler {
                 
-                println("checking \(NSDate()) - cancelled: \(block.cancelled)")
                 if block.cancelled {
                     
-                    println("returning from while loop")
                     return
                 }
                 
@@ -103,35 +80,5 @@ class Task: NSObject {
         }
         
         backgroundQueue.addOperation(block)
-        
-        
-        
-//        let operation: NSOperation = NSBlockOperation { () -> Void in
-//            
-//            task()
-//            println("#1")
-//            NSOperationQueue.mainQueue().addOperationWithBlock({ () -> Void in
-//                
-//                println("#2")
-//                completion()
-//            })
-//        }
-//        //backgroundOperation.queuePriority = .Low
-//        //operation.qualityOfService = .Background
-//        
-//        if let name = identifier {
-//            
-//            operation.name = identifier
-//            operations[name] = operation
-//        }
-//        
-////        operation.completionBlock = {
-////            
-////            println("done")
-////            completion()
-////        }
-//        
-//        operation.addDependency(NSBlockOperation(block: task))
-//        operationQueue.addOperation(operation)
     }
 }
