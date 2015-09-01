@@ -172,6 +172,8 @@ class TransactionsViewController: ACBaseViewController {
         }
     }
     
+    var viewHasAppeared = false
+    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -183,6 +185,13 @@ class TransactionsViewController: ACBaseViewController {
         setHeaderTitleText()
         tableView.delegate = self // incase it wasnt set due to viewwilldissapear method
         scrollViewDidScroll(tableView)
+        
+        if !viewHasAppeared {
+            
+            headerView?.bounceHeaderFromPushTransition()
+        }
+        
+        viewHasAppeared = true
     }
     
     override func setupView() {

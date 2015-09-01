@@ -38,7 +38,6 @@
 		E442C33C1B510E940061CAE6 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C3141B510E940061CAE6 /* MenuViewController.swift */; };
 		E442C33D1B510E940061CAE6 /* SelectLocationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C3151B510E940061CAE6 /* SelectLocationViewController.swift */; };
 		E442C33E1B510E940061CAE6 /* SelectPurchaseOrTransactionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C3161B510E940061CAE6 /* SelectPurchaseOrTransactionViewController.swift */; };
-		E442C33F1B510E940061CAE6 /* VerifyUserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C3171B510E940061CAE6 /* VerifyUserViewController.swift */; };
 		E442C3401B510E940061CAE6 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C31A1B510E940061CAE6 /* Transaction.swift */; };
 		E442C3411B510E940061CAE6 /* SaveTransactionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C31C1B510E940061CAE6 /* SaveTransactionViewController.swift */; };
 		E442C3421B510E940061CAE6 /* TransactionsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C31D1B510E940061CAE6 /* TransactionsViewController.swift */; };
@@ -126,7 +125,6 @@
 		E442C3141B510E940061CAE6 /* MenuViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		E442C3151B510E940061CAE6 /* SelectLocationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectLocationViewController.swift; sourceTree = "<group>"; };
 		E442C3161B510E940061CAE6 /* SelectPurchaseOrTransactionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectPurchaseOrTransactionViewController.swift; sourceTree = "<group>"; };
-		E442C3171B510E940061CAE6 /* VerifyUserViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VerifyUserViewController.swift; sourceTree = "<group>"; };
 		E442C31A1B510E940061CAE6 /* Transaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		E442C31C1B510E940061CAE6 /* SaveTransactionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SaveTransactionViewController.swift; sourceTree = "<group>"; };
 		E442C31D1B510E940061CAE6 /* TransactionsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionsViewController.swift; sourceTree = "<group>"; };
@@ -455,7 +453,6 @@
 				E442C3091B510E940061CAE6 /* AppDelegate.swift */,
 				E45F0B491B7F3DD8004D59E2 /* Constants.swift */,
 				E442C30C1B510E940061CAE6 /* Models */,
-				E442C30F1B510E940061CAE6 /* UIView+Extension.swift */,
 				E442C3101B510E940061CAE6 /* ViewControllers */,
 			);
 			path = Shared;
@@ -493,7 +490,6 @@
 				E442C3141B510E940061CAE6 /* MenuViewController.swift */,
 				E442C3151B510E940061CAE6 /* SelectLocationViewController.swift */,
 				E442C3161B510E940061CAE6 /* SelectPurchaseOrTransactionViewController.swift */,
-				E442C3171B510E940061CAE6 /* VerifyUserViewController.swift */,
 				E47FD8151B5EDFBF004B4C56 /* SaveItemViewController.swift */,
 			);
 			path = ViewControllers;
@@ -580,6 +576,7 @@
 		E46A306E1B7C8A760056EF8F /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				E442C30F1B510E940061CAE6 /* UIView+Extension.swift */,
 				E47FD8111B5700AF004B4C56 /* Extensions.swift */,
 			);
 			name = Extensions;
@@ -779,7 +776,6 @@
 				E442C32E1B510E940061CAE6 /* SavePurchaseViewController.swift in Sources */,
 				E4BA9C5C1B84FD2F00E8DFF6 /* NSDate+Extension.swift in Sources */,
 				E411FE211B6E784F00C29D1F /* FriendTableViewCell.swift in Sources */,
-				E442C33F1B510E940061CAE6 /* VerifyUserViewController.swift in Sources */,
 				E412F9171B7CC3FC00A30F60 /* ABImageLoader.swift in Sources */,
 				E442C3521B52C3150061CAE6 /* FriendRequest.swift in Sources */,
 				E442C3361B510E940061CAE6 /* Friend.swift in Sources */,

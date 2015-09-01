@@ -223,9 +223,7 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
             tableView.endUpdates()
             
             friendRequest.deleteInBackgroundWithBlock({ (success, error) -> Void in
-                
-                println(success)
-                println(error)
+            
                 self.refresh(nil)
                 
                 ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.toUser!], message: "", data: [kPushNotificationTypeKey: PushNotificationType.FriendRequestDeleted.rawValue])

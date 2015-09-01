@@ -13,7 +13,7 @@ import Parse
 import SwiftyJSON
 
 class SavePurchaseViewController: SaveItemViewController {
-
+    
     var purchase = Purchase.withDefaultValues()
     var purchaseObjectId: String?
     var existingPurchase: Purchase?
@@ -28,9 +28,9 @@ class SavePurchaseViewController: SaveItemViewController {
         super.viewDidLoad()
         
         allowEditing = true // dont allow editing on existing purchase
-
+        
         if allowEditing && purchaseObjectId == nil {
-
+            
             title = "Split a bill"
             purchase.user = User.currentUser()!
             purchase.title = ""
@@ -46,7 +46,7 @@ class SavePurchaseViewController: SaveItemViewController {
             updateUIForEditing()
         }
         else if allowEditing && purchaseObjectId != nil {
-
+            
             title = "Edit purchase" // N/A
         }
         else {
@@ -57,14 +57,14 @@ class SavePurchaseViewController: SaveItemViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: UIBarButtonItemStyle.Plain, target: self, action: "askToPopIfChanged")
         
         tableView.setEditing(true, animated: false)
-
+        
         reloadForm()
-
+        
         askToPopMessage = "Going back will discard any changes, Are you sure?"
     }
-        
+    
     func save() {
-
+        
         isSaving = true
         updateUIForSavingOrDeleting()
         
@@ -98,10 +98,10 @@ class SavePurchaseViewController: SaveItemViewController {
                 }
             }
             
-        }, remoteCompletion: { () -> () in
-            
-            completion()
-            didCompleteRemotely = true
+            }, remoteCompletion: { () -> () in
+                
+                completion()
+                didCompleteRemotely = true
         })
     }
     
@@ -109,6 +109,11 @@ class SavePurchaseViewController: SaveItemViewController {
         
         return allowEditing && purchase.modelIsValid() && !isSaving
     }
+    
+//    func scrollTransactionCellsToView() {
+//        
+//        tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 1), atScrollPosition: .Middle, animated: true)
+//    }
 }
 
 extension SavePurchaseViewController: FormViewDelegate {
@@ -118,13 +123,13 @@ extension SavePurchaseViewController: FormViewDelegate {
         let locale: NSLocale? = Settings.getCurrencyLocaleWithIdentifier().locale
         
         var sections = Array<Array<FormViewConfiguration>>()
-
+        
         sections.append([
             FormViewConfiguration.textFieldCurrency("Bill total", value: Formatter.formatCurrencyAsString(purchase.localeAmount), identifier: "Amount", locale: locale),
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(purchase.title), identifier: "Title"),
             FormViewConfiguration.normalCell("User"),
             
-        ])
+            ])
         
         var transactionConfigs: Array<FormViewConfiguration> = [
             FormViewConfiguration.normalCell("Friends")
@@ -138,7 +143,7 @@ extension SavePurchaseViewController: FormViewDelegate {
                 var ex = User.isCurrentUser(transaction.toUser) ? "r" : "'s"
                 var verb = "\(ex) part"
                 var textLabelText = "(\(transaction.toUser!.appropriateShortDisplayName())\(verb))"
-
+                
                 
                 transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
             }
@@ -157,16 +162,16 @@ extension SavePurchaseViewController: FormViewDelegate {
         }
         
         sections.append(transactionConfigs)
-
+        
         var purchasedDate = purchase.purchasedDate != nil ? purchase.purchasedDate : NSDate()
         
         sections.append([
             FormViewConfiguration.datePicker("Date Purchased", date: purchasedDate, identifier: "DatePurchased", format: nil),
             //FormViewConfiguration.normalCell("Location")
-        ])
+            ])
         
         if purchaseObjectId != nil {
-         
+            
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
             ])
@@ -184,9 +189,9 @@ extension SavePurchaseViewController: FormViewDelegate {
     }
     
     func setFriendAmountTextFields() {
-    
-        for transaction in self.purchase.transactions {
         
+        for transaction in self.purchase.transactions {
+            
             self.setTextFieldValueAndUpdateConfig("transactionTo\(transaction.toUser!.objectId)", value: Formatter.formatCurrencyAsString(transaction.amount), cell: self.billSplitCells[transaction.toUser!])
         }
         
@@ -200,8 +205,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         if identifier == "Amount" {
             
             purchase.localeAmount = value
-            purchase.billSplitChanges.removeAll(keepCapacity: false)
-            purchase.preferredValues.removeAll(keepCapacity: false)
+            purchase.resetBillSplitChanges()
             purchase.splitTheBill(nil)
             
         }
@@ -283,7 +287,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         if identifier == "Friends" {
             
             let usersToChooseFrom = User.userListExcludingID(purchase.user.objectId)
-
+            
             let v = SelectUsersViewController(identifier: identifier, users: purchase.usersInTransactions(), selectUsersDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
             navigationController?.pushViewController(v, animated: true)
         }
@@ -364,6 +368,8 @@ extension SavePurchaseViewController: UITableViewDelegate {
             cell.textField.textColor = UIColor.lightGrayColor()
             formViewCells[cell.config.identifier] = cell
             
+            //cell.textField.addTarget(self, action: "textFieldDidBecomeActive:", forControlEvents: UIControlEvents.EditingDidBegin)
+            
             //hacky way to set friend cells
             if indexPath.section == 1 {
                 
@@ -373,11 +379,37 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     
                     let friend = purchase.usersInTransactions()[i]
                     billSplitCells[friend] = cell
+                    
+                    
+//                    if let toolbar = cell.textField.inputAccessoryView as? UIToolbar {
+//                        
+//                        toolbar.items?.insert(<#newElement: T#>, atIndex: 0)
+//                    }
                 }
             }
         }
         return cell
     }
+    
+    func moveInput(from: Int, to: Int) {
+        
+        
+    }
+    
+//    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+//        super.tableView(tableView, didSelectRowAtIndexPath: indexPath)
+//        
+//        //hacky way to set friend cells
+//        if indexPath.section == 1 {
+//            
+//            let i = indexPath.row - 1 // was 2
+//            
+//            if i >= 0 {
+//                
+//                //scrollTransactionCellsToView()
+//            }
+//        }
+//    }
     
     func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
         
@@ -428,18 +460,12 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     
                     billSplitCells.removeValueForKey(friend)
                     purchase.removeTransactionForToUser(friend)
-                    
-                    if purchase.billSplitChanges[friend.objectId!] != nil {
-                        println("before: \(purchase.billSplitChanges.count)")
-                        purchase.billSplitChanges.removeValueForKey(friend.objectId!)
-                        println("after: \(purchase.billSplitChanges.count)")
-                    }
-                    
+                    purchase.removeBillSplitChange(friend.objectId)
                     purchase.splitTheBill(nil)
                     setFriendAmountTextFields()
                     
                     data[indexPath.section].removeAtIndex(indexPath.row)
-
+                    
                     tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Top)
                     tableView.endUpdates()
                     
@@ -453,9 +479,9 @@ extension SavePurchaseViewController: UITableViewDelegate {
 }
 
 extension SavePurchaseViewController: SelectUsersDelegate {
-
+    
     func didSelectUsers(users: Array<User>, identifier: String) {
-
+        
         billSplitCells = Dictionary<User, FormViewTextFieldCell>()
         
         if identifier == "Friends" {
@@ -479,7 +505,7 @@ extension SavePurchaseViewController: SelectUsersDelegate {
             //billSplitChanges.removeAll(keepCapacity: false)
             purchase.splitTheBill(nil)
         }
-
+        
         itemDidChange = true
         showOrHideSaveButton()
         reloadForm()
@@ -500,7 +526,7 @@ extension SavePurchaseViewController: SelectUserDelegate {
             transaction.toUser = user
             transaction.amount = 0
             purchase.transactions.append(transaction)
-            purchase.billSplitChanges.removeAll(keepCapacity: false)
+            purchase.resetBillSplitChanges()
             purchase.splitTheBill(nil)
         }
         
