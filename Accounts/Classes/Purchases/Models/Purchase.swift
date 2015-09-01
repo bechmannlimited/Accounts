@@ -255,7 +255,8 @@ class Purchase: PFObject {
         for transaction in transactionsToChange {
             
             transaction.amount = splitAmount
-            removeBillSplitChange(transaction.toUser!.objectId!)
+            //removeBillSplitChange(transaction.toUser!.objectId!)
+            billSplitChanges.removeValueForKey(transaction.toUser!.objectId!)
         }
 
     }
