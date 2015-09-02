@@ -319,14 +319,14 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             var friendCount = purchase.transactions.count - 1
             
-            cell.detailTextLabel?.text = "\(friendCount)"
+            cell.detailTextLabel?.text = "Tap to select"
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             
             return cell
         }
         else if identifier == "User" {
             
-            cell.textLabel?.text = "Purchased by "
+            cell.textLabel?.text = "Bill settled by "
             cell.detailTextLabel?.text = "\(purchase.user.appropriateDisplayName())"
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             

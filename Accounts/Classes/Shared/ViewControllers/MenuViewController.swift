@@ -125,7 +125,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         else if indexPath == kShareIndexPath {
             
-            cell.textLabel?.text = "Share app link with a friend"
+            cell.textLabel?.text = "Share app link"
         }
         else if indexPath == kTestBotIndexPath {
             
