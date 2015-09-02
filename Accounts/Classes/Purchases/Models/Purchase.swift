@@ -126,7 +126,7 @@ class Purchase: PFObject {
             totalCheck += transaction.amount
         }
         
-        if totalCheck != self.amount {
+        if totalCheck.toStringWithDecimalPlaces(2) != self.amount.toStringWithDecimalPlaces(2) {
             
             println("ERROR bill doesnt match amount")
         }

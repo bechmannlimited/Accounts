@@ -20,7 +20,8 @@ class SavePurchaseViewController: SaveItemViewController {
     
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
-    
+    var toolbar = UIToolbar()
+    var splitButtons = [UIBarButtonItem]()
     
     override func viewDidLoad() {
         
@@ -59,8 +60,57 @@ class SavePurchaseViewController: SaveItemViewController {
         tableView.setEditing(true, animated: false)
         
         reloadForm()
+        setupToolbar()
+        enableOrDisableSplitButtons()
         
         askToPopMessage = "Going back will discard any changes, Are you sure?"
+    }
+    
+    func setupToolbar() {
+
+        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.sizeToFit()
+        view.addSubview(toolbar)
+        
+        toolbar.addHeightConstraint(relation: .Equal, constant: toolbar.frame.height)
+        toolbar.addLeftConstraint(toView: view, relation: .Equal, constant: 0)
+        toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
+        toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
+        
+        var previousInsets = tableView.contentInset
+        tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
+        
+        toolbar.tintColor = kNavigationBarTintColor
+        
+        var splitButton = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
+        splitButtons.append(splitButton)
+        toolbar.items = [splitButton]
+    }
+    
+    func enableOrDisableSplitButtons() {
+        
+        var count = 0
+        
+        for t in purchase.transactions {
+            
+            if t.amount != (self.purchase.amount / Double(self.purchase.transactions.count)) {
+                
+                count++
+            }
+        }
+        
+        var isSplit = count > 0
+        
+        for splitButton in splitButtons {
+            
+            splitButton.enabled = purchase.transactions.count > 1 && isSplit
+        }
+    }
+    
+    override func reloadForm() {
+        super.reloadForm()
+        
+        enableOrDisableSplitButtons()
     }
     
     func save() {
@@ -114,6 +164,13 @@ class SavePurchaseViewController: SaveItemViewController {
 //        
 //        tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 1), atScrollPosition: .Middle, animated: true)
 //    }
+    
+    func splitBillEqually() {
+        
+        purchase.resetBillSplitChanges()
+        purchase.splitTheBill(nil)
+        reloadForm()
+    }
 }
 
 extension SavePurchaseViewController: FormViewDelegate {
@@ -246,6 +303,8 @@ extension SavePurchaseViewController: FormViewDelegate {
                 cell.textField.text = value
             }
         }
+        
+        enableOrDisableSplitButtons()
     }
     
     func formViewButtonTapped(identifier: String) {
@@ -352,6 +411,7 @@ extension SavePurchaseViewController: FormViewDelegate {
     func formViewElementDidChange(identifier: String, value: AnyObject?) {
         
         showOrHideSaveButton()
+        enableOrDisableSplitButtons()
         itemDidChange = true
     }
 }
@@ -380,11 +440,13 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     let friend = purchase.usersInTransactions()[i]
                     billSplitCells[friend] = cell
                     
-                    
-//                    if let toolbar = cell.textField.inputAccessoryView as? UIToolbar {
-//                        
-//                        toolbar.items?.insert(<#newElement: T#>, atIndex: 0)
-//                    }
+                    if let toolbar = cell.textField.inputAccessoryView as? UIToolbar {
+                        
+                        var button = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
+                        splitButtons.append(button)
+                        toolbar.items?.insert(button, atIndex: 0)
+                        enableOrDisableSplitButtons()
+                    }
                 }
             }
         }
