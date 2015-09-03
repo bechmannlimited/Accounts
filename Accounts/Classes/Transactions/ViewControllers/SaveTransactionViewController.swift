@@ -238,39 +238,9 @@ extension SaveTransactionViewController: FormViewDelegate {
 //        }
         else if identifier == "PurchaseInfo" {
             
-            var loadingView = UIView(frame: CGRect(x: 0, y: 0, width: 30, height: 30))
-            loadingView.showLoader()
-            cell.textLabel?.text = "Retrieving purchase details..."
-            cell.accessoryView = loadingView
-            cell.imageView?.image = kPurchaseImage
-            cell.imageView?.tintWithColor(AccountColor.blueColor())
-            
-            Transaction.query()?.whereKey("purchaseTransactionLinkUUID", equalTo: transaction.purchaseTransactionLinkUUID!).findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-                
-                loadingView.hideLoader()
-                var total: Double = 0
-                
-                if let transactions = objects as? [Transaction] {
-                    
-                    for transaction in transactions {
-                        
-                        total += transaction.amount
-                    }
-                }
-                
-                cell.textLabel?.text = "Original bill total"
-                cell.accessoryView = nil
-                
-                if error == nil {
-                    
-                    cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(total)
-                }
-                else {
-                    
-                    cell.detailTextLabel?.text = "load failed"
-                }
-            })
-            
+            let cell = TransactionPurchaseInfoTableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "Cell")
+            cell.transaction = transaction
+            cell.setup()
             return cell
         }
         

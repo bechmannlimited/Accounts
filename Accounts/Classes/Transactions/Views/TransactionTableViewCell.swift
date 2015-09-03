@@ -55,6 +55,11 @@ class TransactionTableViewCell: UITableViewCell {
         
         if transaction.purchaseTransactionLinkUUID != nil {
             
+            imageView?.image = kPurchaseImage
+        }
+        
+        if transaction.purchaseTransactionLinkUUID != nil {
+            
             //imageView?.image = kPurchaseImage
         }
         

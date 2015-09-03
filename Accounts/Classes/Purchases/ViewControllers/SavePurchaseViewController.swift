@@ -22,6 +22,7 @@ class SavePurchaseViewController: SaveItemViewController {
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
     var toolbar = UIToolbar()
     var splitButtons = [UIBarButtonItem]()
+    var transactionTextFieldsIndexPaths = Dictionary<UITextField, NSIndexPath>()
     
     override func viewDidLoad() {
         
@@ -162,14 +163,22 @@ class SavePurchaseViewController: SaveItemViewController {
     
 //    func scrollTransactionCellsToView() {
 //        
-//        tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 1), atScrollPosition: .Middle, animated: true)
+//
 //    }
+    
+    func textFieldDidBecomeActive(textField: UITextField) {
+        
+//        if let indexPath = transactionTextFieldsIndexPaths[textField] {
+//            
+//            tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Top, animated: true)
+//        }
+    }
     
     func splitBillEqually() {
         
         purchase.resetBillSplitChanges()
         purchase.splitTheBill(nil)
-        reloadForm()
+        setFriendAmountTextFields()
     }
 }
 
@@ -428,7 +437,8 @@ extension SavePurchaseViewController: UITableViewDelegate {
             cell.textField.textColor = UIColor.lightGrayColor()
             formViewCells[cell.config.identifier] = cell
             
-            //cell.textField.addTarget(self, action: "textFieldDidBecomeActive:", forControlEvents: UIControlEvents.EditingDidBegin)
+            transactionTextFieldsIndexPaths[cell.textField] = indexPath
+            cell.textField.addTarget(self, action: "textFieldDidBecomeActive:", forControlEvents: UIControlEvents.EditingDidBegin)
             
             //hacky way to set friend cells
             if indexPath.section == 1 {
@@ -458,20 +468,22 @@ extension SavePurchaseViewController: UITableViewDelegate {
         
     }
     
-//    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-//        super.tableView(tableView, didSelectRowAtIndexPath: indexPath)
-//        
-//        //hacky way to set friend cells
-//        if indexPath.section == 1 {
-//            
-//            let i = indexPath.row - 1 // was 2
-//            
-//            if i >= 0 {
-//                
-//                //scrollTransactionCellsToView()
-//            }
-//        }
-//    }
+   
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        super.tableView(tableView, didSelectRowAtIndexPath: indexPath)
+        
+        //hacky way to set friend cells
+        if indexPath.section == 1 {
+            
+            let i = indexPath.row - 1 // was 2
+            
+            if i >= 0 {
+                
+                //tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Top, animated: true)
+            }
+        }
+    }
     
     func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
         
