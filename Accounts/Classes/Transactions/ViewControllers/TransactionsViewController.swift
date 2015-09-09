@@ -577,6 +577,10 @@ class TransactionsViewController: ACBaseViewController {
                         })
                     })
                 }
+                else {
+                    
+                    self.tableView.infiniteScrollingView.stopAnimating()
+                }
             })
         }
         else{
