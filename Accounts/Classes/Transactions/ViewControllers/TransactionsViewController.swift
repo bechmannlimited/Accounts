@@ -129,6 +129,14 @@ class TransactionsViewController: ACBaseViewController {
                     UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
                         
                         imageView.layer.opacity = 1
+                        
+                        }, completion: { (success) -> Void in
+                            
+                            if let image = imageView.screenShot() {
+                                
+                                imageView.removeFromSuperview()
+                                self.view.insertSubview(UIImageView(image: image), atIndex: 0)
+                            }
                     })
                 }
                 else if let id = friend.facebookId{
@@ -142,6 +150,14 @@ class TransactionsViewController: ACBaseViewController {
                         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
                             
                             imageView.layer.opacity = 1
+                            
+                        }, completion: { (success) -> Void in
+                            
+                            if let image = imageView.screenShot() {
+                                
+                                imageView.removeFromSuperview()
+                                self.view.insertSubview(UIImageView(image: image), atIndex: 0)
+                            }
                         })
                     })
                 }
@@ -156,18 +172,6 @@ class TransactionsViewController: ACBaseViewController {
                 cover.setTranslatesAutoresizingMaskIntoConstraints(false)
                 imageView.addSubview(cover)
                 cover.fillSuperView(UIEdgeInsetsZero)
-                
-//                imageView.layer.rasterizationScale = UIScreen.mainScreen().scale
-//                imageView.layer.shouldRasterize = true
-                
-                // convert to image
-                
-                if let  image = imageView.screenShot() {
-                    
-                    imageView.removeFromSuperview()
-                    view.addSubview(UIImageView(image: image))
-                }
-                
             }
         }
     }
