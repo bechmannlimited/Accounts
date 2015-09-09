@@ -105,7 +105,7 @@ extension UITextField {
 
 extension UIView {
     
-    func screenShot() -> UIImage? {
+    func screenShot(completion:(image: UIImage?) -> ()) {
         
         UIGraphicsBeginImageContext(bounds.size)
         println("graphics context size: \(bounds.size)")
@@ -113,7 +113,11 @@ extension UIView {
         var image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         //UIGraphicsPopContext()
-        return image
+        
+        if image != nil {
+            
+            completion(image: image)
+        }
     }
 }
 

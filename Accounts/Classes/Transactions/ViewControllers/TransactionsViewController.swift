@@ -11,6 +11,7 @@ import ABToolKit
 import SwiftyJSON
 import Parse
 import SVPullToRefresh
+import SwiftOverlays
 
 private let kPopoverContentSize = CGSize(width: 390, height: 440)
 private let kLoaderTableFooterViewHeight = 70
@@ -48,6 +49,7 @@ class TransactionsViewController: ACBaseViewController {
     var bounceViewHeightConstraint: NSLayoutConstraint?
     
     var popoverViewController: UIViewController?
+    private var blurViewHasBeenConverted = false
     
     func clean() {
         
@@ -117,9 +119,7 @@ class TransactionsViewController: ACBaseViewController {
                 
                 let imageView = UIImageView(frame: view.bounds)
                 imageView.layer.opacity = 0
-                //imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
                 view.addSubview(imageView)
-                //imageView.fillSuperView(UIEdgeInsetsZero)
                 view.sendSubviewToBack(imageView)
                 
                 if friend.objectId == kTestBotObjectId {
@@ -132,11 +132,12 @@ class TransactionsViewController: ACBaseViewController {
                         
                     }, completion: { (finished) -> Void in
                         
-                        if let image = imageView.screenShot() {
-                            
-                            imageView.removeFromSuperview()
-                            self.view.insertSubview(UIImageView(image: image), atIndex: 0)
-                        }
+//                        imageView.screenShot({ (image) -> () in
+//                            
+//                            imageView.removeFromSuperview()
+//                            self.view.insertSubview(UIImageView(image: image), atIndex: 0)
+//                            self.blurViewHasBeenConverted = true
+//                        })
                     })
                 }
                 else if let id = friend.facebookId{
@@ -153,27 +154,24 @@ class TransactionsViewController: ACBaseViewController {
                             
                         }, completion: { (finished) -> Void in
                             
-                            if let image = imageView.screenShot() {
-                                
-                                imageView.removeFromSuperview()
-                                self.view.insertSubview(UIImageView(image: image), atIndex: 0)
-                            }
+//                            imageView.screenShot({ (image) -> () in
+//                                
+//                                imageView.removeFromSuperview()
+//                                self.view.insertSubview(UIImageView(image: image), atIndex: 0)
+//                                self.blurViewHasBeenConverted = true
+//                            })
                         })
                     })
                 }
                 
                 let blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))
-                //blurView.setTranslatesAutoresizingMaskIntoConstraints(false)
                 blurView.frame = imageView.bounds
                 imageView.addSubview(blurView)
-                //blurView.fillSuperView(UIEdgeInsetsZero)
                 
                 let cover = UIView()
                 cover.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(kDevice == .Pad ? 0.75 : 0.45)
-                //cover.setTranslatesAutoresizingMaskIntoConstraints(false)
                 cover.frame = imageView.bounds
                 imageView.addSubview(cover)
-                //cover.fillSuperView(UIEdgeInsetsZero)
             }
         }
     }
@@ -268,15 +266,12 @@ class TransactionsViewController: ACBaseViewController {
         }
     }
     
-    private var didSetupBackgroundBlurView = false
-    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        if !didSetupBackgroundBlurView {
+        if !blurViewHasBeenConverted {
             
             setupBackgroundBlurView()
-            didSetupBackgroundBlurView = true
         }
         
         popoverViewController = nil // to make sure
