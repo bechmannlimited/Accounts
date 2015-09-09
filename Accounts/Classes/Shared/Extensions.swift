@@ -107,10 +107,12 @@ extension UIView {
     
     func screenShot() -> UIImage? {
         
-        UIGraphicsBeginImageContextWithOptions(bounds.size, false, 0)
-        drawViewHierarchyInRect(bounds, afterScreenUpdates: true)
+        UIGraphicsBeginImageContext(bounds.size)
+        println("graphics context size: \(bounds.size)")
+        drawViewHierarchyInRect(frame, afterScreenUpdates: true)
         var image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
+        //UIGraphicsPopContext()
         return image
     }
 }

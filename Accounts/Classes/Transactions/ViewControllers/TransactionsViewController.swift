@@ -115,11 +115,11 @@ class TransactionsViewController: ACBaseViewController {
             
             if friend.objectId == kTestBotObjectId || friend.facebookId != nil {
                 
-                let imageView = UIImageView()
+                let imageView = UIImageView(frame: view.bounds)
                 imageView.layer.opacity = 0
-                imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
+                //imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
                 view.addSubview(imageView)
-                imageView.fillSuperView(UIEdgeInsetsZero)
+                //imageView.fillSuperView(UIEdgeInsetsZero)
                 view.sendSubviewToBack(imageView)
                 
                 if friend.objectId == kTestBotObjectId {
@@ -130,13 +130,13 @@ class TransactionsViewController: ACBaseViewController {
                         
                         imageView.layer.opacity = 1
                         
-                        }, completion: { (success) -> Void in
+                    }, completion: { (finished) -> Void in
+                        
+                        if let image = imageView.screenShot() {
                             
-                            if let image = imageView.screenShot() {
-                                
-                                imageView.removeFromSuperview()
-                                self.view.insertSubview(UIImageView(image: image), atIndex: 0)
-                            }
+                            imageView.removeFromSuperview()
+                            self.view.insertSubview(UIImageView(image: image), atIndex: 0)
+                        }
                     })
                 }
                 else if let id = friend.facebookId{
@@ -151,7 +151,7 @@ class TransactionsViewController: ACBaseViewController {
                             
                             imageView.layer.opacity = 1
                             
-                        }, completion: { (success) -> Void in
+                        }, completion: { (finished) -> Void in
                             
                             if let image = imageView.screenShot() {
                                 
@@ -163,15 +163,21 @@ class TransactionsViewController: ACBaseViewController {
                 }
                 
                 let blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))
-                blurView.setTranslatesAutoresizingMaskIntoConstraints(false)
+                //blurView.setTranslatesAutoresizingMaskIntoConstraints(false)
+                blurView.frame = imageView.bounds
                 imageView.addSubview(blurView)
-                blurView.fillSuperView(UIEdgeInsetsZero)
+                //blurView.fillSuperView(UIEdgeInsetsZero)
                 
                 let cover = UIView()
                 cover.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(kDevice == .Pad ? 0.75 : 0.45)
-                cover.setTranslatesAutoresizingMaskIntoConstraints(false)
+                //cover.setTranslatesAutoresizingMaskIntoConstraints(false)
+                cover.frame = imageView.bounds
                 imageView.addSubview(cover)
-                cover.fillSuperView(UIEdgeInsetsZero)
+                //cover.fillSuperView(UIEdgeInsetsZero)
+
+                
+                
+                
             }
         }
     }
@@ -196,6 +202,11 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         viewHasAppeared = true
+        
+        if tableView.infiniteScrollingView != nil {
+            
+            tableView.infiniteScrollingView.stopAnimating()
+        }
     }
     
     override func setupView() {
@@ -261,10 +272,17 @@ class TransactionsViewController: ACBaseViewController {
         }
     }
     
+    private var didSetupBackgroundBlurView = false
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        setupBackgroundBlurView()
+        if !didSetupBackgroundBlurView {
+            
+            setupBackgroundBlurView()
+            didSetupBackgroundBlurView = true
+        }
+        
         popoverViewController = nil // to make sure
         setupInfiniteScrolling()
     }
