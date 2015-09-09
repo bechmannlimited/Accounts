@@ -231,6 +231,92 @@ class Transaction: PFObject {
             }
         }
     }
+    
+    private func getPurchaseInfoFromLocalDatastore(completion:(total: Double, error: String?) -> ()) {
+        
+        if let uuid = purchaseTransactionLinkUUID {
+            
+            self.purchaseInfoQuery(uuid)?.fromLocalDatastore().findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+                
+                var total: Double = 0
+                var transactionsCount = 0
+                
+                if let transactions = objects as? [Transaction] {
+                    
+                    for transaction in transactions {
+                        
+                        total += transaction.amount
+                    }
+                    
+                    transactionsCount = transactions.count
+                }
+
+                if transactionsCount > 1 {
+                    
+                    completion(total: total, error: nil)
+                }
+                else {
+                    
+                    completion(total: total, error: "TransactionCount is not more than 1")
+                }
+            })
+        }
+    }
+    
+    private func purchaseInfoQuery(uuid: String) -> PFQuery? {
+        
+        return Transaction.query()?.whereKey("purchaseTransactionLinkUUID", equalTo: uuid)
+    }
+    
+    func getPurchaseInfo(completion:(total: Double, error: String?) -> ()) {
+
+        if let uuid = purchaseTransactionLinkUUID {
+
+            self.purchaseInfoQuery(uuid)?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+                
+                var total: Double = 0
+                
+                if let transactions = objects as? [Transaction] {
+                    
+                    for transaction in transactions {
+                        
+                        total += transaction.amount
+                    }
+                    
+                    completion(total: total, error: nil)
+                }
+                
+                else {
+                    
+                    completion(total: total, error: "Load failed")
+                }
+            })
+            
+//            getPurchaseInfoFromLocalDatastore({ (total, error) -> () in
+// 
+//                if error == nil {
+//                    
+//                    completion(total: total, error: error)
+//                }
+//                
+//                self.purchaseInfoQuery(uuid)?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+//                    
+//                    if let transactions = objects as? [Transaction] {
+//                        
+//                        Task.sharedTasker().executeTaskInBackground({ () -> () in
+//                            
+//                            PFObject.unpinAll(self.purchaseInfoQuery(uuid)?.fromLocalDatastore().findObjects())
+//                            PFObject.pinAll(objects)
+//                            
+//                        }, completion: { () -> () in
+//                            
+//                            self.getPurchaseInfoFromLocalDatastore(completion)
+//                        })
+//                    }
+//                })
+//            })
+        }
+    }
 }
 
 extension Transaction: PFSubclassing {

@@ -20,7 +20,9 @@ class SavePurchaseViewController: SaveItemViewController {
     
     var billSplitCells = Dictionary<User, FormViewTextFieldCell>()
     var formViewCells = Dictionary<String, FormViewTextFieldCell>()
-    
+    var toolbar = UIToolbar()
+    var splitButtons = [UIBarButtonItem]()
+    var transactionTextFieldsIndexPaths = Dictionary<UITextField, NSIndexPath>()
     
     override func viewDidLoad() {
         
@@ -59,8 +61,57 @@ class SavePurchaseViewController: SaveItemViewController {
         tableView.setEditing(true, animated: false)
         
         reloadForm()
+        setupToolbar()
+        enableOrDisableSplitButtons()
         
         askToPopMessage = "Going back will discard any changes, Are you sure?"
+    }
+    
+    func setupToolbar() {
+
+        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.sizeToFit()
+        view.addSubview(toolbar)
+        
+        toolbar.addHeightConstraint(relation: .Equal, constant: toolbar.frame.height)
+        toolbar.addLeftConstraint(toView: view, relation: .Equal, constant: 0)
+        toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
+        toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
+        
+        var previousInsets = tableView.contentInset
+        tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
+        
+        toolbar.tintColor = kNavigationBarTintColor
+        
+        var splitButton = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
+        splitButtons.append(splitButton)
+        toolbar.items = [splitButton]
+    }
+    
+    func enableOrDisableSplitButtons() {
+        
+        var count = 0
+        
+        for t in purchase.transactions {
+            
+            if t.amount != (self.purchase.amount / Double(self.purchase.transactions.count)) {
+                
+                count++
+            }
+        }
+        
+        var isSplit = count > 0
+        
+        for splitButton in splitButtons {
+            
+            splitButton.enabled = purchase.transactions.count > 1 && isSplit
+        }
+    }
+    
+    override func reloadForm() {
+        super.reloadForm()
+        
+        enableOrDisableSplitButtons()
     }
     
     func save() {
@@ -86,22 +137,26 @@ class SavePurchaseViewController: SaveItemViewController {
             self.popAll()
         }
         
-        var didCompleteRemotely = false
+        var didDoCallback = false
         
         purchase?.savePurchase({ (success) -> () in
             
             NSTimer.schedule(delay: kSaveTimeoutForRemoteUpdate){ timer in
                 
-                if !didCompleteRemotely {
-                    
+                if !didDoCallback {
+
                     completion()
+                    didDoCallback = true
                 }
             }
             
-            }, remoteCompletion: { () -> () in
+        }, remoteCompletion: { () -> () in
+
+            if !didDoCallback {
                 
                 completion()
-                didCompleteRemotely = true
+                didDoCallback = true
+            }
         })
     }
     
@@ -112,8 +167,23 @@ class SavePurchaseViewController: SaveItemViewController {
     
 //    func scrollTransactionCellsToView() {
 //        
-//        tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 1), atScrollPosition: .Middle, animated: true)
+//
 //    }
+    
+    func textFieldDidBecomeActive(textField: UITextField) {
+        
+//        if let indexPath = transactionTextFieldsIndexPaths[textField] {
+//            
+//            tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Top, animated: true)
+//        }
+    }
+    
+    func splitBillEqually() {
+        
+        purchase.resetBillSplitChanges()
+        purchase.splitTheBill(nil)
+        setFriendAmountTextFields()
+    }
 }
 
 extension SavePurchaseViewController: FormViewDelegate {
@@ -246,6 +316,8 @@ extension SavePurchaseViewController: FormViewDelegate {
                 cell.textField.text = value
             }
         }
+        
+        enableOrDisableSplitButtons()
     }
     
     func formViewButtonTapped(identifier: String) {
@@ -319,14 +391,14 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             var friendCount = purchase.transactions.count - 1
             
-            cell.detailTextLabel?.text = "\(friendCount)"
+            cell.detailTextLabel?.text = "Tap to select"
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             
             return cell
         }
         else if identifier == "User" {
             
-            cell.textLabel?.text = "Purchased by "
+            cell.textLabel?.text = "Bill settled by "
             cell.detailTextLabel?.text = "\(purchase.user.appropriateDisplayName())"
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             
@@ -352,6 +424,7 @@ extension SavePurchaseViewController: FormViewDelegate {
     func formViewElementDidChange(identifier: String, value: AnyObject?) {
         
         showOrHideSaveButton()
+        enableOrDisableSplitButtons()
         itemDidChange = true
     }
 }
@@ -368,7 +441,8 @@ extension SavePurchaseViewController: UITableViewDelegate {
             cell.textField.textColor = UIColor.lightGrayColor()
             formViewCells[cell.config.identifier] = cell
             
-            //cell.textField.addTarget(self, action: "textFieldDidBecomeActive:", forControlEvents: UIControlEvents.EditingDidBegin)
+            transactionTextFieldsIndexPaths[cell.textField] = indexPath
+            cell.textField.addTarget(self, action: "textFieldDidBecomeActive:", forControlEvents: UIControlEvents.EditingDidBegin)
             
             //hacky way to set friend cells
             if indexPath.section == 1 {
@@ -380,11 +454,13 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     let friend = purchase.usersInTransactions()[i]
                     billSplitCells[friend] = cell
                     
-                    
-//                    if let toolbar = cell.textField.inputAccessoryView as? UIToolbar {
-//                        
-//                        toolbar.items?.insert(<#newElement: T#>, atIndex: 0)
-//                    }
+                    if let toolbar = cell.textField.inputAccessoryView as? UIToolbar {
+                        
+                        var button = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
+                        splitButtons.append(button)
+                        toolbar.items?.insert(button, atIndex: 0)
+                        enableOrDisableSplitButtons()
+                    }
                 }
             }
         }
@@ -396,20 +472,22 @@ extension SavePurchaseViewController: UITableViewDelegate {
         
     }
     
-//    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-//        super.tableView(tableView, didSelectRowAtIndexPath: indexPath)
-//        
-//        //hacky way to set friend cells
-//        if indexPath.section == 1 {
-//            
-//            let i = indexPath.row - 1 // was 2
-//            
-//            if i >= 0 {
-//                
-//                //scrollTransactionCellsToView()
-//            }
-//        }
-//    }
+   
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        super.tableView(tableView, didSelectRowAtIndexPath: indexPath)
+        
+        //hacky way to set friend cells
+        if indexPath.section == 1 {
+            
+            let i = indexPath.row - 1 // was 2
+            
+            if i >= 0 {
+                
+                //tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Top, animated: true)
+            }
+        }
+    }
     
     func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
         

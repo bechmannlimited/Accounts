@@ -11,6 +11,7 @@ import ABToolKit
 import SwiftyJSON
 import Parse
 import SVPullToRefresh
+import SwiftOverlays
 
 private let kPopoverContentSize = CGSize(width: 390, height: 440)
 private let kLoaderTableFooterViewHeight = 70
@@ -48,6 +49,7 @@ class TransactionsViewController: ACBaseViewController {
     var bounceViewHeightConstraint: NSLayoutConstraint?
     
     var popoverViewController: UIViewController?
+    private var blurViewHasBeenConverted = false
     
     func clean() {
         
@@ -115,11 +117,9 @@ class TransactionsViewController: ACBaseViewController {
             
             if friend.objectId == kTestBotObjectId || friend.facebookId != nil {
                 
-                let imageView = UIImageView()
+                let imageView = UIImageView(frame: view.bounds)
                 imageView.layer.opacity = 0
-                imageView.setTranslatesAutoresizingMaskIntoConstraints(false)
                 view.addSubview(imageView)
-                imageView.fillSuperView(UIEdgeInsetsZero)
                 view.sendSubviewToBack(imageView)
                 
                 if friend.objectId == kTestBotObjectId {
@@ -129,6 +129,15 @@ class TransactionsViewController: ACBaseViewController {
                     UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
                         
                         imageView.layer.opacity = 1
+                        
+                    }, completion: { (finished) -> Void in
+                        
+//                        imageView.screenShot({ (image) -> () in
+//                            
+//                            imageView.removeFromSuperview()
+//                            self.view.insertSubview(UIImageView(image: image), atIndex: 0)
+//                            self.blurViewHasBeenConverted = true
+//                        })
                     })
                 }
                 else if let id = friend.facebookId{
@@ -142,32 +151,27 @@ class TransactionsViewController: ACBaseViewController {
                         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
                             
                             imageView.layer.opacity = 1
+                            
+                        }, completion: { (finished) -> Void in
+                            
+//                            imageView.screenShot({ (image) -> () in
+//                                
+//                                imageView.removeFromSuperview()
+//                                self.view.insertSubview(UIImageView(image: image), atIndex: 0)
+//                                self.blurViewHasBeenConverted = true
+//                            })
                         })
                     })
                 }
                 
                 let blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.ExtraLight))
-                blurView.setTranslatesAutoresizingMaskIntoConstraints(false)
+                blurView.frame = imageView.bounds
                 imageView.addSubview(blurView)
-                blurView.fillSuperView(UIEdgeInsetsZero)
                 
                 let cover = UIView()
                 cover.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(kDevice == .Pad ? 0.75 : 0.45)
-                cover.setTranslatesAutoresizingMaskIntoConstraints(false)
+                cover.frame = imageView.bounds
                 imageView.addSubview(cover)
-                cover.fillSuperView(UIEdgeInsetsZero)
-                
-//                imageView.layer.rasterizationScale = UIScreen.mainScreen().scale
-//                imageView.layer.shouldRasterize = true
-                
-                // convert to image
-                
-                if let  image = imageView.screenShot() {
-                    
-                    imageView.removeFromSuperview()
-                    view.addSubview(UIImageView(image: image))
-                }
-                
             }
         }
     }
@@ -192,6 +196,11 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         viewHasAppeared = true
+        
+        if tableView.infiniteScrollingView != nil {
+            
+            tableView.infiniteScrollingView.stopAnimating()
+        }
     }
     
     override func setupView() {
@@ -260,7 +269,11 @@ class TransactionsViewController: ACBaseViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        setupBackgroundBlurView()
+        if !blurViewHasBeenConverted {
+            
+            setupBackgroundBlurView()
+        }
+        
         popoverViewController = nil // to make sure
         setupInfiniteScrolling()
     }
@@ -576,6 +589,10 @@ class TransactionsViewController: ACBaseViewController {
                             self.tableView.infiniteScrollingView.stopAnimating()
                         })
                     })
+                }
+                else {
+                    
+                    self.tableView.infiniteScrollingView.stopAnimating()
                 }
             })
         }

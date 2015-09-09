@@ -102,15 +102,18 @@ class Purchase: PFObject {
             }
             
             transaction.saveEventually({ (success, error) -> Void in
-                
-                transactionsCompleted++
-                
-                if transactionsCompleted == (self.transactions.count - 1) { // - 1 for one to urself
+
+                transaction.pinInBackgroundWithBlock({ (success, error) -> Void in
                     
-                    remoteCompletion()
-                }
-                
-                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                    transactionsCompleted++
+                    
+                    if transactionsCompleted == (self.transactions.count) {
+                        
+                        remoteCompletion()
+                        NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                    }
+                    
+                })
             })
             
             initialCompletion(success: true)
@@ -126,7 +129,7 @@ class Purchase: PFObject {
             totalCheck += transaction.amount
         }
         
-        if totalCheck != self.amount {
+        if totalCheck.toStringWithDecimalPlaces(2) != self.amount.toStringWithDecimalPlaces(2) {
             
             println("ERROR bill doesnt match amount")
         }

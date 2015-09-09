@@ -49,6 +49,7 @@
 		E442C3501B52BE030061CAE6 /* ParseKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C34F1B52BE030061CAE6 /* ParseKeys.swift */; };
 		E442C3521B52C3150061CAE6 /* FriendRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C3511B52C3150061CAE6 /* FriendRequest.swift */; };
 		E44881F51B7D145900043237 /* IOSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44881F41B7D145900043237 /* IOSession.swift */; };
+		E455C4EA1B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E455C4E91B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift */; };
 		E45F0B4A1B7F3DD8004D59E2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45F0B491B7F3DD8004D59E2 /* Constants.swift */; };
 		E46BCE551B66D4E800CA09BF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE541B66D4E800CA09BF /* AudioToolbox.framework */; };
 		E46BCE571B66D4F100CA09BF /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE561B66D4F100CA09BF /* CFNetwork.framework */; };
@@ -136,6 +137,7 @@
 		E442C34F1B52BE030061CAE6 /* ParseKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ParseKeys.swift; path = ../ParseKeys.swift; sourceTree = "<group>"; };
 		E442C3511B52C3150061CAE6 /* FriendRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendRequest.swift; sourceTree = "<group>"; };
 		E44881F41B7D145900043237 /* IOSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IOSession.swift; sourceTree = "<group>"; };
+		E455C4E91B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionPurchaseInfoTableViewCell.swift; sourceTree = "<group>"; };
 		E45F0B491B7F3DD8004D59E2 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E46BCE541B66D4E800CA09BF /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		E46BCE561B66D4F100CA09BF /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
@@ -527,6 +529,7 @@
 			children = (
 				E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */,
 				E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */,
+				E455C4E91B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -776,6 +779,7 @@
 				E442C32E1B510E940061CAE6 /* SavePurchaseViewController.swift in Sources */,
 				E4BA9C5C1B84FD2F00E8DFF6 /* NSDate+Extension.swift in Sources */,
 				E411FE211B6E784F00C29D1F /* FriendTableViewCell.swift in Sources */,
+				E455C4EA1B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift in Sources */,
 				E412F9171B7CC3FC00A30F60 /* ABImageLoader.swift in Sources */,
 				E442C3521B52C3150061CAE6 /* FriendRequest.swift in Sources */,
 				E442C3361B510E940061CAE6 /* Friend.swift in Sources */,

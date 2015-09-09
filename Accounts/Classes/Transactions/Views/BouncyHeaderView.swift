@@ -64,8 +64,9 @@ class BouncyHeaderView: UIView {
         
         if y > 0 {
             
-            headerViewConstraints["Height"]?.constant = headerViewHeight - (+y)
-            heroImageConstraints["Height"]?.constant = headerViewHeight - (+y)
+            let h = headerViewHeight - (+y)
+            headerViewConstraints["Height"]?.constant = h > 0 ? h : 0
+            heroImageConstraints["Height"]?.constant = h > 0 ? h : 0
         }
             
         else{

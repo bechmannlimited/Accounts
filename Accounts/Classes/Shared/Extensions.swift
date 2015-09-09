@@ -105,13 +105,19 @@ extension UITextField {
 
 extension UIView {
     
-    func screenShot() -> UIImage? {
+    func screenShot(completion:(image: UIImage?) -> ()) {
         
-        UIGraphicsBeginImageContextWithOptions(bounds.size, false, 0)
-        drawViewHierarchyInRect(bounds, afterScreenUpdates: true)
+        UIGraphicsBeginImageContext(bounds.size)
+        println("graphics context size: \(bounds.size)")
+        drawViewHierarchyInRect(frame, afterScreenUpdates: true)
         var image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        return image
+        //UIGraphicsPopContext()
+        
+        if image != nil {
+            
+            completion(image: image)
+        }
     }
 }
 
