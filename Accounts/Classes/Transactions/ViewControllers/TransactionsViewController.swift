@@ -174,10 +174,6 @@ class TransactionsViewController: ACBaseViewController {
                 cover.frame = imageView.bounds
                 imageView.addSubview(cover)
                 //cover.fillSuperView(UIEdgeInsetsZero)
-
-                
-                
-                
             }
         }
     }
