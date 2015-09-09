@@ -137,22 +137,26 @@ class SavePurchaseViewController: SaveItemViewController {
             self.popAll()
         }
         
-        var didCompleteRemotely = false
+        var didDoCallback = false
         
         purchase?.savePurchase({ (success) -> () in
             
             NSTimer.schedule(delay: kSaveTimeoutForRemoteUpdate){ timer in
                 
-                if !didCompleteRemotely {
-                    
+                if !didDoCallback {
+
                     completion()
+                    didDoCallback = true
                 }
             }
             
-            }, remoteCompletion: { () -> () in
+        }, remoteCompletion: { () -> () in
+
+            if !didDoCallback {
                 
                 completion()
-                didCompleteRemotely = true
+                didDoCallback = true
+            }
         })
     }
     

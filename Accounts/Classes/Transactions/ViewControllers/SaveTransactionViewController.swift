@@ -94,15 +94,18 @@ class SaveTransactionViewController: SaveItemViewController {
 
             if success {
 
-                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
-                
-                if !delegateCallbackHasBeenFired {
+                transaction?.pinInBackgroundWithBlock({ (success, error) -> Void in
                     
-                    self.delegate?.itemDidChange()
-                    self.delegate?.transactionDidChange(transaction!)
-                    delegateCallbackHasBeenFired = true
-                    self.popAll()
-                }
+                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                    
+                    if !delegateCallbackHasBeenFired {
+                        
+                        self.delegate?.itemDidChange()
+                        self.delegate?.transactionDidChange(transaction!)
+                        delegateCallbackHasBeenFired = true
+                        self.popAll()
+                    }
+                })
             }
             else{
                 

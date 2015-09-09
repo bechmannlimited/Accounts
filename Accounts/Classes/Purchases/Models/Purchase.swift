@@ -102,15 +102,18 @@ class Purchase: PFObject {
             }
             
             transaction.saveEventually({ (success, error) -> Void in
-                
-                transactionsCompleted++
-                
-                if transactionsCompleted == (self.transactions.count - 1) { // - 1 for one to urself
+
+                transaction.pinInBackgroundWithBlock({ (success, error) -> Void in
                     
-                    remoteCompletion()
-                }
-                
-                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                    transactionsCompleted++
+                    
+                    if transactionsCompleted == (self.transactions.count) {
+                        
+                        remoteCompletion()
+                        NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                    }
+                    
+                })
             })
             
             initialCompletion(success: true)
