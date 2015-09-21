@@ -368,9 +368,12 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         
         let friend = data[indexPath.section][indexPath.row]
         (cell as FriendTableViewCell).setup(friend)
+        (cell as FriendTableViewCell).delegate = self
+        (cell as FriendTableViewCell).currentIndexPath = indexPath
         
         //cell.layer.rasterizationScale = UIScreen.mainScreen().scale
         //cell.layer.shouldRasterize = true
+        
         return cell
     }
 
@@ -528,5 +531,25 @@ extension FriendsViewController: SaveItemDelegate {
     func dismissPopover() {
         
         
+    }
+}
+
+extension FriendsViewController: FriendTableViewCellDelegate {
+    
+    func didRemoveFriend(friend: User, indexPath: NSIndexPath?) {
+        
+        if let indexPath = indexPath {
+            
+            tableView.beginUpdates()
+            User.currentUser()?.friends.removeAtIndex(find(User.currentUser()!.friends, friend)!)
+            data[indexPath.section].removeAtIndex(indexPath.row)
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Top)
+            tableView.endUpdates()
+        }
+        
+        NSTimer.schedule(delay: 0.5, handler: { timer in
+        
+            self.refresh(nil)
+        })
     }
 }

@@ -50,10 +50,10 @@ class FindFriendsViewController: BaseViewController {
     func getMatches(searchText: String) {
         
         timer?.invalidate()
-        view.hideLoader()
         
-        tableView.separatorColor = .clearColor()
-        view.showLoader()
+        let loadingView = UIView(frame: CGRect(x: 0, y: 0, width: 25, height: 25))
+        loadingView.showLoader()
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: loadingView)
         
         //timer = NSTimer.scheduledTimerWithTimeInterval(4000, target: self, selector: "", userInfo: nil, repeats: false)
         
@@ -62,9 +62,12 @@ class FindFriendsViewController: BaseViewController {
             //self.timer = timer
             
             self.matchesQuery?.cancel()
-            self.matchesQuery = User.query()
             
-            self.matchesQuery?.whereKey(kParse_User_Username_Key, matchesRegex: "^\(searchText)$", modifiers: "i")
+            self.matchesQuery = PFQuery.orQueryWithSubqueries([
+                User.query()!.whereKey(kParse_User_Username_Key, matchesRegex: "^\(searchText)$", modifiers: "i"),
+                User.query()!.whereKey(kParse_User_DisplayName_Key, matchesRegex: "^\(searchText)$", modifiers: "i")
+            ])
+            
             self.matchesQuery?.whereKey("objectId", notEqualTo: User.currentUser()!.objectId!)
             
             for invite in User.currentUser()!.allInvites[0] {
@@ -115,8 +118,7 @@ class FindFriendsViewController: BaseViewController {
                 }
                 
                 self.tableView.reloadData()
-                self.tableView.separatorColor = kTableViewSeparatorColor
-                self.view.hideLoader()
+                self.navigationItem.rightBarButtonItem = nil
             })
         })
     }

@@ -14,6 +14,11 @@ private let kContentViewVerticalPadding: CGFloat = 10
 private let kContentViewHorizontalPadding: CGFloat = 15
 private let kContentViewGap: CGFloat = 15
 
+protocol FriendTableViewCellDelegate {
+    
+    func didRemoveFriend(friend: User, indexPath: NSIndexPath?)
+}
+
 class FriendTableViewCell: UITableViewCell {
 
     var friend: User!
@@ -24,6 +29,8 @@ class FriendTableViewCell: UITableViewCell {
     var contextualTintColor = UIColor.grayColor()
     var noImageLabel = UILabel()
     var friendImageViewConstraints = Dictionary<String, NSLayoutConstraint>()
+    var delegate: FriendTableViewCellDelegate?
+    var currentIndexPath: NSIndexPath?
     
     convenience init(reuseIdentifier:String) {
         
@@ -64,6 +71,7 @@ class FriendTableViewCell: UITableViewCell {
         self.friend = friend
         setImageViewImage()
         setupLabelValues()
+        setupGestureRecognizer()
     }
     
     func setImageViewImage(){
@@ -125,6 +133,49 @@ class FriendTableViewCell: UITableViewCell {
         
         detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
         detailTextLabel?.textColor = contextualTintColor
+    }
+    
+    func setupGestureRecognizer() {
+        
+        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: "showFriendOptions:")
+        addGestureRecognizer(gestureRecognizer)
+    }
+    
+    func setupActionSheet() {
+        
+        
+    }
+    
+    func showFriendOptions(gestureRecognizor: UILongPressGestureRecognizer) {
+        
+        let optionMenu = UIAlertController(title: nil, message: "Options for \(friend.appropriateDisplayName())", preferredStyle: .ActionSheet)
+        
+        let deleteAction = UIAlertAction(title: "Remove friend", style: .Default, handler: {
+            (alert: UIAlertAction!) -> Void in
+            
+            User.currentUser()?.removeFriend(self.friend, completion: { (success) -> () in
+                
+                self.delegate!.didRemoveFriend(self.friend, indexPath: self.currentIndexPath)
+            })
+        })
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: {
+            (alert: UIAlertAction!) -> Void in
+            println("Cancelled")
+        })
+        
+        optionMenu.addAction(deleteAction)
+        optionMenu.addAction(cancelAction)
+        
+        if gestureRecognizor.state == UIGestureRecognizerState.Began {
+            
+            UIViewController.topMostController().presentViewController(optionMenu, animated: true, completion: nil)
+        }
+    }
+    
+    func removeFriend() {
+        
+        User.currentUser()?.friends.removeAtIndex(find(User.currentUser()!.friends, friend)!)
     }
     
     func calculateTintColor() {

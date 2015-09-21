@@ -35,7 +35,7 @@ class FriendInvitesViewController: ACBaseViewController {
         tableView.allowsSelectionDuringEditing = true
         tableView.setEditing(true, animated: false)
         
-        addCloseButton()
+        //addCloseButton()
         view.showLoader()
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "findFriends")
@@ -164,7 +164,7 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
         
         let friendRequest = invites[indexPath.section][indexPath.row]
         let user = friendRequest.fromUser!
-        
+        println(indexPath.section); println(kUnconfirmedInvitesSection)
         if indexPath.section == kUnconfirmedInvitesSection {
             
             tableView.beginUpdates()

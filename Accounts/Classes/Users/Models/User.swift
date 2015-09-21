@@ -59,8 +59,6 @@ class User: PFUser {
         friendRequest.toUser = friend
         friendRequest.friendRequestStatus = FriendRequestStatus.RequestingDeletion.rawValue
         
-        friend.unpinInBackground()
-        
         friendRequest.saveInBackgroundWithBlock { (success, error) -> Void in
             
             completion(success: success)
@@ -76,6 +74,10 @@ class User: PFUser {
             rc = "You"
         }
         else if let name = displayName {
+            
+            rc = name
+        }
+        else if let name = username {
             
             rc = name
         }
@@ -170,80 +172,139 @@ class User: PFUser {
 
         let execRemoteQuery: () -> () = {
             
-            let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
-            graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
+            if let facebookId = self.facebookId {
                 
-                if error == nil{
+                let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
+                graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
                     
-                    var canContinue = true
+                    if error == nil{
+                        
+                        var canContinue = true
+                        
+                        Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
+                            
+                            var friendInfo = Dictionary<String, NSNumber>()
+                            
+                            var queries = [PFQuery]()
+                            var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
+                            
+                            if let facebookId = self.facebookId {
+                                
+                                let friendsJson = JSON(result)["data"]
+                                
+                                for (index: String, friendJson: JSON) in friendsJson {
+                                    
+                                    let friendQuery = User.query()
+                                    friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
+                                    queries.append(friendQuery!)
+                                }
+                            }
+                            
+                            if Settings.shouldShowTestBot() {
+                                
+                                let botQuery = User.query()
+                                botQuery?.whereKey("objectId", equalTo: kTestBotObjectId)
+                                queries.append(botQuery!)
+                            }
+                            
+                            queries.append(query1!)  // must add friends relation back to user
+                            
+                            self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
+                            
+                            for friend in self.friends {
+                                
+                                if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
+                                    
+                                    let responseJson = JSON(cloudResponse)
+                                    friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+                                    friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                                }
+                                else {
+                                    
+                                    canContinue = false
+                                }
+                            }
+                            
+                            if canContinue {
+                                
+                                PFObject.pinAll(self.friends)
+                                
+                                self.friendsIdsWithDifference = friendInfo
+                                self.pinInBackground()
+                                self.saveInBackground()
+                            }
+                            
+                            
+                            }, completion: { () -> () in
+                                
+                                if canContinue {
+                                    
+                                    completion(completedRemoteRequest: true)
+                                }
+                        })
+                    }
+                    else{
+                        
+                        connection.cancel()
+                    }
+                })
+            }
+            
+            else {
+                
+                var canContinue = true
+                
+                Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
                     
-                    Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
+                    var friendInfo = Dictionary<String, NSNumber>()
+                    
+                    var queries = [PFQuery]()
+                    var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
+                    
+                    if Settings.shouldShowTestBot() {
                         
-                        var friendInfo = Dictionary<String, NSNumber>()
+                        let botQuery = User.query()
+                        botQuery?.whereKey("objectId", equalTo: kTestBotObjectId)
+                        queries.append(botQuery!)
+                    }
+                    
+                    queries.append(query1!)  // must add friends relation back to user
+                    
+                    self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
+                    
+                    for friend in self.friends {
                         
-                        var queries = [PFQuery]()
-                        var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
-                        
-                        if let facebookId = self.facebookId {
+                        if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
                             
-                            let friendsJson = JSON(result)["data"]
-                            
-                            for (index: String, friendJson: JSON) in friendsJson {
-                                
-                                let friendQuery = User.query()
-                                friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
-                                queries.append(friendQuery!)
-                            }
+                            let responseJson = JSON(cloudResponse)
+                            friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
+                            friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
                         }
-                     
-                        if Settings.shouldShowTestBot() {
+                        else {
                             
-                            let botQuery = User.query()
-                            botQuery?.whereKey("objectId", equalTo: kTestBotObjectId)
-                            queries.append(botQuery!)
+                            canContinue = false
                         }
+                    }
+                    
+                    if canContinue {
                         
-                        queries.append(query1!)  // must add friends relation back to user
+                        PFObject.pinAll(self.friends)
                         
-                        self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
-                        
-                        for friend in self.friends {
-                            
-                            if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
-                                
-                                let responseJson = JSON(cloudResponse)
-                                friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                                friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
-                            }
-                            else {
-                                
-                                canContinue = false
-                            }
-                        }
-                        
-                        if canContinue {
-                            
-                            PFObject.pinAll(self.friends)
-                            
-                            self.friendsIdsWithDifference = friendInfo
-                            self.pinInBackground()
-                            self.saveInBackground()
-                        }
-
-                        
+                        self.friendsIdsWithDifference = friendInfo
+                        self.pinInBackground()
+                        self.saveInBackground()
+                    }
+                    
+                    
                     }, completion: { () -> () in
                         
                         if canContinue {
                             
                             completion(completedRemoteRequest: true)
                         }
-                    })
-                }
-                else{
-                    
-                    connection.cancel()
-                }
-            })
+                })
+            }
+
         }
         
         var ids = [String]()
@@ -333,6 +394,8 @@ class User: PFUser {
     
     func addFriendFromRequest(friendRequest: FriendRequest, completion:(success: Bool) -> ()) {
         
+        //friendRequest.fromUser?.fetchIfNeeded()
+        //friendRequest.toUser?.fetchIfNeeded()
         friendRequest.friendRequestStatus = FriendRequestStatus.Confirmed.rawValue
         
         PFObject.saveAllInBackground([friendRequest, User.currentUser()!], block: { (success, error) -> Void in
