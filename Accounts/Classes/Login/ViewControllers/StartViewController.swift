@@ -24,8 +24,9 @@ class StartViewController: ACBaseViewController {
             
             var loginViewController = PFLogInViewController()
             
-            loginViewController.fields =  PFLogInFields.Facebook //| PFLogInFields.UsernameAndPassword |  PFLogInFields.SignUpButton | PFLogInFields.LogInButton | PFLogInFields.PasswordForgotten
+            loginViewController.fields =  PFLogInFields.Facebook | PFLogInFields.UsernameAndPassword |  PFLogInFields.SignUpButton | PFLogInFields.LogInButton | PFLogInFields.PasswordForgotten
             loginViewController.facebookPermissions = ["email", "public_profile", "user_friends"]
+        
             loginViewController.logInView?.logo = titleView()
             
             var signUpViewController = PFSignUpViewController()
@@ -50,37 +51,25 @@ class StartViewController: ACBaseViewController {
     
     func titleView() -> UIView {
         
-        var titleView = UIView()
-        titleView.frame = CGRect(x: 0, y: 0, width: 200, height: 400)
+        var heightWidth: CGFloat = view.frame.height >= 568 ? 120 : 60
+        var topMargin: CGFloat = view.frame.height >= 568 ? -70 : -30
+        var cornerRadius: CGFloat = view.frame.height >= 568 ? 15 : 8
         
+        var titleView = UIView()
+        titleView.frame = CGRect(x: 0, y: 0, width: heightWidth, height: heightWidth)
+ 
         var logo = UIImageView()
         logo.setTranslatesAutoresizingMaskIntoConstraints(false)
         titleView.addSubview(logo)
         
         logo.image = AppTools.iconAssetNamed("iTunesArtwork")
-        logo.layer.cornerRadius = 20
+        logo.layer.cornerRadius = cornerRadius
         logo.clipsToBounds = true
-        logo.addTopConstraint(toView: titleView, relation: .Equal, constant: -200)
+        logo.addTopConstraint(toView: titleView, relation: .Equal, constant: topMargin)
         logo.addLeftConstraint(toView: titleView, relation: .Equal, constant: 0)
         logo.addRightConstraint(toView: titleView, relation: .Equal, constant: 0)
-        logo.addHeightConstraint(relation: .Equal, constant: 200)
-        
-        var subTitleLabel = UILabel()
-        subTitleLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
-        titleView.addSubview(subTitleLabel)
-        
-        subTitleLabel.textAlignment = NSTextAlignment.Center
-        subTitleLabel.text = "Please login with Facebook. Don't worry, we won't post anything!"
-        subTitleLabel.numberOfLines = 0
-        subTitleLabel.font = UIFont.lightFont(24)
-        subTitleLabel.textColor = UIColor.lightGrayColor()
-        subTitleLabel.addTopConstraint(toView: logo, attribute: NSLayoutAttribute.Bottom, relation: .Equal, constant: 10)
-        subTitleLabel.addLeftConstraint(toView: titleView, relation: .Equal, constant: -30)
-        subTitleLabel.addRightConstraint(toView: titleView, relation: .Equal, constant: 30)
-        subTitleLabel.addHeightConstraint(relation: .Equal, constant: 120)
-//
-//        println(subTitleLabel.frame)
-        
+        logo.addHeightConstraint(relation: .Equal, constant: heightWidth)
+
         return titleView
     }
     

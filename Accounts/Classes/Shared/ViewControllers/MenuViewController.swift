@@ -14,10 +14,11 @@ import Parse
 import AFDateHelper
 import SwiftOverlays
 
-private let kProfileSection = 3
-private let kTestBotSection = 2
-private let kShareSection = 1
-private let kFeedbackSection = 0
+private let kProfileSection = 4
+private let kTestBotSection = 3
+private let kShareSection = 2
+private let kFeedbackSection = 1
+private let kFriendsSection = 0
 
 private let kProfileIndexPath = NSIndexPath(forRow: 09999, inSection: kProfileSection)
 private let kLogoutIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
@@ -29,6 +30,8 @@ private let kShareIndexPath = NSIndexPath(forRow: 0, inSection: kShareSection)
 
 private let kTestBotIndexPath = NSIndexPath(forRow: 0, inSection: kTestBotSection)
 
+private let kFriendsIndexPath = NSIndexPath(forRow: 0, inSection: kFriendsSection)
+
 //protocol MenuDelegate {
 //    
 //    func menuDidClose()
@@ -38,11 +41,14 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
+        [kFriendsIndexPath],
         [kFeedbackIndexPath],
         [kShareIndexPath],
         [kTestBotIndexPath],
         [kLogoutIndexPath]
     ]
+    
+    var hasAppearedFirstTime = false
     
     //var delegate: MenuDelegate?
     
@@ -58,11 +64,23 @@ class MenuViewController: ACBaseViewController {
         super.viewWillAppear(animated)
         
         deselectSelectedCell(tableView)
+        
+        if hasAppearedFirstTime {
+            
+            getInvites()
+        }
+        
+        hasAppearedFirstTime = true
     }
     
     func testBotSwitchIsChanged(testBotSwitch: UISwitch) {
         
         Settings.setShouldShowTestBot(testBotSwitch.on)
+    }
+    
+    func getInvites() {
+        
+        self.tableView.reloadRowsAtIndexPaths([kFriendsIndexPath], withRowAnimation: UITableViewRowAnimation.None)
     }
 }
 
@@ -135,8 +153,21 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             testBotSwitch.on = Settings.shouldShowTestBot()
             testBotSwitch.addTarget(self, action: Selector("testBotSwitchIsChanged:"), forControlEvents: UIControlEvents.ValueChanged)
 
-            
             cell.accessoryView = testBotSwitch
+        }
+        else if indexPath == kFriendsIndexPath {
+            
+            cell.textLabel?.text = "Friend invites"
+            cell.detailTextLabel?.text = ""
+            cell.accessoryType = .DisclosureIndicator
+
+            User.currentUser()?.getInvites({ (invites) -> () in
+                
+                let i = User.currentUser()!.pendingInvitesCount()
+                
+                cell.detailTextLabel?.text = i > 0 ? "\(i)" : "No pending invites"
+                cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+            })
         }
         
         return cell
@@ -236,7 +267,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         else if indexPath == kTestBotIndexPath {
             
             tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        }
+        else if indexPath == kFriendsIndexPath {
             
+            let v = FriendInvitesViewController()
+            navigationController?.pushViewController(v, animated: true)
         }
     }
     

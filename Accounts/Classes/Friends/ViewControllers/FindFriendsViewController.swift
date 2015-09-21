@@ -17,6 +17,7 @@ class FindFriendsViewController: BaseViewController {
     var matches = [User]()
     var searchController = UISearchController(searchResultsController: nil)
     var matchesQuery: PFQuery?
+    var timer: NSTimer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -41,64 +42,82 @@ class FindFriendsViewController: BaseViewController {
         searchBar.sizeToFit()
 
         searchController.dimsBackgroundDuringPresentation = false
+        searchController.hidesNavigationBarDuringPresentation = false
+        
+        searchBar.tintColor = kNavigationBarTintColor
     }
     
     func getMatches(searchText: String) {
         
-        matchesQuery?.cancel()
-        matchesQuery = User.query()
+        timer?.invalidate()
+        view.hideLoader()
         
-        matchesQuery?.whereKey(kParse_User_Username_Key, matchesRegex: "^\(searchText)$", modifiers: "i")
-        matchesQuery?.whereKey("objectId", notEqualTo: User.currentUser()!.objectId!)
+        tableView.separatorColor = .clearColor()
+        view.showLoader()
         
-        for invite in User.currentUser()!.allInvites[0] {
-            
-            matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.toUser!)
-            matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
-        }
-        for invite in User.currentUser()!.allInvites[1] {
-            
-            matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.toUser!)
-            matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
-        }
+        //timer = NSTimer.scheduledTimerWithTimeInterval(4000, target: self, selector: "", userInfo: nil, repeats: false)
         
-        matchesQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+        self.timer = NSTimer.schedule(delay: 2.5, handler: { timer in
             
-            if var matches = objects as? [User] {
+            //self.timer = timer
+            
+            self.matchesQuery?.cancel()
+            self.matchesQuery = User.query()
+            
+            self.matchesQuery?.whereKey(kParse_User_Username_Key, matchesRegex: "^\(searchText)$", modifiers: "i")
+            self.matchesQuery?.whereKey("objectId", notEqualTo: User.currentUser()!.objectId!)
+            
+            for invite in User.currentUser()!.allInvites[0] {
                 
-                //remove match if already in invite pool
-                for match in matches {
-                    
-                    for invite in User.currentUser()!.allInvites[0] {
-                     
-                        if invite.fromUser?.objectId == match.objectId {
-                            
-                            let index = find(matches, match)!
-                            matches.removeAtIndex(index)
-                        }
-                    }
-                    for invite in User.currentUser()!.allInvites[1] {
-                        
-                        if invite.toUser?.objectId == match.objectId {
-                            
-                            let index = find(matches, match)!
-                            matches.removeAtIndex(index)
-                        }
-                    }
-                    for friend in User.currentUser()!.friends {
-                        
-                        if friend.objectId == match.objectId {
-                            
-                            let index = find(matches, match)!
-                            matches.removeAtIndex(index)
-                        }
-                    }
-                }
-
-                self.matches = matches
+                self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.toUser!)
+                self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
             }
-            
-            self.tableView.reloadData()
+            for invite in User.currentUser()!.allInvites[1] {
+                
+                self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.toUser!)
+                self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
+            }
+            print("hi")
+            self.matchesQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+                print("hi2")
+                if var matches = objects as? [User] {
+                    
+                    //remove match if already in invite pool
+                    for match in matches {
+                        
+                        for invite in User.currentUser()!.allInvites[0] {
+                            
+                            if invite.fromUser?.objectId == match.objectId {
+                                
+                                let index = find(matches, match)!
+                                matches.removeAtIndex(index)
+                            }
+                        }
+                        for invite in User.currentUser()!.allInvites[1] {
+                            
+                            if invite.toUser?.objectId == match.objectId {
+                                
+                                let index = find(matches, match)!
+                                matches.removeAtIndex(index)
+                            }
+                        }
+                        for friend in User.currentUser()!.friends {
+                            
+                            if friend.objectId == match.objectId {
+                                
+                                let index = find(matches, match)!
+                                matches.removeAtIndex(index)
+                            }
+                        }
+                    }
+                    
+                    self.matches = matches
+                }
+                
+                self.tableView.reloadData()
+                self.tableView.separatorColor = kTableViewSeparatorColor
+                self.view.hideLoader()
+            })
         })
     }
     
@@ -126,6 +145,13 @@ class FindFriendsViewController: BaseViewController {
                 self.searchController.searchBar.userInteractionEnabled = true
             })
         })
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(true)
+        
+        searchController.searchBar.removeFromSuperview()
+        searchController.delegate = nil
     }
 }
 

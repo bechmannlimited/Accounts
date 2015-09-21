@@ -49,7 +49,8 @@ class FriendsViewController: ACBaseViewController {
             tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
-        setupNoDataLabel(noDataView, text: "Your Facebook friends who have this app, will appear here!", originView: tableView) //To get started, invite some friends!
+        let text = User.currentUser()?.facebookId != nil ? "Your Facebook friends who have this app, will appear here!" : "Tap settings and send a friend invite to get started!"
+        setupNoDataLabel(noDataView, text: text, originView: tableView) //To get started, invite some friends!
         setupTextLabelForSaveStatusInToolbarWithLabel()
         setupToolbar()
         
@@ -133,6 +134,15 @@ class FriendsViewController: ACBaseViewController {
         toolbar.addLeftConstraint(toView: view, relation: .Equal, constant: 0)
         toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
         toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
+        
+        if var height = navigationController?.navigationBar.frame.height {
+            
+            if NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) {
+                
+                height += UIApplication.sharedApplication().statusBarFrame.height
+                tableView.contentInset = UIEdgeInsets(top: height, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
+            }
+        }
         
         var previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
@@ -238,8 +248,8 @@ class FriendsViewController: ACBaseViewController {
         }
         
         for friend in User.currentUser()!.friends {
-            
-            if friend.localeDifferenceBetweenActiveUser == 0 {
+
+            if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) == 0 {
                 
                 friendsWhoAreEven.append(friend)
             }
@@ -283,16 +293,6 @@ class FriendsViewController: ACBaseViewController {
         
         //getInvites()
     }
-    
-//    func getInvites(){
-//        
-//        User.currentUser()?.getInvites({ (invites) -> () in
-//            
-//            self.hasCheckedForInvites = true
-//            self.invitesCount = invites[0].count
-//            //self.setBarButtonItems()
-//        })
-//    }
     
     func refreshFromBarButton(){
         

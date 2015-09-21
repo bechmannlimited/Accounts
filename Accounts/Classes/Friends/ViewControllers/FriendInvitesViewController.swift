@@ -41,8 +41,6 @@ class FriendInvitesViewController: ACBaseViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "findFriends")
         
         setupNoDataLabel(noDataView, text: "Tap plus to send someone a friend invitation", originView: view)
-        
-       
     }
     
     override func didReceivePushNotification(notification: NSNotification) {
@@ -82,12 +80,12 @@ class FriendInvitesViewController: ACBaseViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        if isInsidePopover() {
-            
-            navigationController?.view.backgroundColor = UIColor.clearColor()
-            view.backgroundColor = UIColor.clearColor()
-            tableView.backgroundColor = UIColor.clearColor()
-        }
+//        if isInsidePopover() {
+//            
+//            navigationController?.view.backgroundColor = UIColor.clearColor()
+//            view.backgroundColor = UIColor.clearColor()
+//            tableView.backgroundColor = UIColor.clearColor()
+//        }
     }
     
     override func viewDidAppear(animated: Bool) {

@@ -148,6 +148,24 @@ class User: PFUser {
         return split(appropriateDisplayName()) {$0 == " "}
     }
     
+    func pendingInvitesCount() -> Int {
+        
+        var count = 0
+        
+        for list in allInvites {
+            
+            for invite in list {
+                
+                if invite.toUser?.objectId == objectId {
+                    
+                    count++
+                }
+            }
+        }
+        
+        return count
+    }
+    
     func getFriends(completion:(completedRemoteRequest:Bool) -> ()) {
 
         let execRemoteQuery: () -> () = {
