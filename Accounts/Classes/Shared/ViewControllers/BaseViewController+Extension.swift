@@ -8,6 +8,7 @@
 
 import UIKit
 import ABToolKit
+import SwiftOverlays
 
 extension BaseViewController {
     
@@ -59,6 +60,28 @@ extension BaseViewController {
         noDataView.addTopConstraint(toView: originView, relation: .Equal, constant: 10)
         
         noDataView.layer.opacity = 0
+    }
+    
+    func showSavingOverlay() {
+        
+        showLoadingOverlayWithText("Saving...")
+    }
+    
+    func showDeletingOverlay() {
+        
+        showLoadingOverlayWithText("Deleting...")
+    }
+    
+    func showLoadingOverlayWithText(text: String) {
+        
+        //SwiftOverlays.showBlockingWaitOverlayWithText(text)
+        self.showWaitOverlayWithText(text)
+    }
+    
+    func removeLoadingViews() {
+        
+        SwiftOverlays.removeAllBlockingOverlays()
+        self.removeAllOverlays()
     }
 }
 

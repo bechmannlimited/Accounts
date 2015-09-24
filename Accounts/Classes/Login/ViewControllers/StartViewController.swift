@@ -124,6 +124,7 @@ extension StartViewController: PFLogInViewControllerDelegate{
     
     func logInViewController(logInController: PFLogInViewController, didFailToLogInWithError error: NSError?) {
         println(error)
+        ParseUtilities.showAlertWithErrorIfExists(error)
     }
 }
 
@@ -136,5 +137,6 @@ extension StartViewController: PFSignUpViewControllerDelegate {
     
     func signUpViewController(signUpController: PFSignUpViewController, didFailToSignUpWithError error: NSError?) {
         println(error)
+        ParseUtilities.showAlertWithErrorIfExists(error)
     }
 }

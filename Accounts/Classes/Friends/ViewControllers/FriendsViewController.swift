@@ -233,7 +233,7 @@ class FriendsViewController: ACBaseViewController {
         //owes you money
         for friend in User.currentUser()!.friends {
             
-            if friend.localeDifferenceBetweenActiveUser < 0 {
+            if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
                 
                 friendsWhoOweMoney.append(friend)
             }
@@ -241,7 +241,7 @@ class FriendsViewController: ACBaseViewController {
         
         for friend in User.currentUser()!.friends {
             
-            if friend.localeDifferenceBetweenActiveUser > 0 {
+            if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
                 
                 friendsWhoYouOweMoney.append(friend)
             }
@@ -275,7 +275,6 @@ class FriendsViewController: ACBaseViewController {
         
         User.currentUser()?.getFriends({ (completedRemoteRequest) -> () in
             
-            println("is in this closure")
             refreshControl?.endRefreshing()
             self.setDataForTable()
             self.tableView.reloadData()
@@ -541,7 +540,7 @@ extension FriendsViewController: FriendTableViewCellDelegate {
         if let indexPath = indexPath {
             
             tableView.beginUpdates()
-            User.currentUser()?.friends.removeAtIndex(find(User.currentUser()!.friends, friend)!)
+            //User.currentUser()?.friends.removeAtIndex(find(User.currentUser()!.friends, friend)!)
             data[indexPath.section].removeAtIndex(indexPath.row)
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Top)
             tableView.endUpdates()

@@ -174,13 +174,24 @@ class BouncyHeaderView: UIView {
     func setupTitle(title: String) {
         
         //TITLE
+        titleLabel.removeFromSuperview()
+        titleLabel = UILabel()
+        
         titleLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
         self.addSubview(titleLabel)
         
         let font = UIFont(name: "AppleSDGothicNeo-Bold", size: 25)! //"AppleSDGothicNeo-Bold"
         titleLabelHeight = UILabel.heightForLabel(title, font: font, width: originView.frame.width - (kTitlePadding * 2))
         //println("\(titleLabelHeight) - \(self.bounds.width - (kTitlePadding * 2))")
-        titleLabel.addHeightConstraint(relation: .Equal, constant: titleLabelHeight)
+        
+//        if let c = headerViewConstraints["title_height"] {
+//            
+//            titleLabel.removeConstraint(c)
+//        }
+
+        titleLabel.removeConstraints(titleLabel.constraints())
+        
+        titleLabel.addHeightConstraint(relation: NSLayoutRelation.Equal, constant: titleLabelHeight)
         titleLabel.addLeftConstraint(toView: self, relation: .Equal, constant: kTitlePadding)
         titleLabel.addRightConstraint(toView: self, relation: .Equal, constant: -kTitlePadding)
         titleLabel.addBottomConstraint(toView: heroImageView, attribute: NSLayoutAttribute.Bottom, relation: .Equal, constant: -kTitlePadding)

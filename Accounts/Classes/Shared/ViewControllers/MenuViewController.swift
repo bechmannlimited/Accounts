@@ -20,8 +20,8 @@ private let kShareSection = 2
 private let kFeedbackSection = 1
 private let kFriendsSection = 0
 
-private let kProfileIndexPath = NSIndexPath(forRow: 09999, inSection: kProfileSection)
-private let kLogoutIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
+private let kProfileIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
+private let kLogoutIndexPath = NSIndexPath(forRow: 1, inSection: kProfileSection)
 
 private let kCurrencyIndexPath = NSIndexPath(forRow: 999, inSection: 9999)
 
@@ -45,7 +45,7 @@ class MenuViewController: ACBaseViewController {
         [kFeedbackIndexPath],
         [kShareIndexPath],
         [kTestBotIndexPath],
-        [kLogoutIndexPath]
+        [kProfileIndexPath, kLogoutIndexPath]
     ]
     
     var hasAppearedFirstTime = false
@@ -118,6 +118,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         else if indexPath == kProfileIndexPath {
             
             cell.textLabel?.text = "Edit profile"
+            cell.accessoryType = .DisclosureIndicator
         }
         else if indexPath == kFeedbackIndexPath {
          
@@ -198,6 +199,8 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                         
                         if success {
                             
+                            User.currentUser()?.unpin()
+                            
                             User.logOutInBackgroundWithBlock({ (error) -> Void in
                                 
                                 SwiftOverlays.removeAllBlockingOverlays()
@@ -230,17 +233,9 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         else if indexPath == kProfileIndexPath {
             
-            if User.currentUser()?.facebookId == nil {
-                
-                let v = SaveUserViewController()
-                navigationController?.pushViewController(v, animated: true)
-            }
-            else{
-                
-                UIAlertView(title: "Not ready yet!", message: "You cant view your profile if you are logged in via facebook for the moment.", delegate: nil, cancelButtonTitle: "Ok").show()
-                
-                tableView.deselectRowAtIndexPath(indexPath, animated: true)
-            }
+            let v = SaveUserViewController()
+            v.delegate = self
+            navigationController?.pushViewController(v, animated: true)
         }
         else if indexPath == kFeedbackIndexPath{
             
@@ -279,7 +274,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         
         if section == kProfileSection {
             
-            return "Logged in as \(String.emptyIfNull(User.currentUser()?.displayName))"
+            return "Logged in as \(User.currentUser()!.namePrioritizingDisplayName())"
         }
         
         return ""
@@ -295,12 +290,41 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             
             return "Your Facebook friends who have this app, will appear in your friends list!"
         }
+        else if section == kFriendsSection && User.currentUser()?.facebookId != nil {
+            
+            let username = User.currentUser()?.username
+            let displayName = User.currentUser()?.displayName
+            
+            var text = ""
+            var namesAdded = 0
+            
+            if displayName?.isEmpty == false {
+                
+                text += "\"\(displayName!)\" "
+                namesAdded++
+            }
+            if username?.isEmpty == false && User.currentUser()?.facebookId == nil {
+                
+                var connector = namesAdded == 0 ? "" : "or"
+                text += "\(connector) \"\(username!)\""
+            }
+            
+            return "Your friends can find you by searching: \(text)"
+        }
         
         return nil
     }
     
     override func appDidResume() {
         super.appDidResume()
+        
+        tableView.reloadData()
+    }
+}
+
+extension MenuViewController: SaveUserDelegate {
+    
+    func didSaveUser() {
         
         tableView.reloadData()
     }

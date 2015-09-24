@@ -54,39 +54,59 @@ class User: PFUser {
     
     func removeFriend(friend:User, completion: (success: Bool) -> ()) {
     
-        let friendRequest = FriendRequest()
-        friendRequest.fromUser = User.currentUser()
-        friendRequest.toUser = friend
-        friendRequest.friendRequestStatus = FriendRequestStatus.RequestingDeletion.rawValue
-        
-        friendRequest.saveInBackgroundWithBlock { (success, error) -> Void in
+        let params: [NSObject : AnyObject] = [
+            "fromUserId" : User.currentUser()!.objectId!,
+            "toUserId": friend.objectId!,
+            "friendRequestStatus" : FriendRequestStatus.RequestingDeletion.rawValue
+        ]
+        PFCloud.callFunctionInBackground("SaveFriendRequest", withParameters: params, block: { (response, error) -> Void in
             
-            completion(success: success)
-        }
+            ParseUtilities.showAlertWithErrorIfExists(error)
+            
+            Task.sharedTasker().executeTaskInBackground({ () -> () in
+                
+                for f in self.friends.filter({ (t) -> Bool in
+                    println(t.objectId)
+                    return t.objectId == friend.objectId
+                }) {
+                    
+                    self.friends.removeAtIndex(find(self.friends, f)!)
+                    self.relationForKey("friends").removeObject(f)
+                }
+                
+                self.friendsIdsWithDifference?.removeValueForKey(friend.objectId!)
+                friend.unpin()
+                self.save()
+                
+            }, completion: { () -> () in
+                
+                completion(success: true)
+            })
+        })
     }
     
     func appropriateDisplayName() -> String {
-    
-        var rc = ""
         
         if objectId == User.currentUser()?.objectId {
             
-            rc = "You"
+            return "You"
         }
         else if let name = displayName {
             
-            rc = name
+            if name.isEmpty == false {
+                
+                return name
+            }
         }
         else if let name = username {
             
-            rc = name
-        }
-        else {
-            
-            rc = String.emptyIfNull(username)
+            if name.isEmpty == false {
+                
+                return name
+            }
         }
         
-        return rc
+        return String.emptyIfNull(username)
     }
     
 //    func imageUrl() -> String? {
@@ -148,6 +168,20 @@ class User: PFUser {
     func appropriateDisplayNamesAsArray() -> [String] {
         
         return split(appropriateDisplayName()) {$0 == " "}
+    }
+    
+    func namePrioritizingDisplayName() -> String {
+        
+        if displayName?.isEmpty == false {
+            
+            return displayName!
+        }
+        else if username?.isEmpty == false {
+            
+            return username!
+        }
+        
+        return ""
     }
     
     func pendingInvitesCount() -> Int {
@@ -212,6 +246,8 @@ class User: PFUser {
                             self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
                             
                             for friend in self.friends {
+                                
+                                friend.fetch()
                                 
                                 if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
                                     
@@ -365,26 +401,35 @@ class User: PFUser {
             
             var acceptedFriendRequest = false
             
-            if let match = query?.findObjects()?.first as? FriendRequest {
+            let objects = query?.findObjects()
+            
+            if objects?.count > 0 {
                 
-                if match.friendRequestStatus == FriendRequestStatus.Pending.rawValue {
+                let match = query?.findObjects()?.first as? FriendRequest
+                
+                if match?.friendRequestStatus == FriendRequestStatus.Pending.rawValue {
                     
-                    match.friendRequestStatus = FriendRequestStatus.Confirmed.rawValue
-                    PFObject.saveAllInBackground([[match, User.currentUser()!]])
                     acceptedFriendRequest = true
+                    //match.delete()
                     
-                    ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
+                    let params: [NSObject : AnyObject] = [
+                        "fromUserId" : friendRequest.fromUser!.objectId!,
+                        "toUserId": friendRequest.toUser!.objectId!,
+                        "friendRequestStatus" : FriendRequestStatus.Confirmed.rawValue
+                    ]
+                    PFCloud.callFunction("SaveFriendRequest", withParameters: params)
                 }
             }
             
             if !acceptedFriendRequest {
                 
-                friendRequest.friendRequestStatus = FriendRequestStatus.Pending.rawValue
-                friendRequest.save()
-                
-                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "New friend request from \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestSent.rawValue])
+                let params: [NSObject : AnyObject] = [
+                    "fromUserId" : friendRequest.fromUser!.objectId!,
+                    "toUserId": friendRequest.toUser!.objectId!,
+                    "friendRequestStatus" : FriendRequestStatus.Pending.rawValue
+                ]
+                PFCloud.callFunction("SaveFriendRequest", withParameters: params)
             }
-
             
         }, completion: { () -> () in
             
@@ -394,15 +439,15 @@ class User: PFUser {
     
     func addFriendFromRequest(friendRequest: FriendRequest, completion:(success: Bool) -> ()) {
         
-        //friendRequest.fromUser?.fetchIfNeeded()
-        //friendRequest.toUser?.fetchIfNeeded()
-        friendRequest.friendRequestStatus = FriendRequestStatus.Confirmed.rawValue
-        
-        PFObject.saveAllInBackground([friendRequest, User.currentUser()!], block: { (success, error) -> Void in
+        let params: [NSObject : AnyObject] = [
+            "fromUserId" : friendRequest.fromUser!.objectId!,
+            "toUserId": friendRequest.toUser!.objectId!,
+            "friendRequestStatus" : FriendRequestStatus.Confirmed.rawValue
+        ]
+        PFCloud.callFunctionInBackground("SaveFriendRequest", withParameters: params, block: { (response, error) -> Void in
             
-            completion(success: success)
-            
-            ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.fromUser!], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
+            ParseUtilities.showAlertWithErrorIfExists(error)
+            completion(success: true)
         })
     }
     

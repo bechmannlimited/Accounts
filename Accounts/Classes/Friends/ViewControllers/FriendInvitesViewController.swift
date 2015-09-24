@@ -142,8 +142,24 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
             
             user = invites[indexPath.section][indexPath.row].toUser
         }
+        
+        var text = ""
+        
+        if user?.facebookId != nil {
+            
+            text = user!.appropriateDisplayName()
+        }
+        else{
+            
+            text = "\(String.emptyIfNull(user?.username))"
+            
+            if user?.displayName?.isEmpty == false {
+                
+                text = "\(String.emptyIfNull(user?.username)) (\(String.emptyIfNull(user?.displayName))"
+            }
+        }
 
-        cell.textLabel?.text = user!.appropriateDisplayName()
+        cell.textLabel?.text = text
         
         if indexPath.section == kUnconfirmedInvitesSection {
             

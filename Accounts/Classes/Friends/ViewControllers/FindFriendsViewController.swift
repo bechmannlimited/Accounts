@@ -15,7 +15,8 @@ class FindFriendsViewController: BaseViewController {
 
     var tableView = UITableView()
     var matches = [User]()
-    var searchController = UISearchController(searchResultsController: nil)
+    //var searchController = UISearchController(searchResultsController: nil)
+    var searchBar = UISearchBar()
     var matchesQuery: PFQuery?
     var timer: NSTimer?
     
@@ -28,21 +29,32 @@ class FindFriendsViewController: BaseViewController {
         tableView.allowsSelectionDuringEditing = true
         tableView.setEditing(true, animated: false)
         
-        setupSearchController()
+        setupSearchBar()
     }
     
-    func setupSearchController() {
+//    func setupSearchController() {
+//        
+//        let searchBar = searchController.searchBar
+//        
+//        searchController.delegate = self
+//        searchBar.delegate = self
+//
+//        tableView.tableHeaderView = searchBar
+//        searchBar.sizeToFit()
+//
+//        searchController.dimsBackgroundDuringPresentation = false
+//        searchController.hidesNavigationBarDuringPresentation = false
+//        
+//        searchBar.tintColor = kNavigationBarTintColor
+//    }
+    func setupSearchBar() {
         
-        let searchBar = searchController.searchBar
-        
-        searchController.delegate = self
         searchBar.delegate = self
-
+        
+        searchBar.frame = CGRect(x: 0, y: 0, width: 100, height: 40)
+        //navigationController?.navigationBar.addSubview(searchBar)
         tableView.tableHeaderView = searchBar
         searchBar.sizeToFit()
-
-        searchController.dimsBackgroundDuringPresentation = false
-        searchController.hidesNavigationBarDuringPresentation = false
         
         searchBar.tintColor = kNavigationBarTintColor
     }
@@ -80,36 +92,44 @@ class FindFriendsViewController: BaseViewController {
                 self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.toUser!)
                 self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
             }
-            print("hi")
+            
+            //println(User.currentUser()!.allInvites)
+            
             self.matchesQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
-                print("hi2")
+                
                 if var matches = objects as? [User] {
-                    
+                    println(matches)
                     //remove match if already in invite pool
                     for match in matches {
                         
                         for invite in User.currentUser()!.allInvites[0] {
                             
                             if invite.fromUser?.objectId == match.objectId {
-                                
-                                let index = find(matches, match)!
-                                matches.removeAtIndex(index)
+                                println("removing from a")
+                                if let index = find(matches, match) {
+                                    
+                                    matches.removeAtIndex(index)
+                                }
                             }
                         }
                         for invite in User.currentUser()!.allInvites[1] {
                             
                             if invite.toUser?.objectId == match.objectId {
-                                
-                                let index = find(matches, match)!
-                                matches.removeAtIndex(index)
+                                println("removing from b")
+                                if let index = find(matches, match) {
+                                    
+                                    matches.removeAtIndex(index)
+                                }
                             }
                         }
                         for friend in User.currentUser()!.friends {
                             
                             if friend.objectId == match.objectId {
-                                
-                                let index = find(matches, match)!
-                                matches.removeAtIndex(index)
+                                println("removing from c")
+                                if let index = find(matches, match) {
+                                    
+                                    matches.removeAtIndex(index)
+                                }
                             }
                         }
                     }
@@ -125,15 +145,15 @@ class FindFriendsViewController: BaseViewController {
     
     func addFriend(match:User) {
         
-        searchController.active = false
-        searchController.searchBar.userInteractionEnabled = false
+        //searchController.active = false
+        searchBar.userInteractionEnabled = false
         
         User.currentUser()?.sendFriendRequest(match, completion: { (success) -> () in
             
             if success {
                 
                 UIAlertView(title: "Invitation sent!", message: "Please wait for your invite to be accepted!", delegate: nil, cancelButtonTitle: "OK").show()
-                self.searchController.searchBar.text = ""
+                self.searchBar.text = ""
                 self.matches = []
                 self.tableView.reloadData()
             }
@@ -144,7 +164,7 @@ class FindFriendsViewController: BaseViewController {
             
             User.currentUser()?.getInvites({ (invites) -> () in
                 
-                self.searchController.searchBar.userInteractionEnabled = true
+                self.searchBar.userInteractionEnabled = true
             })
         })
     }
@@ -152,8 +172,8 @@ class FindFriendsViewController: BaseViewController {
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(true)
         
-        searchController.searchBar.removeFromSuperview()
-        searchController.delegate = nil
+        //searchBar.removeFromSuperview()
+        searchBar.delegate = nil
     }
 }
 
@@ -178,7 +198,24 @@ extension FindFriendsViewController: UITableViewDelegate, UITableViewDataSource 
         
         let match = matches[indexPath.row]
         
-        cell.textLabel?.text = match.appropriateDisplayName()
+        var text = ""
+    
+        if match.facebookId != nil {
+            
+            text = match.appropriateDisplayName()
+        }
+        else{
+            
+            text = "\(String.emptyIfNull(match.username))"
+            
+            if match.displayName?.isEmpty == false {
+                
+                text = "\(String.emptyIfNull(match.username)) (\(String.emptyIfNull(match.displayName)))"
+            }
+        }
+        
+        cell.textLabel?.text = text
+        
         cell.detailTextLabel?.text = "Add as friend"
         cell.detailTextLabel?.textColor = AccountColor.greenColor()
         

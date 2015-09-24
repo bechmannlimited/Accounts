@@ -78,12 +78,6 @@ class SaveItemViewController: ACFormViewController {
         navigationItem.leftBarButtonItem?.enabled = true
     }
     
-    func showLoadingOverlayWithText(text: String) {
-        
-        //SwiftOverlays.showBlockingWaitOverlayWithText(text)
-        self.showWaitOverlayWithText(text)
-    }
-    
     func updateUIForSavingOrDeleting() {
         
         tableView.userInteractionEnabled = false
@@ -114,21 +108,7 @@ class SaveItemViewController: ACFormViewController {
         
     }
     
-    func showSavingOverlay() {
-        
-        showLoadingOverlayWithText("Saving...")
-    }
     
-    func showDeletingOverlay() {
-        
-        showLoadingOverlayWithText("Deleting...")
-    }
-
-    func removeLoadingViews() {
-        
-        SwiftOverlays.removeAllBlockingOverlays()
-        self.removeAllOverlays()
-    }
 }
 
 extension SaveItemViewController: UITableViewDelegate {

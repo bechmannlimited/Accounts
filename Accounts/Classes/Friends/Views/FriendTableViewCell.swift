@@ -150,18 +150,24 @@ class FriendTableViewCell: UITableViewCell {
         
         let optionMenu = UIAlertController(title: nil, message: "Options for \(friend.appropriateDisplayName())", preferredStyle: .ActionSheet)
         
-        let deleteAction = UIAlertAction(title: "Remove friend", style: .Default, handler: {
+        let deleteAction = UIAlertAction(title: "Remove friend", style: .Destructive, handler: {
             (alert: UIAlertAction!) -> Void in
             
-            User.currentUser()?.removeFriend(self.friend, completion: { (success) -> () in
+            UIAlertController.showAlertControllerWithButtonTitle("Remove", confirmBtnStyle: UIAlertActionStyle.Destructive, message: "Are you sure you want to remove \(self.friend.appropriateDisplayName()) from your friends list?", completion: { (response) -> () in
                 
-                self.delegate!.didRemoveFriend(self.friend, indexPath: self.currentIndexPath)
+                if response == AlertResponse.Confirm {
+                    
+                    User.currentUser()?.removeFriend(self.friend, completion: { (success) -> () in
+                        
+                        self.delegate!.didRemoveFriend(self.friend, indexPath: self.currentIndexPath)
+                    })
+                }
             })
         })
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: {
             (alert: UIAlertAction!) -> Void in
-            println("Cancelled")
+            
         })
         
         optionMenu.addAction(deleteAction)
@@ -171,11 +177,6 @@ class FriendTableViewCell: UITableViewCell {
             
             UIViewController.topMostController().presentViewController(optionMenu, animated: true, completion: nil)
         }
-    }
-    
-    func removeFriend() {
-        
-        User.currentUser()?.friends.removeAtIndex(find(User.currentUser()!.friends, friend)!)
     }
     
     func calculateTintColor() {
