@@ -48,6 +48,7 @@ public class ParseUtilities: NSObject {
         pushData["alert"] = message
         pushData["sound"] = "default"
         pushData["userIds"] = userIds
+        pushData["iouEvent"] = IOUEvent.ItemSaved.rawValue
             
         pushNotification.setData(pushData)
         pushNotification.sendPushInBackground()

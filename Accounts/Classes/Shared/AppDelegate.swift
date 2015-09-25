@@ -123,7 +123,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             if let value = userInfo["iouEvent"] as? String {
                 
-                if value == "ItemSaved" {
+                if value == IOUEvent.ItemSaved.rawValue {
 
                     if let currentUserId = userInfo["currentUserId"] as? String {
                         

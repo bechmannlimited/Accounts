@@ -14,9 +14,9 @@ import Parse
 import AFDateHelper
 import SwiftOverlays
 
-private let kProfileSection = 4
-private let kTestBotSection = 3
-private let kShareSection = 2
+private let kProfileSection = 3
+private let kTestBotSection = 2
+//private let kShareSection = 2
 private let kFeedbackSection = 1
 private let kFriendsSection = 0
 
@@ -26,7 +26,7 @@ private let kLogoutIndexPath = NSIndexPath(forRow: 1, inSection: kProfileSection
 private let kCurrencyIndexPath = NSIndexPath(forRow: 999, inSection: 9999)
 
 private let kFeedbackIndexPath = NSIndexPath(forRow: 0, inSection: kFeedbackSection)
-private let kShareIndexPath = NSIndexPath(forRow: 0, inSection: kShareSection)
+private let kShareIndexPath = NSIndexPath(forRow: 1, inSection: kFriendsSection)
 
 private let kTestBotIndexPath = NSIndexPath(forRow: 0, inSection: kTestBotSection)
 
@@ -41,9 +41,8 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
-        [kFriendsIndexPath],
+        [kFriendsIndexPath, kShareIndexPath],
         [kFeedbackIndexPath],
-        [kShareIndexPath],
         [kTestBotIndexPath],
         [kProfileIndexPath, kLogoutIndexPath]
     ]
@@ -199,22 +198,29 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                         
                         if success {
                             
-                            User.currentUser()?.unpin()
-                            
-                            User.logOutInBackgroundWithBlock({ (error) -> Void in
+                            Task.sharedTasker().executeTaskInBackground({ () -> () in
                                 
-                                SwiftOverlays.removeAllBlockingOverlays()
+                                User.currentUser()?.unpin()
+                                PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
+                                PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
                                 
-                                if let error = error {
+                            }, completion: { () -> () in
+                                
+                                User.logOutInBackgroundWithBlock({ (error) -> Void in
                                     
-                                    ParseUtilities.showAlertWithErrorIfExists(error)
-                                    self.deselectSelectedCell(tableView)
-                                }
-                                else {
+                                    SwiftOverlays.removeAllBlockingOverlays()
                                     
-                                    let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Login")
-                                    self.presentViewController(v, animated: true, completion: nil)
-                                }
+                                    if let error = error {
+                                        
+                                        ParseUtilities.showAlertWithErrorIfExists(error)
+                                        self.deselectSelectedCell(tableView)
+                                    }
+                                    else {
+                                        
+                                        let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Login")
+                                        self.presentViewController(v, animated: true, completion: nil)
+                                    }
+                                })
                             })
                         }
                         else {
@@ -286,11 +292,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             
             return "Send a message to our support team at any time and we'll respond asap (online 09:00 - 21:00 GMT+1)"
         }
-        else if section == kShareSection {
-            
-            return "Your Facebook friends who have this app, will appear in your friends list!"
-        }
-        else if section == kFriendsSection && User.currentUser()?.facebookId != nil {
+        else if section == kFriendsSection {
             
             let username = User.currentUser()?.username
             let displayName = User.currentUser()?.displayName
@@ -300,16 +302,24 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             
             if displayName?.isEmpty == false {
                 
-                text += "\"\(displayName!)\" "
+                text += "\"\(displayName!)\""
                 namesAdded++
             }
             if username?.isEmpty == false && User.currentUser()?.facebookId == nil {
                 
-                var connector = namesAdded == 0 ? "" : "or"
-                text += "\(connector) \"\(username!)\""
+                var connector = namesAdded == 0 ? "" : ", "
+                text += "\(connector)\"\(username!)\""
             }
             
-            return "Your friends can find you by searching: \(text)"
+            let orYourEmail: String = User.currentUser()?.email?.isEmpty == false ? " or your email" : ""
+            text = "Your friends can find you by searching for \(text)\(orYourEmail) in the friend invites section. "
+            
+            if User.currentUser()?.facebookId != nil {
+                
+                text += "Your Facebook friends who have this app, will appear in your friends list!"
+            }
+           
+            return text
         }
         
         return nil

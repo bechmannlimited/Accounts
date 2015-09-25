@@ -124,7 +124,7 @@ class TransactionsViewController: ACBaseViewController {
                 
                 if friend.objectId == kTestBotObjectId {
                     
-                    imageView.image = AppTools.iconAssetNamed("bender.jpg")
+                    imageView.image = AppTools.iconAssetNamed("50981152_thumbnail.jpg")
                     
                     UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
                         
@@ -222,7 +222,7 @@ class TransactionsViewController: ACBaseViewController {
         
         if friend.objectId == kTestBotObjectId {
             
-            headerView?.heroImageView.image = AppTools.iconAssetNamed("bender.jpg")
+            headerView?.heroImageView.image = AppTools.iconAssetNamed("50981152_thumbnail.jpg")
         }
         else if let id = friend.facebookId{
             

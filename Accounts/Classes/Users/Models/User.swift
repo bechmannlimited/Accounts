@@ -243,7 +243,10 @@ class User: PFUser {
                             
                             queries.append(query1!)  // must add friends relation back to user
                             
-                            self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
+                            if let friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as? [User] {
+                                
+                                self.friends = friends
+                            }
                             
                             for friend in self.friends {
                                 
@@ -305,8 +308,11 @@ class User: PFUser {
                     }
                     
                     queries.append(query1!)  // must add friends relation back to user
-                    
-                    self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
+
+                    if let friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as? [User] {
+                        
+                        self.friends = friends
+                    }
                     
                     for friend in self.friends {
                         
@@ -418,6 +424,8 @@ class User: PFUser {
                         "friendRequestStatus" : FriendRequestStatus.Confirmed.rawValue
                     ]
                     PFCloud.callFunction("SaveFriendRequest", withParameters: params)
+                    
+                    ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request accepted by \(User.currentUser()!.namePrioritizingDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
                 }
             }
             
@@ -429,6 +437,8 @@ class User: PFUser {
                     "friendRequestStatus" : FriendRequestStatus.Pending.rawValue
                 ]
                 PFCloud.callFunction("SaveFriendRequest", withParameters: params)
+                
+                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request from \(User.currentUser()!.namePrioritizingDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
             }
             
         }, completion: { () -> () in
@@ -449,11 +459,13 @@ class User: PFUser {
             ParseUtilities.showAlertWithErrorIfExists(error)
             completion(success: true)
         })
+        
+        ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.fromUser!], message: "Friend request accepted by \(User.currentUser()!.namePrioritizingDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
     }
     
     func getInvites(completion:(invites:Array<Array<FriendRequest>>) -> ()) {
 
-        allInvites = Array<Array<FriendRequest>>()
+        allInvites = [[],[]]
         var unconfirmedInvites = Array<FriendRequest>()
         var unconfirmedSentInvites = Array<FriendRequest>()
         
@@ -501,6 +513,7 @@ class User: PFUser {
 
             allUsersInContext.append(friend)
         }
+        
         allUsersInContext.append(User.currentUser()!)
 
         for user in allUsersInContext {

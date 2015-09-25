@@ -57,6 +57,7 @@ class FindFriendsViewController: BaseViewController {
         searchBar.sizeToFit()
         
         searchBar.tintColor = kNavigationBarTintColor
+        searchBar.placeholder = "Search for a user"
     }
     
     func getMatches(searchText: String) {
@@ -67,17 +68,14 @@ class FindFriendsViewController: BaseViewController {
         loadingView.showLoader()
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: loadingView)
         
-        //timer = NSTimer.scheduledTimerWithTimeInterval(4000, target: self, selector: "", userInfo: nil, repeats: false)
-        
         self.timer = NSTimer.schedule(delay: 2.5, handler: { timer in
-            
-            //self.timer = timer
             
             self.matchesQuery?.cancel()
             
             self.matchesQuery = PFQuery.orQueryWithSubqueries([
                 User.query()!.whereKey(kParse_User_Username_Key, matchesRegex: "^\(searchText)$", modifiers: "i"),
-                User.query()!.whereKey(kParse_User_DisplayName_Key, matchesRegex: "^\(searchText)$", modifiers: "i")
+                User.query()!.whereKey(kParse_User_DisplayName_Key, matchesRegex: "^\(searchText)$", modifiers: "i"),
+                User.query()!.whereKey("email", matchesRegex: "^\(searchText)$", modifiers: "i")
             ])
             
             self.matchesQuery?.whereKey("objectId", notEqualTo: User.currentUser()!.objectId!)
@@ -93,19 +91,17 @@ class FindFriendsViewController: BaseViewController {
                 self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
             }
             
-            //println(User.currentUser()!.allInvites)
-            
             self.matchesQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                 
                 if var matches = objects as? [User] {
-                    println(matches)
+                    
                     //remove match if already in invite pool
                     for match in matches {
                         
                         for invite in User.currentUser()!.allInvites[0] {
                             
                             if invite.fromUser?.objectId == match.objectId {
-                                println("removing from a")
+                                
                                 if let index = find(matches, match) {
                                     
                                     matches.removeAtIndex(index)
@@ -115,7 +111,7 @@ class FindFriendsViewController: BaseViewController {
                         for invite in User.currentUser()!.allInvites[1] {
                             
                             if invite.toUser?.objectId == match.objectId {
-                                println("removing from b")
+                                
                                 if let index = find(matches, match) {
                                     
                                     matches.removeAtIndex(index)
@@ -125,7 +121,7 @@ class FindFriendsViewController: BaseViewController {
                         for friend in User.currentUser()!.friends {
                             
                             if friend.objectId == match.objectId {
-                                println("removing from c")
+                                
                                 if let index = find(matches, match) {
                                     
                                     matches.removeAtIndex(index)
@@ -146,6 +142,7 @@ class FindFriendsViewController: BaseViewController {
     func addFriend(match:User) {
         
         //searchController.active = false
+        view.endEditing(true)
         searchBar.userInteractionEnabled = false
         
         User.currentUser()?.sendFriendRequest(match, completion: { (success) -> () in
@@ -250,5 +247,10 @@ extension FindFriendsViewController: UISearchControllerDelegate, UISearchBarDele
     func searchBar(searchBar: UISearchBar, textDidChange searchText: String) {
         
         getMatches(searchText)
+    }
+    
+    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+        
+        getMatches(searchBar.text)
     }
 }

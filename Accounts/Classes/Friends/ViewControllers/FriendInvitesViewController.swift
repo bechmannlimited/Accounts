@@ -155,7 +155,7 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
             
             if user?.displayName?.isEmpty == false {
                 
-                text = "\(String.emptyIfNull(user?.username)) (\(String.emptyIfNull(user?.displayName))"
+                text = "\(String.emptyIfNull(user?.username)) (\(String.emptyIfNull(user?.displayName)))"
             }
         }
 

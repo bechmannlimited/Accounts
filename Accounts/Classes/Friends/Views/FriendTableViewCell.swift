@@ -94,7 +94,7 @@ class FriendTableViewCell: UITableViewCell {
             
             if friend.objectId == kTestBotObjectId {
                 
-                friendImageView.image = AppTools.iconAssetNamed("bender.jpg")
+                friendImageView.image = AppTools.iconAssetNamed("50981152_thumbnail.jpg")
                 completionHandler()
             }
             else if let id = friend.facebookId {
