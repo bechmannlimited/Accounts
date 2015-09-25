@@ -497,6 +497,7 @@ class User: PFUser {
                 }
             }
             
+            self.allInvites = []
             self.allInvites.append(unconfirmedInvites)
             self.allInvites.append(unconfirmedSentInvites)
             

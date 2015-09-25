@@ -19,6 +19,7 @@ class BouncyHeaderView: UIView {
     
     var titleLabel = UILabel()
     var titleLabelHeight:CGFloat = 0
+    var heightConstraint : NSLayoutConstraint?
 
     func setupHeaderWithOriginView(originView: UIView, originTableView: UITableView){
         
@@ -174,8 +175,8 @@ class BouncyHeaderView: UIView {
     func setupTitle(title: String) {
         
         //TITLE
-        titleLabel.removeFromSuperview()
-        titleLabel = UILabel()
+        //titleLabel.removeFromSuperview()
+        //titleLabel = UILabel()
         
         titleLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
         self.addSubview(titleLabel)
@@ -188,10 +189,23 @@ class BouncyHeaderView: UIView {
 //            
 //            titleLabel.removeConstraint(c)
 //        }
+        
+        println(titleLabelHeight)
 
         titleLabel.removeConstraints(titleLabel.constraints())
+        removeConstraints(titleLabel.constraints())
+        heroImageView.removeConstraints(titleLabel.constraints())
         
-        titleLabel.addHeightConstraint(relation: NSLayoutRelation.Equal, constant: titleLabelHeight)
+        if let heightConstraint = heightConstraint {
+            
+            heightConstraint.constant = titleLabelHeight
+        }
+        else {
+            
+            heightConstraint = titleLabel.addHeightConstraint(relation: NSLayoutRelation.Equal, constant: titleLabelHeight)
+        }
+        
+        
         titleLabel.addLeftConstraint(toView: self, relation: .Equal, constant: kTitlePadding)
         titleLabel.addRightConstraint(toView: self, relation: .Equal, constant: -kTitlePadding)
         titleLabel.addBottomConstraint(toView: heroImageView, attribute: NSLayoutAttribute.Bottom, relation: .Equal, constant: -kTitlePadding)
@@ -204,5 +218,9 @@ class BouncyHeaderView: UIView {
         titleLabel.textAlignment = kDevice == .Pad ? .Center : NSTextAlignment.Left
         
         titleLabel.userInteractionEnabled = false
+        
+        titleLabel.setNeedsUpdateConstraints()
+        setNeedsUpdateConstraints()
+        heroImageView.setNeedsUpdateConstraints()
     }
 }

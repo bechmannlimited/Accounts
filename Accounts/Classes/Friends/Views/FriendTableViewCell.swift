@@ -137,8 +137,11 @@ class FriendTableViewCell: UITableViewCell {
     
     func setupGestureRecognizer() {
         
-        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: "showFriendOptions:")
-        addGestureRecognizer(gestureRecognizer)
+        if friend.objectId != kTestBotObjectId {
+            
+            let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: "showFriendOptions:")
+            addGestureRecognizer(gestureRecognizer)
+        }
     }
     
     func setupActionSheet() {
@@ -172,6 +175,9 @@ class FriendTableViewCell: UITableViewCell {
         
         optionMenu.addAction(deleteAction)
         optionMenu.addAction(cancelAction)
+        
+        optionMenu.popoverPresentationController!.sourceView = self.contentView
+        optionMenu.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 0, width: 70, height: contentView.frame.height)
         
         if gestureRecognizor.state == UIGestureRecognizerState.Began {
             

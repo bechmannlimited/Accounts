@@ -11,7 +11,7 @@ import UIKit
 import ABToolKit
 import Parse
 
-class FindFriendsViewController: BaseViewController {
+class FindFriendsViewController: ACBaseViewController {
 
     var tableView = UITableView()
     var matches = [User]()
@@ -58,6 +58,12 @@ class FindFriendsViewController: BaseViewController {
         
         searchBar.tintColor = kNavigationBarTintColor
         searchBar.placeholder = "Search for a user"
+    }
+    
+    override func appDidResume() {
+        super.appDidResume()
+        
+        getMatches(searchBar.text)
     }
     
     func getMatches(searchText: String) {
