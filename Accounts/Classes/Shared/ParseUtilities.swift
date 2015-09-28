@@ -27,7 +27,7 @@ public class ParseUtilities: NSObject {
         
     }
     
-    class func sendPushNotificationsInBackgroundToUsers(users: [User], message: String, data: [NSObject : AnyObject]?) {
+    class func sendPushNotificationsInBackgroundToUsers(users: [User], message: String, data: [NSObject : AnyObject]?, iouEvent: IOUEvent) {
         
         let query = PFInstallation.query()
         var userIds:[String] = []
@@ -48,7 +48,8 @@ public class ParseUtilities: NSObject {
         pushData["alert"] = message
         pushData["sound"] = "default"
         pushData["userIds"] = userIds
-        pushData["iouEvent"] = IOUEvent.ItemSaved.rawValue
+        pushData["iouEvent"] = iouEvent.rawValue
+        pushData["message"] = message
             
         pushNotification.setData(pushData)
         pushNotification.sendPushInBackground()

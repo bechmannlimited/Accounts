@@ -11,4 +11,11 @@ import UIKit
 enum IOUEvent: String {
 
     case ItemSaved = "ItemSaved"
+    case InviteEvent = "InviteEvent"
+}
+
+enum IOUCommand: String {
+    
+    case PresentTransaction = "PresentTransaction"
+    case PresentInvites = "PresentInvites"
 }

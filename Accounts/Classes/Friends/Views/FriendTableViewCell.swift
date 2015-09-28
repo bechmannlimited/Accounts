@@ -176,8 +176,11 @@ class FriendTableViewCell: UITableViewCell {
         optionMenu.addAction(deleteAction)
         optionMenu.addAction(cancelAction)
         
-        optionMenu.popoverPresentationController!.sourceView = self.contentView
-        optionMenu.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 0, width: 70, height: contentView.frame.height)
+        if kDevice == .Pad {
+            
+            optionMenu.popoverPresentationController!.sourceView = self.contentView
+            optionMenu.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 0, width: 70, height: contentView.frame.height)
+        }
         
         if gestureRecognizor.state == UIGestureRecognizerState.Began {
             

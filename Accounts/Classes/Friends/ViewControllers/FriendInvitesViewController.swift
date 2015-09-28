@@ -240,7 +240,7 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
             
                 self.refresh(nil)
                 
-                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.toUser!], message: "", data: [kPushNotificationTypeKey: PushNotificationType.FriendRequestDeleted.rawValue])
+                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.toUser!], message: "", data: [kPushNotificationTypeKey: PushNotificationType.FriendRequestDeleted.rawValue], iouEvent: IOUEvent.InviteEvent)
             })
         }
         else{

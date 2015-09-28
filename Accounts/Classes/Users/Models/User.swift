@@ -62,7 +62,7 @@ class User: PFUser {
         PFCloud.callFunctionInBackground("SaveFriendRequest", withParameters: params, block: { (response, error) -> Void in
             
             ParseUtilities.showAlertWithErrorIfExists(error)
-            
+         
             Task.sharedTasker().executeTaskInBackground({ () -> () in
                 
                 for f in self.friends.filter({ (t) -> Bool in
@@ -83,6 +83,16 @@ class User: PFUser {
                 completion(success: true)
             })
         })
+        
+//        PFCloud.callFunctionInBackground("RemoveFriend", withParameters: [
+//            "fromUserId" : objectId!,
+//            "toUserId" : friend.objectId!
+//        ]) { (response, error) -> Void in
+//            
+//            ParseUtilities.showAlertWithErrorIfExists(error)
+//            
+//            completion(success: error != nil)
+//        }
     }
     
     func appropriateDisplayName() -> String {
@@ -389,62 +399,26 @@ class User: PFUser {
             completion(completedRemoteRequest: false)
             execRemoteQuery()
         }
-
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {
-                
-        Task.sharedTasker().executeTaskInBackground({ () -> () in
+        
+        let friendRequest = FriendRequest()
+        friendRequest.fromUser = User.currentUser()
+        friendRequest.toUser = friend
+        
+        let params: [NSObject : AnyObject] = [
+            "fromUserId" : friendRequest.fromUser!.objectId!,
+            "toUserId": friendRequest.toUser!.objectId!,
+            "friendRequestStatus" : FriendRequestStatus.Pending.rawValue
+        ]
+        
+        PFCloud.callFunctionInBackground("SaveFriendRequest", withParameters: params) { (response, error) -> Void in
             
-            let friendRequest = FriendRequest()
-            friendRequest.fromUser = User.currentUser()
-            friendRequest.toUser = friend
+            ParseUtilities.showAlertWithErrorIfExists(error)
             
-            //check to see if they accepted it meanwhile
-            let query = FriendRequest.query()
-            query?.whereKey("fromUser", equalTo: friendRequest.toUser!)
-            query?.whereKey("toUser", equalTo: friendRequest.fromUser!)
-            
-            var acceptedFriendRequest = false
-            
-            let objects = query?.findObjects()
-            
-            if objects?.count > 0 {
-                
-                let match = query?.findObjects()?.first as? FriendRequest
-                
-                if match?.friendRequestStatus == FriendRequestStatus.Pending.rawValue {
-                    
-                    acceptedFriendRequest = true
-                    //match.delete()
-                    
-                    let params: [NSObject : AnyObject] = [
-                        "fromUserId" : friendRequest.fromUser!.objectId!,
-                        "toUserId": friendRequest.toUser!.objectId!,
-                        "friendRequestStatus" : FriendRequestStatus.Confirmed.rawValue
-                    ]
-                    PFCloud.callFunction("SaveFriendRequest", withParameters: params)
-                    
-                    ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request accepted by \(User.currentUser()!.namePrioritizingDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
-                }
-            }
-            
-            if !acceptedFriendRequest {
-                
-                let params: [NSObject : AnyObject] = [
-                    "fromUserId" : friendRequest.fromUser!.objectId!,
-                    "toUserId": friendRequest.toUser!.objectId!,
-                    "friendRequestStatus" : FriendRequestStatus.Pending.rawValue
-                ]
-                PFCloud.callFunction("SaveFriendRequest", withParameters: params)
-                
-                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request from \(User.currentUser()!.namePrioritizingDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
-            }
-            
-        }, completion: { () -> () in
-            
-            completion(success:true)
-        })
+            completion(success: error == nil)
+        }
     }
     
     func addFriendFromRequest(friendRequest: FriendRequest, completion:(success: Bool) -> ()) {
@@ -454,13 +428,13 @@ class User: PFUser {
             "toUserId": friendRequest.toUser!.objectId!,
             "friendRequestStatus" : FriendRequestStatus.Confirmed.rawValue
         ]
-        PFCloud.callFunctionInBackground("SaveFriendRequest", withParameters: params, block: { (response, error) -> Void in
-            
-            ParseUtilities.showAlertWithErrorIfExists(error)
-            completion(success: true)
-        })
         
-        ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.fromUser!], message: "Friend request accepted by \(User.currentUser()!.namePrioritizingDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
+        PFCloud.callFunctionInBackground("SaveFriendRequest", withParameters: params) { (response, error) -> Void in
+                
+            ParseUtilities.showAlertWithErrorIfExists(error)
+            
+            completion(success: error == nil)
+        }
     }
     
     func getInvites(completion:(invites:Array<Array<FriendRequest>>) -> ()) {

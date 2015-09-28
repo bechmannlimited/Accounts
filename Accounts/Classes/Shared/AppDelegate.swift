@@ -16,6 +16,7 @@ import ParseFacebookUtilsV4
 import KFSwiftImageLoader
 import GoogleMaps
 import SwiftyJSON
+import SwiftOverlays
 //import ParseCrashReporting
 
 let kDevice = UIDevice.currentDevice().userInterfaceIdiom
@@ -80,6 +81,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         GMSServices.provideAPIKey("AIzaSyB7bF8J5Oe5E87ovtdy7l1MRvpe3Rc1zkU")
         
+        if let remoteNotification = launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? [NSObject : AnyObject] {
+            
+            handleUserTappedOnNotification(remoteNotification, delay: 1)
+        }
+        
         return true
     }
     
@@ -119,30 +125,138 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         println(userInfo)
 
-        if userInfo.indexForKey("iouEvent") != nil {
+        if application.applicationState == UIApplicationState.Active && userInfo.indexForKey("iouEvent") != nil {
             
-            if let value = userInfo["iouEvent"] as? String {
+            let userInfoJson = JSON(userInfo)
+            
+            if userInfoJson["iouEvent"].stringValue == IOUEvent.ItemSaved.rawValue {
                 
-                if value == IOUEvent.ItemSaved.rawValue {
-
-                    if let currentUserId = userInfo["currentUserId"] as? String {
-                        
-                        println("\(User.currentUser()?.objectId) - \(currentUserId)")
-                        
-                        if User.currentUser()?.objectId != currentUserId {
-                            
-                            if let message = userInfo["message"] as? String {
-                                
-                                HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: message, isAutoHide: true, onTouch: { () -> Void in
-                                    
-                                })
-                            }
-                        }
-                    }
+                if userInfoJson["currentUserId"].stringValue != User.currentUser()?.objectId {
                     
-                    NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                    if userInfoJson["message"].stringValue.characterCount() > 0 {
+                        
+                        HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfoJson["message"].stringValue, isAutoHide: true, onTouch: { () -> Void in
+                            
+                            self.getTransactionAndPresentView(userInfoJson, delay: 0)
+                        })
+                    }
                 }
             }
+            else if userInfoJson["iouEvent"].stringValue == IOUEvent.InviteEvent.rawValue {
+                
+                if userInfoJson["message"].stringValue.characterCount() > 0 {
+                    
+                    HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfoJson["message"].stringValue, isAutoHide: true, onTouch: { () -> Void in
+                        
+                        if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentInvites.rawValue {
+                            
+                            self.openInvitesView(userInfoJson, delay: 0)
+                        }
+                    })
+                }
+                
+                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+            }
+            
+//            if userInfo.indexForKey("iouEvent") != nil {
+//                
+//                if let value = userInfo["iouEvent"] as? String {
+//                    
+//                    if value == IOUEvent.ItemSaved.rawValue {
+//                        
+//                        if let currentUserId = userInfo["currentUserId"] as? String {
+//                            
+//                            println("\(User.currentUser()?.objectId) - \(currentUserId)")
+//                            
+//                            if User.currentUser()?.objectId != currentUserId {
+//                                
+//                                if let message = userInfo["message"] as? String {
+//                                    
+//                                    HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: message, isAutoHide: true, onTouch: { () -> Void in
+//                                        
+//                                    })
+//                                }
+//                            }
+//                        }
+//                        
+//                        NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+//                    }
+//                    else if value == IOUEvent.InviteEvent.rawValue {
+//                        
+//                        if let message = userInfo["message"] as? String {
+//                            
+//                            HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: message, isAutoHide: true, onTouch: { () -> Void in
+//                                
+//                            })
+//                        }
+//                        
+//                        NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+//                    }
+//                }
+//            }
+
+        }
+        else {
+            
+            handleUserTappedOnNotification(userInfo, delay : 0)
+        }
+    }
+    
+    func getTransactionAndPresentView(userInfoJson: JSON, delay: NSTimeInterval) {
+        
+        if let id = userInfoJson["objectId"].string {
+            
+            SwiftOverlays.showBlockingWaitOverlayWithText("Retrieving details...")
+            
+            Transaction.query()?.getObjectInBackgroundWithId(id, block: { (object, error) -> Void in
+                
+                ParseUtilities.showAlertWithErrorIfExists(error)
+                
+                SwiftOverlays.removeAllBlockingOverlays()
+                
+                if let transaction = object as? Transaction {
+                    
+                    let v = SaveTransactionViewController()
+                    
+                    v.transaction = transaction.copyWithUsefulValues()
+                    v.transactionObjectId = id
+                    v.existingTransaction = transaction
+                    v.isExistingTransaction = true
+                    
+                    if transaction.fromUser?.objectId == User.currentUser()?.objectId || transaction.toUser?.objectId == User.currentUser()?.objectId {
+                        
+                        NSTimer.schedule(delay: delay, handler: { timer in
+                            
+                            UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+                        })
+                    }
+                }
+            })
+        }
+    }
+    
+    func openInvitesView(userInfoJson: JSON, delay: NSTimeInterval) {
+        
+        let v = FriendInvitesViewController()
+        v.addCloseButton()
+        
+        NSTimer.schedule(delay: delay, handler: { timer in
+            
+            UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+        })
+    }
+    
+    func handleUserTappedOnNotification(userInfo: [NSObject : AnyObject], delay: NSTimeInterval) {
+        
+        let userInfoJson = JSON(userInfo)
+        
+        if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentTransaction.rawValue {
+
+            getTransactionAndPresentView(userInfoJson, delay: 1)
+        }
+        else if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentInvites.rawValue {
+            
+            openInvitesView(userInfoJson, delay: delay)
         }
     }
     

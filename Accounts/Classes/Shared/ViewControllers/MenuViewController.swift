@@ -264,8 +264,11 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
                 
                 let cell = tableView.cellForRowAtIndexPath(indexPath)!
                 
-                activityVC.popoverPresentationController!.sourceView = cell.contentView
-                activityVC.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 0, width: 140, height: cell.contentView.frame.height)
+                if kDevice == .Pad {
+                    
+                    activityVC.popoverPresentationController!.sourceView = cell.contentView
+                    activityVC.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 0, width: 140, height: cell.contentView.frame.height)
+                }
                 
                 self.presentViewController(activityVC, animated: true, completion: nil)
             }
