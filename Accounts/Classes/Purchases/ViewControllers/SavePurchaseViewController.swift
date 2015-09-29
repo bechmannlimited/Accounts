@@ -8,7 +8,7 @@
 
 
 import UIKit
-import ABToolKit
+ 
 import Parse
 import SwiftyJSON
 
@@ -69,7 +69,7 @@ class SavePurchaseViewController: SaveItemViewController {
     
     func setupToolbar() {
 
-        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
         toolbar.sizeToFit()
         view.addSubview(toolbar)
         
@@ -100,7 +100,7 @@ class SavePurchaseViewController: SaveItemViewController {
             }
         }
         
-        var isSplit = count > 0
+        let isSplit = count > 0
         
         for splitButton in splitButtons {
             

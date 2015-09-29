@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 import Alamofire
 import Parse
@@ -66,11 +66,11 @@ class User: PFUser {
             Task.sharedTasker().executeTaskInBackground({ () -> () in
                 
                 for f in self.friends.filter({ (t) -> Bool in
-                    println(t.objectId)
+                    print(t.objectId)
                     return t.objectId == friend.objectId
                 }) {
                     
-                    self.friends.removeAtIndex(find(self.friends, f)!)
+                    self.friends.removeAtIndex(self.friends.indexOf(f)!)
                     self.relationForKey("friends").removeObject(f)
                 }
                 
@@ -177,7 +177,7 @@ class User: PFUser {
     
     func appropriateDisplayNamesAsArray() -> [String] {
         
-        return split(appropriateDisplayName()) {$0 == " "}
+        return split(appropriateDisplayName().characters) {$0 == " "}.map { String($0) }
     }
     
     func namePrioritizingDisplayName() -> String {
@@ -236,7 +236,7 @@ class User: PFUser {
                                 
                                 let friendsJson = JSON(result)["data"]
                                 
-                                for (index: String, friendJson: JSON) in friendsJson {
+                                for (index, friendJson): (String, JSON) in friendsJson {
                                     
                                     let friendQuery = User.query()
                                     friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)

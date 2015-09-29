@@ -8,7 +8,7 @@
 
 
 import UIKit
-import ABToolKit
+ 
 import Parse
 import SwiftOverlays
 
@@ -64,7 +64,7 @@ class FindFriendsViewController: ACBaseViewController {
     override func appDidResume() {
         //super.appDidResume()
         
-        getMatches(searchBar.text)
+        getMatches(searchBar.text!)
     }
     
     func getMatches(searchText: String) {
@@ -188,7 +188,7 @@ class FindFriendsViewController: ACBaseViewController {
     }
 }
 
-extension FindFriendsViewController: UITableViewDelegate, UITableViewDataSource {
+extension FindFriendsViewController {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         

@@ -8,7 +8,7 @@
 
 
 import UIKit
-import ABToolKit
+ 
 
 class SelectPurchaseOrTransactionViewController: ACBaseViewController {
 
@@ -52,7 +52,7 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     }
 }
 
-extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITableViewDataSource {
+extension SelectPurchaseOrTransactionViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -66,7 +66,7 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as UITableViewCell!
         
         cell.textLabel?.text = data[indexPath.section].textLabelText
         cell.imageView?.image = data[indexPath.section].image

@@ -7,11 +7,10 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyUserDefaults
 import SwiftyJSON
 import Parse
-import AFDateHelper
 import SwiftOverlays
 
 private let kProfileSection = 3
@@ -315,7 +314,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
             }
             if username?.isEmpty == false && User.currentUser()?.facebookId == nil {
                 
-                var connector = namesAdded == 0 ? "" : ", "
+                let connector = namesAdded == 0 ? "" : ", "
                 text += "\(connector)\"\(username!)\""
             }
             

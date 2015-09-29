@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 import Parse
 import SVPullToRefresh
@@ -322,7 +322,7 @@ class TransactionsViewController: ACBaseViewController {
     
     func setupToolbar(){
         
-        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
         toolbar.sizeToFit()
         view.addSubview(toolbar)
         
@@ -388,7 +388,7 @@ class TransactionsViewController: ACBaseViewController {
             
             for transaction in transactions {
                 
-                let row = find(transactions, transaction)!
+                let row = transactions.indexOf(transaction)!
                 
                 if let purchaseID = selectedPurchaseID {
                     
@@ -532,7 +532,7 @@ class TransactionsViewController: ACBaseViewController {
                 
                 for transaction in transactionsNotAvailable {
                     
-                    let index = find(transactions, transaction)!
+                    let index = transactions.indexOf(transaction)!
                     transactions.removeAtIndex(index)
                 }
                 
@@ -623,7 +623,7 @@ class TransactionsViewController: ACBaseViewController {
         
         //setupBounceView()
         
-        tableView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
         tableView.addLeftConstraint(toView: view, attribute: NSLayoutAttribute.Left, relation: NSLayoutRelation.GreaterThanOrEqual, constant: -0)
         tableView.addRightConstraint(toView: view, attribute: NSLayoutAttribute.Right, relation: NSLayoutRelation.GreaterThanOrEqual, constant: -0)
@@ -644,7 +644,7 @@ class TransactionsViewController: ACBaseViewController {
     }
 }
 
-extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource {
+extension TransactionsViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -731,7 +731,7 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
     
     func reorderTransactions() {
         
-        transactions.sort { return $0.transactionDate > $1.transactionDate }
+        transactions.sortInPlace { return $0.transactionDate > $1.transactionDate }
     }
 }
 
@@ -765,7 +765,7 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
     }
 }
 
-extension TransactionsViewController: UIScrollViewDelegate {
+extension TransactionsViewController {
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
         

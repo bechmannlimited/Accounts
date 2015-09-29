@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 import Alamofire
 import Parse
@@ -87,7 +87,7 @@ class Transaction: PFObject {
     
     class func withDefaultValues() -> Transaction{
         
-        var transaction = Transaction()
+        let transaction = Transaction()
         
         transaction.fromUser = User.currentUser()
         transaction.transactionDate = NSDate()
@@ -174,7 +174,7 @@ class Transaction: PFObject {
     
     func copyWithUsefulValues() -> Transaction {
         
-        var transaction = Transaction()
+        let transaction = Transaction()
         
         transaction.fromUser = fromUser
         transaction.toUser = toUser

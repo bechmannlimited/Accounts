@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import Alamofire
 import SwiftyJSON
 import Parse
@@ -131,7 +131,7 @@ class Purchase: PFObject {
         
         if totalCheck.toStringWithDecimalPlaces(2) != self.amount.toStringWithDecimalPlaces(2) {
             
-            println("ERROR bill doesnt match amount")
+            print("ERROR bill doesnt match amount")
         }
 
         return totalCheck.toStringWithDecimalPlaces(2) == self.amount.toStringWithDecimalPlaces(2)
@@ -161,11 +161,11 @@ class Purchase: PFObject {
             idsInChangeTimes.append(change.0)
         }
         
-        idsInChangeTimes.sort { return NSDate().timeIntervalSinceDate(self.billSplitChangeTimes[$0]!) > NSDate().timeIntervalSinceDate(self.billSplitChangeTimes[$1]!) }
+        idsInChangeTimes.sortInPlace { return NSDate().timeIntervalSinceDate(self.billSplitChangeTimes[$0]!) > NSDate().timeIntervalSinceDate(self.billSplitChangeTimes[$1]!) }
         
         if idsInChangeTimes.count > 0 {
             
-            var id = idsInChangeTimes[0]
+            let id = idsInChangeTimes[0]
             billSplitChanges.removeValueForKey(id)
         }
     }
@@ -220,8 +220,8 @@ class Purchase: PFObject {
         
         for change in billSplitChanges {
             
-            var toUserId: String = change.0
-            var amount: Double = change.1
+            let toUserId: String = change.0
+            let amount: Double = change.1
             
             if toUserId != currentFieldToUserId {
                 
@@ -248,7 +248,7 @@ class Purchase: PFObject {
             if transaction.toUser?.objectId == currentFieldToUserId {
                 
                 transactionsToChange.removeAtIndex(
-                    find(transactionsToChange, transaction)!
+                    transactionsToChange.indexOf(transaction)!
                 )
             }
         }
@@ -276,12 +276,12 @@ class Purchase: PFObject {
                     
                     for previousValue in previousTransactionValuesForToUsers {
                         
-                        var toUserId: String = previousValue.0
-                        var amount: Double = previousValue.1
+                        let toUserId: String = previousValue.0
+                        let amount: Double = previousValue.1
                         
                         transactionForToUserId(toUserId)!.amount = amount
                         
-                        if contains(previousBillSplitChanges.keys, toUserId) {
+                        if previousBillSplitChanges.keys.contains(toUserId) {
                             
                             billSplitChanges[toUserId] = amount
                         }
@@ -492,7 +492,7 @@ class Purchase: PFObject {
             
             if transaction.toUser == toUser {
                 
-                let index = find(transactions, transaction)!
+                let index = transactions.indexOf(transaction)!
                 transactions.removeAtIndex(index)
             }
         }
@@ -513,7 +513,7 @@ class Purchase: PFObject {
     
     func copyWithUsefulValues() -> Purchase {
         
-        var purchase = Purchase()
+        let purchase = Purchase()
         
         purchase.user = user
         purchase.amount = amount

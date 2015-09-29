@@ -42,7 +42,7 @@ public class ParseUtilities: NSObject {
         
         var pushData: [NSObject : AnyObject] = data != nil ? data! : [NSObject : AnyObject]()
         
-        var pushNotification = PFPush()
+        let pushNotification = PFPush()
         pushNotification.setQuery(query)
         
         pushData["alert"] = message

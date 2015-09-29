@@ -44,9 +44,9 @@ class Task: NSObject {
         
         var cancelTimer: NSTimer?
         
-        var backgroundQueue = NSOperationQueue()
+        let backgroundQueue = NSOperationQueue()
         
-        var block = NSBlockOperation()
+        let block = NSBlockOperation()
         
         if let identifier = identifier {
             

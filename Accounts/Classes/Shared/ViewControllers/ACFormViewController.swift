@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 
 class ACFormViewController: FormViewController {
 
@@ -54,7 +54,7 @@ class ACFormViewController: FormViewController {
     
     override func setupTableViewConstraints(tableView: UITableView) {
         
-        tableView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
         tableView.addLeftConstraint(toView: view, attribute: NSLayoutAttribute.Left, relation: NSLayoutRelation.GreaterThanOrEqual, constant: 0)
         tableView.addRightConstraint(toView: view, attribute: NSLayoutAttribute.Right, relation: NSLayoutRelation.GreaterThanOrEqual, constant: 0)

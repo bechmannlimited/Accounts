@@ -4,92 +4,42 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Pods-ABToolKit-ABToolKit.xcscheme</key>
+		<key>Alamofire.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-ABToolKit.xcscheme</key>
+		<key>Bolts.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-AFDateHelper.xcscheme</key>
+		<key>FBSDKCoreKit.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-Alamofire.xcscheme</key>
+		<key>FBSDKLoginKit.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-AwesomeCache.xcscheme</key>
+		<key>FBSDKShareKit.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-Bolts.xcscheme</key>
+		<key>Parse.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-FBSDKCoreKit.xcscheme</key>
+		<key>ParseFacebookUtilsV4.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-FBSDKLoginKit.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-FBSDKShareKit.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-KFSwiftImageLoader.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-Parse.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-ParseFacebookUtilsV4.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-ParseUI.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-ReachabilitySwift.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-SVPullToRefresh.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-SwiftOverlays.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-SwiftyJSON.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
-		<key>Pods-SwiftyUserDefaults.xcscheme</key>
+		<key>ParseUI.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -99,100 +49,90 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
+		<key>SVPullToRefresh.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>SwiftOverlays.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>SwiftyJSON.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>SwiftyUserDefaults.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>04A244CD63CA8D5B57EC70BE</key>
+		<key>1D238AB76E1D43FC24A88D6B65E4C9F6</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>06AE577AD0F3A6AB119CBEA5</key>
+		<key>3AA89246364B9B1670BD37A5B93E4539</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>2E65BE59B3A9F9214ABD3402</key>
+		<key>3F4C1B9CEE03E1CE6ACAC5093B38E620</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>2F0DDDECEC4464DABCEAE7C6</key>
+		<key>51919F4693842C1746935EB2D41BB287</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>31675051A69387876B0AD092</key>
+		<key>618CCD45691F2BC3E119C9CAD0084CFC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>59B45099F8F7903FC76408E2</key>
+		<key>6414809413ACE9BD22DE9BA9CC930175</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>6FBF24AFF288155D120A6DAA</key>
+		<key>64DDAE22A7189D11EDCB88852236BC9A</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>8FEF125D4FAC9A7C1E1B54C5</key>
+		<key>65EB674F5BA83DCC5DD33605CF3437EC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>9ABCA12D5CCFF666ED660D76</key>
+		<key>8EFF47FAFF5A87901DA9B0D2CB39E87A</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>A821D8799E68C09602F7CB6F</key>
+		<key>9E73273BBE227C1E4D8B2D0C1F0456E8</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>A8450CC2826362151E9BC445</key>
+		<key>B9A04D3C9B208813656510FDA8ADAE02</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>B555C6D3D1683961D69ACB95</key>
+		<key>BBBC74FD0CB5F60623E41A33EC915F8B</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>B73BDCD349C014369D3E3B7E</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>BC9EB917D6A8ABB48AF87261</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>BCB1DA923E49F09E9BBA2E92</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>D219949DA7CEFFC3C9416108</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>D3687F104B65E29CA5C074C1</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>D5A1EFA8F0F96BE22E1BD629</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>E3B113444B2F025C997CB0BB</key>
+		<key>E8A3B39F35F263B68E0B045A573E1943</key>
 		<dict>
 			<key>primary</key>
 			<true/>

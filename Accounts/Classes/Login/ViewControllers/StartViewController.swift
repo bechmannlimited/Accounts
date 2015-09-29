@@ -24,7 +24,7 @@ class StartViewController: ACBaseViewController {
             
             var loginViewController = PFLogInViewController()
             
-            loginViewController.fields =  PFLogInFields.Facebook | PFLogInFields.UsernameAndPassword |  PFLogInFields.SignUpButton | PFLogInFields.LogInButton | PFLogInFields.PasswordForgotten
+            loginViewController.fields =  [PFLogInFields.Facebook, PFLogInFields.UsernameAndPassword, PFLogInFields.SignUpButton, PFLogInFields.LogInButton, PFLogInFields.PasswordForgotten]
             loginViewController.facebookPermissions = ["email", "public_profile", "user_friends"]
         
             loginViewController.logInView?.logo = titleView()
@@ -59,7 +59,7 @@ class StartViewController: ACBaseViewController {
         titleView.frame = CGRect(x: 0, y: 0, width: heightWidth, height: heightWidth)
  
         var logo = UIImageView()
-        logo.setTranslatesAutoresizingMaskIntoConstraints(false)
+        logo.translatesAutoresizingMaskIntoConstraints = false
         titleView.addSubview(logo)
         
         logo.image = AppTools.iconAssetNamed("iTunesArtwork")
@@ -123,7 +123,7 @@ extension StartViewController: PFLogInViewControllerDelegate{
     }
     
     func logInViewController(logInController: PFLogInViewController, didFailToLogInWithError error: NSError?) {
-        println(error)
+        print(error)
         ParseUtilities.showAlertWithErrorIfExists(error)
     }
 }
@@ -131,12 +131,12 @@ extension StartViewController: PFLogInViewControllerDelegate{
 extension StartViewController: PFSignUpViewControllerDelegate {
     
     func signUpViewController(signUpController: PFSignUpViewController, didSignUpUser user: PFUser) {
-        println(user)
+        print(user)
         goToAppAnimated(true)
     }
     
     func signUpViewController(signUpController: PFSignUpViewController, didFailToSignUpWithError error: NSError?) {
-        println(error)
+        print(error)
         ParseUtilities.showAlertWithErrorIfExists(error)
     }
 }

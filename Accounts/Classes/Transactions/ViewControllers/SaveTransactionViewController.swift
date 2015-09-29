@@ -8,11 +8,9 @@
 
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyUserDefaults
 import SwiftyJSON
-import GoogleMaps
-//import Reachability
 import SwiftOverlays
 
 class SaveTransactionViewController: SaveItemViewController {
@@ -201,7 +199,7 @@ extension SaveTransactionViewController: FormViewDelegate {
             label.textAlignment = .Center
             label.textColor = .blackColor()
             
-            label.setTranslatesAutoresizingMaskIntoConstraints(false)
+            label.translatesAutoresizingMaskIntoConstraints = false
             cell.contentView.addSubview(label)
             label.fillSuperView(UIEdgeInsetsZero)
             
@@ -387,7 +385,7 @@ extension SaveTransactionViewController: UITableViewDelegate {
             label.text = "- \(verb)\(s) -"
             label.textColor = .darkGrayColor()
             
-            label.setTranslatesAutoresizingMaskIntoConstraints(false)
+            label.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview(label)
             label.fillSuperView(UIEdgeInsets(top: 0, left: 0, bottom: 17, right: 0))
             

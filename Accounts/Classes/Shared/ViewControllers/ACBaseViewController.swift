@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 
 class ACBaseViewController: BaseViewController {
 
@@ -48,7 +48,7 @@ class ACBaseViewController: BaseViewController {
     
     func saveEventuallyItemDidSave() {
         
-        println("saveEventuallyItemDidSave triggered")
+        print("saveEventuallyItemDidSave triggered")
         appDidResume()
     }
     
@@ -68,7 +68,7 @@ class ACBaseViewController: BaseViewController {
     
     override func setupTableViewConstraints(tableView: UITableView) {
         
-        tableView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
         tableView.addLeftConstraint(toView: view, attribute: NSLayoutAttribute.Left, relation: NSLayoutRelation.GreaterThanOrEqual, constant: 0)
         tableView.addRightConstraint(toView: view, attribute: NSLayoutAttribute.Right, relation: NSLayoutRelation.GreaterThanOrEqual, constant: 0)
@@ -99,7 +99,7 @@ class ACBaseViewController: BaseViewController {
     func setupTextLabelForSaveStatusInToolbarWithLabel() {
         
         let label = UILabel()
-        label.setTranslatesAutoresizingMaskIntoConstraints(false)
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 2
         toolbar.addSubview(label)
         

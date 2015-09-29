@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import Parse
 import SwiftyJSON
 
@@ -82,7 +82,7 @@ class FriendsViewController: ACBaseViewController {
         refresh(nil)
         setEditing(false, animated: false)
         
-        if let indexPath = tableView.indexPathForSelectedRow() {
+        if let indexPath = tableView.indexPathForSelectedRow {
             
             tableView.deselectRowAtIndexPath(indexPath, animated: false)
         }
@@ -96,7 +96,7 @@ class FriendsViewController: ACBaseViewController {
     
     override func didReceivePushNotification(notification: NSNotification) {
         
-        println(notification.object)
+        print(notification.object)
         
         if let object: AnyObject = notification.object{
             
@@ -126,7 +126,7 @@ class FriendsViewController: ACBaseViewController {
     
     func setupToolbar(){
         
-        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
         toolbar.sizeToFit()
         view.addSubview(toolbar)
         
