@@ -301,7 +301,7 @@ class FriendsViewController: ACBaseViewController {
     func openMenu() {
         
         let view = MenuViewController()
-        //view.delegate = self
+        view.delegate = self
         
         let v = UINavigationController(rootViewController:view)
         v.modalPresentationStyle = UIModalPresentationStyle.FormSheet
@@ -550,5 +550,13 @@ extension FriendsViewController: FriendTableViewCellDelegate {
         
             self.refresh(nil)
         })
+    }
+}
+
+extension FriendsViewController: MenuDelegate {
+    
+    func menuDidClose() {
+        
+        refresh(nil)
     }
 }

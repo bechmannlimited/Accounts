@@ -136,11 +136,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     if userInfoJson["message"].stringValue.characterCount() > 0 {
                         
                         HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfoJson["message"].stringValue, isAutoHide: true, onTouch: { () -> Void in
-                            
+
                             self.getTransactionAndPresentView(userInfoJson, delay: 0)
+                            
+                            HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
+                            })
                         })
                     }
                 }
+                
+                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
             }
             else if userInfoJson["iouEvent"].stringValue == IOUEvent.InviteEvent.rawValue {
                 
@@ -151,50 +156,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentInvites.rawValue {
                             
                             self.openInvitesView(userInfoJson, delay: 0)
+                            
+                            HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
+                            })
                         }
                     })
                 }
                 
                 NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
             }
-            
-//            if userInfo.indexForKey("iouEvent") != nil {
-//                
-//                if let value = userInfo["iouEvent"] as? String {
-//                    
-//                    if value == IOUEvent.ItemSaved.rawValue {
-//                        
-//                        if let currentUserId = userInfo["currentUserId"] as? String {
-//                            
-//                            println("\(User.currentUser()?.objectId) - \(currentUserId)")
-//                            
-//                            if User.currentUser()?.objectId != currentUserId {
-//                                
-//                                if let message = userInfo["message"] as? String {
-//                                    
-//                                    HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: message, isAutoHide: true, onTouch: { () -> Void in
-//                                        
-//                                    })
-//                                }
-//                            }
-//                        }
-//                        
-//                        NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
-//                    }
-//                    else if value == IOUEvent.InviteEvent.rawValue {
-//                        
-//                        if let message = userInfo["message"] as? String {
-//                            
-//                            HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: message, isAutoHide: true, onTouch: { () -> Void in
-//                                
-//                            })
-//                        }
-//                        
-//                        NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
-//                    }
-//                }
-//            }
-
         }
         else {
             
@@ -222,8 +192,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     v.transactionObjectId = id
                     v.existingTransaction = transaction
                     v.isExistingTransaction = true
+                    v.modalPresentationStyle = UIModalPresentationStyle.FormSheet
                     
-                    if transaction.fromUser?.objectId == User.currentUser()?.objectId || transaction.toUser?.objectId == User.currentUser()?.objectId {
+                    var isActiveTransaction = false
+                    
+                    if let view = UIViewController.topMostController() as? SaveTransactionViewController {
+                        
+                        isActiveTransaction = view.transactionObjectId == transaction.objectId
+                    }
+                    
+                    if transaction.fromUser?.objectId == User.currentUser()?.objectId || transaction.toUser?.objectId == User.currentUser()?.objectId && !isActiveTransaction {
                         
                         NSTimer.schedule(delay: delay, handler: { timer in
                             
@@ -238,12 +216,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func openInvitesView(userInfoJson: JSON, delay: NSTimeInterval) {
         
         let v = FriendInvitesViewController()
+        v.modalPresentationStyle = UIModalPresentationStyle.FormSheet
         v.addCloseButton()
         
-        NSTimer.schedule(delay: delay, handler: { timer in
+        if let view = UIViewController.topMostController() as? FriendInvitesViewController {
             
-            UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
-        })
+            view.refresh(nil) // neccessary?
+        }
+        else {
+            
+            NSTimer.schedule(delay: delay, handler: { timer in
+                
+                UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+            })
+        }
     }
     
     func handleUserTappedOnNotification(userInfo: [NSObject : AnyObject], delay: NSTimeInterval) {
@@ -252,7 +238,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentTransaction.rawValue {
 
-            getTransactionAndPresentView(userInfoJson, delay: 1)
+            getTransactionAndPresentView(userInfoJson, delay: delay)
         }
         else if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentInvites.rawValue {
             

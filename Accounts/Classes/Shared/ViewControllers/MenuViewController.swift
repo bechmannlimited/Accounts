@@ -32,10 +32,10 @@ private let kTestBotIndexPath = NSIndexPath(forRow: 0, inSection: kTestBotSectio
 
 private let kFriendsIndexPath = NSIndexPath(forRow: 0, inSection: kFriendsSection)
 
-//protocol MenuDelegate {
-//    
-//    func menuDidClose()
-//}
+protocol MenuDelegate {
+    
+    func menuDidClose()
+}
 
 class MenuViewController: ACBaseViewController {
 
@@ -49,7 +49,7 @@ class MenuViewController: ACBaseViewController {
     
     var hasAppearedFirstTime = false
     
-    //var delegate: MenuDelegate?
+    var delegate: MenuDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -147,7 +147,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         else if indexPath == kTestBotIndexPath {
             
-            cell.textLabel?.text = "Enable TestBot"
+            cell.textLabel?.text = "Enable ioubot"
             
             let testBotSwitch = UISwitch(frame: CGRect(x: 0, y: 0, width: 100, height: 40))
             testBotSwitch.on = Settings.shouldShowTestBot()
@@ -337,6 +337,12 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         super.appDidResume()
         
         tableView.reloadData()
+    }
+    
+    override func close() {
+        super.close()
+        
+        delegate?.menuDidClose()
     }
 }
 

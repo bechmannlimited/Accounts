@@ -10,6 +10,7 @@
 import UIKit
 import ABToolKit
 import Parse
+import SwiftOverlays
 
 class FindFriendsViewController: ACBaseViewController {
 
@@ -61,7 +62,7 @@ class FindFriendsViewController: ACBaseViewController {
     }
     
     override func appDidResume() {
-        super.appDidResume()
+        //super.appDidResume()
         
         getMatches(searchBar.text)
     }
@@ -74,75 +75,78 @@ class FindFriendsViewController: ACBaseViewController {
         loadingView.showLoader()
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: loadingView)
         
-        self.timer = NSTimer.schedule(delay: 2.5, handler: { timer in
+        self.matchesQuery?.cancel()
+        
+        if searchText.characterCount() > 0 {
             
-            self.matchesQuery?.cancel()
-            
-            self.matchesQuery = PFQuery.orQueryWithSubqueries([
-                User.query()!.whereKey(kParse_User_Username_Key, matchesRegex: "^\(searchText)$", modifiers: "i"),
-                User.query()!.whereKey(kParse_User_DisplayName_Key, matchesRegex: "^\(searchText)$", modifiers: "i"),
-                User.query()!.whereKey("email", matchesRegex: "^\(searchText)$", modifiers: "i")
-            ])
-            
-            self.matchesQuery?.whereKey("objectId", notEqualTo: User.currentUser()!.objectId!)
-            
-            for invite in User.currentUser()!.allInvites[0] {
+            self.timer = NSTimer.schedule(delay: 2.5, handler: { timer in
                 
-                self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.toUser!)
-                self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
-            }
-            for invite in User.currentUser()!.allInvites[1] {
+                self.matchesQuery = PFQuery.orQueryWithSubqueries([
+                    User.query()!.whereKey(kParse_User_Username_Key, matchesRegex: "^\(searchText)$", modifiers: "i"),
+                    User.query()!.whereKey(kParse_User_DisplayName_Key, matchesRegex: "^\(searchText)$", modifiers: "i"),
+                    User.query()!.whereKey("email", matchesRegex: "^\(searchText)$", modifiers: "i")
+                    ])
                 
-                self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.toUser!)
-                self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
-            }
-            
-            self.matchesQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+                self.matchesQuery?.whereKey("objectId", notEqualTo: User.currentUser()!.objectId!)
                 
-                if var matches = objects as? [User] {
+                for invite in User.currentUser()!.allInvites[0] {
                     
-                    //remove match if already in invite pool
-                    for match in matches {
-                        
-                        for invite in User.currentUser()!.allInvites[0] {
-                            
-                            if invite.fromUser?.objectId == match.objectId {
-                                
-                                if let index = find(matches, match) {
-                                    
-                                    matches.removeAtIndex(index)
-                                }
-                            }
-                        }
-                        for invite in User.currentUser()!.allInvites[1] {
-                            
-                            if invite.toUser?.objectId == match.objectId {
-                                
-                                if let index = find(matches, match) {
-                                    
-                                    matches.removeAtIndex(index)
-                                }
-                            }
-                        }
-                        for friend in User.currentUser()!.friends {
-                            
-                            if friend.objectId == match.objectId {
-                                
-                                if let index = find(matches, match) {
-                                    
-                                    matches.removeAtIndex(index)
-                                }
-                            }
-                        }
-                    }
+                    self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.toUser!)
+                    self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
+                }
+                for invite in User.currentUser()!.allInvites[1] {
                     
-                    self.matches = matches
+                    self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.toUser!)
+                    self.matchesQuery?.whereKey(kParse_User_Friends_Key, notEqualTo: invite.fromUser!)
                 }
                 
-                self.tableView.reloadData()
-                self.navigationItem.rightBarButtonItem = nil
+                self.matchesQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
+                    
+                    if var matches = objects as? [User] {
+                        
+                        //remove match if already in invite pool
+                        for match in matches {
+                            
+                            for invite in User.currentUser()!.allInvites[0] {
+                                
+                                if invite.fromUser?.objectId == match.objectId {
+                                    
+                                    if let index = find(matches, match) {
+                                        
+                                        matches.removeAtIndex(index)
+                                    }
+                                }
+                            }
+                            for invite in User.currentUser()!.allInvites[1] {
+                                
+                                if invite.toUser?.objectId == match.objectId {
+                                    
+                                    if let index = find(matches, match) {
+                                        
+                                        matches.removeAtIndex(index)
+                                    }
+                                }
+                            }
+                            for friend in User.currentUser()!.friends {
+                                
+                                if friend.objectId == match.objectId {
+                                    
+                                    if let index = find(matches, match) {
+                                        
+                                        matches.removeAtIndex(index)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        self.matches = matches
+                    }
+                    
+                    self.tableView.reloadData()
+                    self.navigationItem.rightBarButtonItem = nil
+                })
             })
-        })
+        }
     }
     
     func addFriend(match:User) {
@@ -150,6 +154,8 @@ class FindFriendsViewController: ACBaseViewController {
         //searchController.active = false
         view.endEditing(true)
         searchBar.userInteractionEnabled = false
+        
+        SwiftOverlays.showBlockingWaitOverlayWithText("Adding friend...")
         
         User.currentUser()?.sendFriendRequest(match, completion: { (success) -> () in
             
@@ -164,6 +170,8 @@ class FindFriendsViewController: ACBaseViewController {
                 
                 UIAlertView(title: "Oops!", message: "Something went wrong!", delegate: self, cancelButtonTitle: "OK").show()
             }
+            
+            SwiftOverlays.removeAllBlockingOverlays()
             
             User.currentUser()?.getInvites({ (invites) -> () in
                 
