@@ -62,6 +62,11 @@ class SelectUsersViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if kDevice == .Pad {
+            
+            tableView = UITableView(frame: CGRectZero, style: .Grouped)
+        }
+        
         setupTableView(tableView, delegate: self, dataSource: self)
         setupTableViewRefreshControl(tableView)
         
@@ -99,7 +104,15 @@ class SelectUsersViewController: ACBaseViewController {
         
         refresh(nil)
         
-        tableView.backgroundColor = UIColor.whiteColor()
+        if kDevice == .Pad {
+            
+            tableView.separatorColor = .clearColor()
+        }
+        else {
+            
+            tableView.backgroundColor = UIColor.whiteColor()
+        }
+        
     }
     
     override func refresh(refreshControl: UIRefreshControl?) {

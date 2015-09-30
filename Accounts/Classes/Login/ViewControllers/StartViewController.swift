@@ -119,7 +119,16 @@ extension StartViewController: PFLogInViewControllerDelegate{
     
     func logInViewController(logInController: PFLogInViewController, didLogInUser user: PFUser) {
         
-        checkForGraphRequestAndGoToAppWithUser(user)
+        Task.sharedTasker().executeTaskInBackground({ () -> () in
+            
+            User.currentUser()?.fetch()
+            PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
+            PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
+            
+        }, completion: { () -> () in
+
+            self.checkForGraphRequestAndGoToAppWithUser(user)
+        })
     }
     
     func logInViewController(logInController: PFLogInViewController, didFailToLogInWithError error: NSError?) {
@@ -131,8 +140,17 @@ extension StartViewController: PFLogInViewControllerDelegate{
 extension StartViewController: PFSignUpViewControllerDelegate {
     
     func signUpViewController(signUpController: PFSignUpViewController, didSignUpUser user: PFUser) {
-        print(user)
-        goToAppAnimated(true)
+        
+        Task.sharedTasker().executeTaskInBackground({ () -> () in
+            
+            User.currentUser()?.fetch()
+            PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
+            PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
+            
+        }, completion: { () -> () in
+                
+            self.goToAppAnimated(true)
+        })
     }
     
     func signUpViewController(signUpController: PFSignUpViewController, didFailToSignUpWithError error: NSError?) {

@@ -19,6 +19,15 @@ class SaveItemViewController: ACFormViewController {
     
     var delegate: SaveItemDelegate?
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if kDevice == .Pad {
+            
+            tableView.separatorColor = .clearColor()
+        }
+    }
+    
     func pop() {
         
         self.dismissViewControllerFromCurrentContextAnimated(true)
