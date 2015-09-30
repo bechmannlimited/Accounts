@@ -140,6 +140,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                             HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
                             })
                         }
+                        else {
+                            
+                            HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
+                            })
+                        }
                     })
                 }
                 
