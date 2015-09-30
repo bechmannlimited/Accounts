@@ -183,7 +183,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             Transaction.query()?.getObjectInBackgroundWithId(id, block: { (object, error) -> Void in
                 
-                ParseUtilities.showAlertWithErrorIfExists(error)
+                //ParseUtilities.showAlertWithErrorIfExists(error)
                 
                 if let transaction = object as? Transaction {
                     
@@ -196,7 +196,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     v.modalPresentationStyle = UIModalPresentationStyle.FormSheet
                     
                     var isActiveTransaction = false
-                    print(UIViewController.topMostController())
+                    
                     if let nvc = UIViewController.topMostController() as? UINavigationController {
                         
                         for view in nvc.viewControllers {
@@ -217,17 +217,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                             
                             v.transaction.fromUser?.fetchIfNeeded()
                             v.transaction.toUser?.fetchIfNeeded()
-                            //v.transaction.pin()
-                            //transaction = Transaction.query()?.getObjectWithId(transaction.objectId!)
                             
                         }, completion: { () -> () in
                             
-                            
                             NSTimer.schedule(delay: delay, handler: { timer in
                                 
-                                UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+                                if let nvc = UIViewController.topMostController() as? UINavigationController {
+                                    
+                                    for view in nvc.viewControllers {
+                                        
+                                        if let view = view as? SaveTransactionViewController {
+                                            
+                                            if !isActiveTransaction {
+                                                
+                                                isActiveTransaction = view.transactionObjectId == transaction.objectId
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                if !isActiveTransaction {
+                                    
+                                     UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+                                }
                             })
-                            
                         })
                     }
                 }
