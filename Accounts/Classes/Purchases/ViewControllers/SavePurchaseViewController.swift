@@ -78,12 +78,12 @@ class SavePurchaseViewController: SaveItemViewController {
         toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
         toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
         
-        var previousInsets = tableView.contentInset
+        let previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
         
         toolbar.tintColor = kNavigationBarTintColor
         
-        var splitButton = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
+        let splitButton = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
         splitButtons.append(splitButton)
         toolbar.items = [splitButton]
     }
@@ -119,7 +119,7 @@ class SavePurchaseViewController: SaveItemViewController {
         isSaving = true
         updateUIForSavingOrDeleting()
         
-        var copyOfOriginalForIfSaveFails = existingPurchase?.copyWithUsefulValues()
+        //var copyOfOriginalForIfSaveFails = existingPurchase?.copyWithUsefulValues()
         
         let purchase = purchaseObjectId != nil ? existingPurchase : self.purchase
         
@@ -209,9 +209,9 @@ class SavePurchaseViewController: SaveItemViewController {
             
             if transaction.toUser?.objectId == purchase.user.objectId {
                 
-                var ex = User.isCurrentUser(transaction.toUser) ? "r" : "'s"
-                var verb = "\(ex) part"
-                var textLabelText = "(\(transaction.toUser!.appropriateShortDisplayName())\(verb))"
+                let ex = User.isCurrentUser(transaction.toUser) ? "r" : "'s"
+                let verb = "\(ex) part"
+                let textLabelText = "(\(transaction.toUser!.appropriateShortDisplayName())\(verb))"
                 
                 
                 transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
@@ -223,8 +223,8 @@ class SavePurchaseViewController: SaveItemViewController {
             
             if transaction.toUser?.objectId != purchase.user.objectId {
                 
-                var s: String = transaction.toUser?.objectId == User.currentUser()?.objectId ? "" : "s"
-                var textLabelText = "\(transaction.toUser!.appropriateShortDisplayName()) owe\(s)"
+                let s: String = transaction.toUser?.objectId == User.currentUser()?.objectId ? "" : "s"
+                let textLabelText = "\(transaction.toUser!.appropriateShortDisplayName()) owe\(s)"
                 
                 transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
             }
@@ -232,7 +232,7 @@ class SavePurchaseViewController: SaveItemViewController {
         
         sections.append(transactionConfigs)
         
-        var purchasedDate = purchase.purchasedDate != nil ? purchase.purchasedDate : NSDate()
+        let purchasedDate = purchase.purchasedDate != nil ? purchase.purchasedDate : NSDate()
         
         sections.append([
             FormViewConfiguration.datePicker("Date Purchased", date: purchasedDate, identifier: "DatePurchased", format: nil),
@@ -388,7 +388,7 @@ class SavePurchaseViewController: SaveItemViewController {
             
             cell.textLabel?.text = "Split with"
             
-            var friendCount = purchase.transactions.count - 1
+            //var friendCount = purchase.transactions.count - 1
             
             cell.detailTextLabel?.text = "Tap to select"
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
@@ -457,7 +457,7 @@ extension SavePurchaseViewController {
                     
                     if let toolbar = cell.textField.inputAccessoryView as? UIToolbar {
                         
-                        var button = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
+                        let button = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
                         splitButtons.append(button)
                         toolbar.items?.insert(button, atIndex: 0)
                         enableOrDisableSplitButtons()

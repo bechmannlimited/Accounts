@@ -100,7 +100,7 @@ class FriendsViewController: ACBaseViewController {
         
         if let object: AnyObject = notification.object{
             
-            let value = JSON(notification.object![kPushNotificationTypeKey]!!).intValue
+            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
             
             if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestAccepted || PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved {
                 
@@ -144,7 +144,7 @@ class FriendsViewController: ACBaseViewController {
             }
         }
         
-        var previousInsets = tableView.contentInset
+        let previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
         
         toolbar.tintColor = kNavigationBarTintColor
@@ -168,7 +168,7 @@ class FriendsViewController: ACBaseViewController {
     
     func setBarButtonItems() {
         
-        var emptyBarButtonItem = UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: nil, action: nil)
+        let emptyBarButtonItem = UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: nil, action: nil)
         emptyBarButtonItem.width = 0
         
         addBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
@@ -179,7 +179,7 @@ class FriendsViewController: ACBaseViewController {
         friendInvitesBarButtonItem = UIBarButtonItem(title: invitesText, style: .Plain, target: self, action: "friendInvites")
         openMenuBarButtonItem = UIBarButtonItem(image: kMenuIcon, style: .Plain, target: self, action: "openMenu")
         
-        let editBarButtonItem = editButtonItem() //data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
+        //let editBarButtonItem = editButtonItem() //data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
         
         navigationItem.leftBarButtonItems = [
             openMenuBarButtonItem!
@@ -224,7 +224,7 @@ class FriendsViewController: ACBaseViewController {
     
     func setDataForTable() {
         
-        var rc = Array<Array<User>>()
+        //var rc = Array<Array<User>>()
         
         var friendsWhoOweMoney = Array<User>()
         var friendsWhoYouOweMoney = Array<User>()
@@ -380,7 +380,7 @@ extension FriendsViewController: UITableViewDataSource {
         
         let friend = data[indexPath.section][indexPath.row]
         
-        var v = TransactionsViewController()
+        let v = TransactionsViewController()
         v.friend = friend
         navigationController?.pushViewController(v, animated: true)
     }

@@ -22,14 +22,14 @@ class StartViewController: ACBaseViewController {
             view.backgroundColor = UIColor.whiteColor()
             navigationController?.setNavigationBarHidden(true, animated: false)
             
-            var loginViewController = PFLogInViewController()
+            let loginViewController = PFLogInViewController()
             
             loginViewController.fields =  [PFLogInFields.Facebook, PFLogInFields.UsernameAndPassword, PFLogInFields.SignUpButton, PFLogInFields.LogInButton, PFLogInFields.PasswordForgotten]
             loginViewController.facebookPermissions = ["email", "public_profile", "user_friends"]
         
             loginViewController.logInView?.logo = titleView()
             
-            var signUpViewController = PFSignUpViewController()
+            let signUpViewController = PFSignUpViewController()
             loginViewController.signUpController = signUpViewController
             
             self.presentViewController(loginViewController, animated: true, completion: nil)
@@ -51,14 +51,14 @@ class StartViewController: ACBaseViewController {
     
     func titleView() -> UIView {
         
-        var heightWidth: CGFloat = view.frame.height >= 568 ? 120 : 60
-        var topMargin: CGFloat = view.frame.height >= 568 ? -70 : -30
-        var cornerRadius: CGFloat = view.frame.height >= 568 ? 15 : 8
+        let heightWidth: CGFloat = view.frame.height >= 568 ? 120 : 60
+        let topMargin: CGFloat = view.frame.height >= 568 ? -70 : -30
+        let cornerRadius: CGFloat = view.frame.height >= 568 ? 15 : 8
         
-        var titleView = UIView()
+        let titleView = UIView()
         titleView.frame = CGRect(x: 0, y: 0, width: heightWidth, height: heightWidth)
  
-        var logo = UIImageView()
+        let logo = UIImageView()
         logo.translatesAutoresizingMaskIntoConstraints = false
         titleView.addSubview(logo)
         
@@ -78,7 +78,7 @@ class StartViewController: ACBaseViewController {
         SKTUser.currentUser().firstName = User.currentUser()?.displayName
         SKTUser.currentUser().addProperties([ "objectId" : User.currentUser()!.objectId! ])
         
-        var v = UIStoryboard.initialViewControllerFromStoryboardNamed("Main")
+        let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Main")
         UIViewController.topMostController().presentViewController(v, animated: animated, completion: nil)
     }
 

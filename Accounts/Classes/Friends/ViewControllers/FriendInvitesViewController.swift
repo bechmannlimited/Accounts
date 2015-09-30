@@ -66,7 +66,7 @@ class FriendInvitesViewController: ACBaseViewController {
             
             for arr in self.invites {
                 
-                for invite in arr {
+                for _ in arr {
                     
                     count++
                 }
@@ -179,8 +179,8 @@ extension FriendInvitesViewController: UITableViewDataSource {
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
         let friendRequest = invites[indexPath.section][indexPath.row]
-        let user = friendRequest.fromUser!
-        print(indexPath.section); print(kUnconfirmedInvitesSection)
+        //let user = friendRequest.fromUser!
+
         if indexPath.section == kUnconfirmedInvitesSection {
             
             tableView.beginUpdates()

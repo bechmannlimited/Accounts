@@ -68,7 +68,7 @@ class Purchase: PFObject {
     
     func savePurchase(initialCompletion: (success:Bool) -> (), remoteCompletion: () -> ()) {
         
-        var isNewPurchase = objectId == nil
+       // var isNewPurchase = objectId == nil
         
         if !modelIsValid() {
             
@@ -403,7 +403,7 @@ class Purchase: PFObject {
             errors.append("title is empty")
         }
         
-        var friendTotals:Double = 0
+        //var friendTotals:Double = 0
         
         var c = 1
         var errorMessageString = ""

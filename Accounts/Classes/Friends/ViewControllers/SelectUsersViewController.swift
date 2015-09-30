@@ -207,7 +207,7 @@ extension SelectUsersViewController: UITableViewDataSource {
             
             if allowMultipleSelection {
                 
-                if let v = userIsSelected[user.objectId!] {
+                if let _ = userIsSelected[user.objectId!] {
                     
                     userIsSelected.removeValueForKey(user.objectId!)
                 }

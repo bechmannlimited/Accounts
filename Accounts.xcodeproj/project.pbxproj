@@ -1235,10 +1235,6 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-framework",
-					"\"ABToolKit\"",
-					"-framework",
-					"\"Alamofire\"",
-					"-framework",
 					"\"SwiftyJSON\"",
 					"-framework",
 					"\"SwiftyUserDefaults\"",
@@ -1274,10 +1270,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
-					"-framework",
-					"\"ABToolKit\"",
-					"-framework",
-					"\"Alamofire\"",
 					"-framework",
 					"\"SwiftyJSON\"",
 					"-framework",

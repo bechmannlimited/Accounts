@@ -127,7 +127,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
             let userInfoJson = JSON(userInfo)
             
-            if userInfoJson["iouEvent"].stringValue == IOUEvent.ItemSaved.rawValue {
+            if userInfoJson["iouEvent"].stringValue == IOUEvent.InviteEvent.rawValue {
+                
+                if userInfoJson["message"].stringValue.characterCount() > 0 {
+                    
+                    HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfoJson["message"].stringValue, isAutoHide: true, onTouch: { () -> Void in
+                        print("1")
+                        if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentInvites.rawValue {
+                                print("2")
+                            self.openInvitesView(userInfoJson, delay: 0)
+                            
+                            HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
+                            })
+                        }
+                    })
+                }
+                
+                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+            }
+            else if userInfoJson["iouEvent"].stringValue == IOUEvent.ItemSaved.rawValue {
                 
                 if userInfoJson["currentUserId"].stringValue != User.currentUser()?.objectId {
                     
@@ -145,24 +163,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 
                 NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
             }
-            else if userInfoJson["iouEvent"].stringValue == IOUEvent.InviteEvent.rawValue {
-                
-                if userInfoJson["message"].stringValue.characterCount() > 0 {
-                    
-                    HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfoJson["message"].stringValue, isAutoHide: true, onTouch: { () -> Void in
-                        
-                        if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentInvites.rawValue {
-                            
-                            self.openInvitesView(userInfoJson, delay: 0)
-                            
-                            HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
-                            })
-                        }
-                    })
-                }
-                
-                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
-            }
+            
         }
         else {
             
@@ -201,9 +202,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     
                     if transaction.fromUser?.objectId == User.currentUser()?.objectId || transaction.toUser?.objectId == User.currentUser()?.objectId && !isActiveTransaction {
                         
-                        NSTimer.schedule(delay: delay, handler: { timer in
+                        Task.sharedTasker().executeTaskInBackground({ () -> () in
                             
-                            UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+                            transaction.pin()
+                            //transaction = Transaction.query()?.getObjectWithId(transaction.objectId!)
+                            
+                        }, completion: { () -> () in
+                            
+                            
+                            NSTimer.schedule(delay: delay, handler: { timer in
+                                
+                                UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+                            })
+                            
                         })
                     }
                 }

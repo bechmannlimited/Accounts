@@ -217,7 +217,7 @@ class User: PFUser {
 
         let execRemoteQuery: () -> () = {
             
-            if let facebookId = self.facebookId {
+            if let _ = self.facebookId {
                 
                 let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
                 graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
@@ -237,7 +237,7 @@ class User: PFUser {
                                 
                                 let friendsJson = JSON(result)["data"]
                                 
-                                for (index, friendJson): (String, JSON) in friendsJson {
+                                for (_, friendJson): (String, JSON) in friendsJson {
                                     
                                     let friendQuery = User.query()
                                     friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
@@ -309,7 +309,7 @@ class User: PFUser {
                     var friendInfo = Dictionary<String, NSNumber>()
                     
                     var queries = [PFQuery]()
-                    var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
+                    let query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
                     
                     if Settings.shouldShowTestBot() {
                         
