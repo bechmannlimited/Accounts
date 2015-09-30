@@ -126,18 +126,11 @@ class TransactionsViewController: ACBaseViewController {
                     
                     imageView.image = AppTools.iconAssetNamed("50981152_thumbnail.jpg")
                     
-                    UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                    UIView.animateWithDuration(kHeroImageAnimationDuration, animations: { () -> Void in
                         
                         imageView.layer.opacity = 1
                         
                     }, completion: { (finished) -> Void in
-                        
-//                        imageView.screenShot({ (image) -> () in
-//                            
-//                            imageView.removeFromSuperview()
-//                            self.view.insertSubview(UIImageView(image: image), atIndex: 0)
-//                            self.blurViewHasBeenConverted = true
-//                        })
                     })
                 }
                 else if let id = friend.facebookId{
@@ -148,18 +141,11 @@ class TransactionsViewController: ACBaseViewController {
                         
                         imageView.image = image
                         
-                        UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                        UIView.animateWithDuration(kHeroImageAnimationDuration, animations: { () -> Void in
                             
                             imageView.layer.opacity = 1
                             
                         }, completion: { (finished) -> Void in
-                            
-//                            imageView.screenShot({ (image) -> () in
-//                                
-//                                imageView.removeFromSuperview()
-//                                self.view.insertSubview(UIImageView(image: image), atIndex: 0)
-//                                self.blurViewHasBeenConverted = true
-//                            })
                         })
                     })
                 }

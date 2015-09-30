@@ -23,6 +23,12 @@
 </dict> 
 </dict>
 
+
+<key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>fbauth</string>
+    </array>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

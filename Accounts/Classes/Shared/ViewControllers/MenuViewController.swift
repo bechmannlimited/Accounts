@@ -159,14 +159,14 @@ extension MenuViewController: UITableViewDataSource {
         else if indexPath == kFriendsIndexPath {
             
             cell.textLabel?.text = "Friend invites"
-            cell.detailTextLabel?.text = ""
+            cell.detailTextLabel?.text = "Send an invite"
             cell.accessoryType = .DisclosureIndicator
 
             User.currentUser()?.getInvites({ (invites) -> () in
                 
                 let i = User.currentUser()!.pendingInvitesCount()
                 
-                cell.detailTextLabel?.text = i > 0 ? "\(i)" : "No pending invites"
+                cell.detailTextLabel?.text = i > 0 ? "\(i)" : "Send an invite"
                 cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             })
         }

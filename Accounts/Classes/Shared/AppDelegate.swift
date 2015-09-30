@@ -42,6 +42,7 @@ let kTableViewMaxWidth:CGFloat = 570
 let kTableViewCellIpadCornerRadiusSize = CGSize(width: 5, height: 5)
 
 let kAnimationDuration:NSTimeInterval = 0.5
+let kHeroImageAnimationDuration: NSTimeInterval = 0.35
 
 let kParseInstallationUserKey = "user"
 let kNotificationCenterPushNotificationKey = "pushNotificationUserInfoReceived"

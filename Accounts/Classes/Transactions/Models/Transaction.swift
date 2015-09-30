@@ -18,6 +18,11 @@ enum TransactionType: NSNumber {
     case payment = 1
 }
 
+enum Currency: NSNumber {
+    
+    case GBP = 0
+}
+
 
 class Transaction: PFObject {
    
@@ -31,6 +36,7 @@ class Transaction: PFObject {
     @NSManaged private var transactionType: NSNumber?
     @NSManaged var purchaseTransactionLinkUUID: String?
     @NSManaged var isDeleted: Bool
+    @NSManaged var currencyId: NSNumber? 
     
     var purchase: Purchase?
     

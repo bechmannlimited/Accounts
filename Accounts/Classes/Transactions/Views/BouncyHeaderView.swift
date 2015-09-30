@@ -154,7 +154,7 @@ class BouncyHeaderView: UIView {
             
             self.heroImageView.image = image
             
-            UIView.animateWithDuration(0.35, animations: { () -> Void in
+            UIView.animateWithDuration(kHeroImageAnimationDuration, animations: { () -> Void in
                 
                 self.heroImageView.layer.opacity = 1
                 

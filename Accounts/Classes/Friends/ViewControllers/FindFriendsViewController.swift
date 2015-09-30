@@ -33,21 +33,6 @@ class FindFriendsViewController: ACBaseViewController {
         setupSearchBar()
     }
     
-//    func setupSearchController() {
-//        
-//        let searchBar = searchController.searchBar
-//        
-//        searchController.delegate = self
-//        searchBar.delegate = self
-//
-//        tableView.tableHeaderView = searchBar
-//        searchBar.sizeToFit()
-//
-//        searchController.dimsBackgroundDuringPresentation = false
-//        searchController.hidesNavigationBarDuringPresentation = false
-//        
-//        searchBar.tintColor = kNavigationBarTintColor
-//    }
     func setupSearchBar() {
         
         searchBar.delegate = self
@@ -58,7 +43,7 @@ class FindFriendsViewController: ACBaseViewController {
         searchBar.sizeToFit()
         
         searchBar.tintColor = kNavigationBarTintColor
-        searchBar.placeholder = "Search for a user"
+        searchBar.placeholder = "Search for a username, display name or email"
     }
     
     override func appDidResume() {
