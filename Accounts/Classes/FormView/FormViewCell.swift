@@ -16,7 +16,7 @@ public class FormViewCell: UITableViewCell {
     public var editable: Bool {
         get {
          
-            if let editable = formViewDelegate?.formViewElementIsEditable?(config.identifier) {
+            if let editable = formViewDelegate?.formViewElementIsEditable(config.identifier) {
                 
                 return editable
             }

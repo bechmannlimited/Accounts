@@ -13,7 +13,7 @@ public extension UIStoryboard {
     public class func initialViewControllerFromStoryboardNamed(name:String) -> UIViewController {
         
         let storyboard = UIStoryboard(name: name, bundle: nil)
-        return storyboard.instantiateInitialViewController() as! UIViewController
+        return storyboard.instantiateInitialViewController() as! UIViewController!
     }
 }
 

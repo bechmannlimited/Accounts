@@ -33,7 +33,7 @@ public extension UIView {
     public func hideLoader() {
         for v in self.subviews {
             if v is UIActivityIndicatorView{
-                v.stopAnimating()
+                v.removeFromSuperview()
             }
         }
     }

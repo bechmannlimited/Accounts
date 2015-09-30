@@ -331,7 +331,7 @@ class TransactionsViewController: ACBaseViewController {
         toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
         toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
         
-        var previousInsets = tableView.contentInset
+        let previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
         
         toolbar.tintColor = kNavigationBarTintColor
@@ -349,7 +349,7 @@ class TransactionsViewController: ACBaseViewController {
         
         tableView.addInfiniteScrollingWithActionHandler { () -> Void in
             
-            var y: CGFloat = self.tableView.contentOffset.y + self.tableView.contentInset.top
+            let y: CGFloat = self.tableView.contentOffset.y + self.tableView.contentInset.top
             
             if y > 0 {
                 
@@ -435,11 +435,11 @@ class TransactionsViewController: ACBaseViewController {
                     
                     NSTimer.schedule(delay: kAnimationDuration, handler: { timer in
                         
-                        var cellRect = self.tableView.rectForRowAtIndexPath(indexPath)
+                        let cellRect = self.tableView.rectForRowAtIndexPath(indexPath)
                         
                         let rectToCheck = CGRect(x: self.tableView.bounds.origin.x, y: self.tableView.bounds.origin.y + 64, width: self.tableView.bounds.width, height: self.tableView.bounds.height - 64 - 44)
                         
-                        var completelyVisible = CGRectContainsRect(rectToCheck, cellRect)
+                        let completelyVisible = CGRectContainsRect(rectToCheck, cellRect)
                         
                         if !completelyVisible {
                             
@@ -493,7 +493,7 @@ class TransactionsViewController: ACBaseViewController {
                 refreshBarButtonItem?.enabled = true
             })
             
-            var remoteQuery = self.query()
+            let remoteQuery = self.query()
             remoteQuery?.limit = 16
             
             remoteQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
@@ -522,11 +522,11 @@ class TransactionsViewController: ACBaseViewController {
         
         self.refreshBarButtonItem?.enabled = false
         
-        var localQuery = query()?.fromLocalDatastore()
+        let localQuery = query()?.fromLocalDatastore()
         
         localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             
-            var transactionsNotAvailable = [Transaction]()
+            let transactionsNotAvailable = [Transaction]()
             
             if var transactions = objects as? [Transaction] {
                 
@@ -731,7 +731,7 @@ extension TransactionsViewController: UITableViewDataSource {
     
     func reorderTransactions() {
         
-        transactions.sortInPlace { return $0.transactionDate > $1.transactionDate }
+        transactions.sortInPlace { return $0.transactionDate.timeIntervalSince1970 > $1.transactionDate.timeIntervalSince1970 }
     }
 }
 

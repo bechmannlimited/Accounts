@@ -22,7 +22,7 @@ public extension String {
     
     public func contains(find: String) -> Bool {
         
-        if let temp = self.rangeOfString(find) {
+        if let _ = self.rangeOfString(find) {
             return true
         }
         return false
@@ -72,18 +72,18 @@ public extension String {
     
     public subscript (i: Int) -> Character {
         
-        return self[self.startIndex.advancedBy(i)]
+        return self.characters[self.characters.startIndex.advancedBy(i)]
     }
-    
+//
     public subscript (i: Int) -> String {
         
-        return String(self[i] as Character)
+        return String(self[i])
     }
-    
-    public subscript (r: Range<Int>) -> String {
-        
-        return substringWithRange(Range(start: startIndex.advancedBy(r.startIndex), end: startIndex.advancedBy(r.endIndex)))
-    }
+//
+//    public subscript (r: Range<Int>) -> String {
+//        
+//        return substringWithRange(Range(start: startIndex.advancedBy(r.startIndex), end: startIndex.advancedBy(r.endIndex)))
+//    }
     
     // MARK - substring
     

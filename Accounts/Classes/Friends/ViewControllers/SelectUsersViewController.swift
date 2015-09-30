@@ -156,7 +156,7 @@ class SelectUsersViewController: ACBaseViewController {
     }
 }
 
-extension SelectUsersViewController: UITableViewDelegate, UITableViewDataSource {
+extension SelectUsersViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -170,9 +170,9 @@ extension SelectUsersViewController: UITableViewDelegate, UITableViewDataSource 
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as UITableViewCell!
         
-        var user = users[indexPath.row]
+        let user = users[indexPath.row]
 //        
 //        if indexPath.row == kActiveUser.friends.count - 1 {
 //            

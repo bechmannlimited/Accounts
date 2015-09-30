@@ -177,7 +177,8 @@ class User: PFUser {
     
     func appropriateDisplayNamesAsArray() -> [String] {
         
-        return split(appropriateDisplayName().characters) {$0 == " "}.map { String($0) }
+        
+        return appropriateDisplayName().componentsSeparatedByString(" ")
     }
     
     func namePrioritizingDisplayName() -> String {
@@ -230,9 +231,9 @@ class User: PFUser {
                             var friendInfo = Dictionary<String, NSNumber>()
                             
                             var queries = [PFQuery]()
-                            var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
+                            let query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
                             
-                            if let facebookId = self.facebookId {
+                            //if let facebookId = self.facebookId {
                                 
                                 let friendsJson = JSON(result)["data"]
                                 
@@ -242,7 +243,7 @@ class User: PFUser {
                                     friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
                                     queries.append(friendQuery!)
                                 }
-                            }
+                            //}
                             
                             if Settings.shouldShowTestBot() {
                                 

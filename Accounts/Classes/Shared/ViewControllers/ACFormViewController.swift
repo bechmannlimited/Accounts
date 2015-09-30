@@ -125,6 +125,6 @@ extension ACFormViewController: UITableViewDelegate {
     
     func replaceNormalSpacesWithNonBreakingSpaces(textField: UITextField) {
         
-        textField.text = textField.text.replaceString(" ", withString: "\u{00a0}")
+        textField.text = textField.text!.replaceString(" ", withString: "\u{00a0}")
     }
 }

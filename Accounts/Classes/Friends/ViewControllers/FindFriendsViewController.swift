@@ -111,7 +111,7 @@ class FindFriendsViewController: ACBaseViewController {
                                 
                                 if invite.fromUser?.objectId == match.objectId {
                                     
-                                    if let index = find(matches, match) {
+                                    if let index = matches.indexOf(match) {
                                         
                                         matches.removeAtIndex(index)
                                     }
@@ -121,7 +121,7 @@ class FindFriendsViewController: ACBaseViewController {
                                 
                                 if invite.toUser?.objectId == match.objectId {
                                     
-                                    if let index = find(matches, match) {
+                                    if let index = matches.indexOf(match) {
                                         
                                         matches.removeAtIndex(index)
                                     }
@@ -131,7 +131,7 @@ class FindFriendsViewController: ACBaseViewController {
                                 
                                 if friend.objectId == match.objectId {
                                     
-                                    if let index = find(matches, match) {
+                                    if let index = matches.indexOf(match) {
                                         
                                         matches.removeAtIndex(index)
                                     }
@@ -188,7 +188,7 @@ class FindFriendsViewController: ACBaseViewController {
     }
 }
 
-extension FindFriendsViewController {
+extension FindFriendsViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -265,6 +265,6 @@ extension FindFriendsViewController: UISearchControllerDelegate, UISearchBarDele
     
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         
-        getMatches(searchBar.text)
+        getMatches(searchBar.text!)
     }
 }

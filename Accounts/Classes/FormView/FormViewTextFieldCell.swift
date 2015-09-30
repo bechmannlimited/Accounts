@@ -103,7 +103,7 @@ extension FormViewTextFieldCell: UITextFieldDelegate {
         if config.formCellType == FormCellType.TextFieldCurrency {
             
             // Construct the text that will be in the field if this change is accepted
-            var oldText = textField.text as NSString
+            let oldText =  NSString(string: textField.text!)
             var newText = oldText.stringByReplacingCharactersInRange(range, withString: string) as NSString!
             var newTextString = String(newText)
             
@@ -118,19 +118,19 @@ extension FormViewTextFieldCell: UITextFieldDelegate {
             let formatter = NSNumberFormatter()
             formatter.numberStyle = NSNumberFormatterStyle.CurrencyStyle
             formatter.locale = config.currencyLocale
-            var numberFromField = (NSString(string: digitText).doubleValue)/100
+            let numberFromField = (NSString(string: digitText).doubleValue)/100
             newText = formatter.stringFromNumber(numberFromField)
             
             textField.text = String(newText)
             
             if config.currencyLocale == NSLocale(localeIdentifier: "da_DK") {
                 
-                textField.text = textField.text.replaceString("kr", withString: "").removeLastCharacter()
+                textField.text = textField.text!.replaceString("kr", withString: "").removeLastCharacter()
                 textField.text = "kr, \(textField.text)"
             }
             
-            formViewDelegate?.formViewTextFieldCurrencyEditingChanged?(config.identifier, value: numberFromField)
-            formViewDelegate?.formViewElementDidChange?(config.identifier, value: numberFromField)
+            formViewDelegate?.formViewTextFieldCurrencyEditingChanged(config.identifier, value: numberFromField)
+            formViewDelegate?.formViewElementDidChange(config.identifier, value: numberFromField)
             
             return false
         }

@@ -125,7 +125,7 @@ class ACBaseViewController: BaseViewController {
     }
 }
 
-extension ACBaseViewController: UITableViewDelegate {
+extension ACBaseViewController {
     
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         

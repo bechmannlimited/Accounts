@@ -72,7 +72,7 @@ class SaveTransactionViewController: SaveItemViewController {
         isSaving = true
         updateUIForSavingOrDeleting()
         
-        var copyOfOriginalForIfSaveFails = existingTransaction?.copyWithUsefulValues()
+        //_ = existingTransaction?.copyWithUsefulValues()
         
         Transaction.calculateOfflineOweValuesByDeletingTransaction(existingTransaction)
         Transaction.calculateOfflineOweValuesWithTransaction(self.transaction)
@@ -130,12 +130,11 @@ class SaveTransactionViewController: SaveItemViewController {
     
     func selectPlace() {
         
-        var view = SelectLocationViewController()
-        navigationController?.pushViewController(view, animated: true)
+        //var view = SelectLocationViewController()
+        //navigationController?.pushViewController(view, animated: true)
     }
-}
-
-extension SaveTransactionViewController: FormViewDelegate {
+    
+    // MARK: - Form view delegate 
     
     override func formViewElements() -> Array<Array<FormViewConfiguration>> {
         
@@ -147,54 +146,54 @@ extension SaveTransactionViewController: FormViewDelegate {
             
             sections.append([
                 FormViewConfiguration.normalCell("Friend")
-            ])
+                ])
             
             sections.append([
                 FormViewConfiguration.normalCell("User")
-            ])
+                ])
         }
         else if transaction.type == TransactionType.payment {
             
             sections.append([
                 FormViewConfiguration.normalCell("User")
-            ])
+                ])
             
             sections.append([
                 FormViewConfiguration.normalCell("Friend")
-            ])
+                ])
         }
-
+        
         sections.append([
             FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.localeAmount), identifier: "Amount", locale: locale),
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
             FormViewConfiguration.datePicker("Transaction date", date: transaction.transactionDate, identifier: "TransactionDate", format: nil)
             //FormViewConfiguration.normalCell("Location")
-        ])
+            ])
         
         if transaction.purchaseTransactionLinkUUID != nil {
             
             sections.append([
                 FormViewConfiguration.normalCell("PurchaseInfo")
-            ])
+                ])
         }
         
         if isExistingTransaction && allowEditing {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
-            ])
+                ])
         }
         
         return sections
     }
     
-    func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
+    override func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
         
         let cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "Cell")
         
         if identifier == "Friend" || identifier == "User" {
             
-            var label = UILabel()
+            let label = UILabel()
             label.font = UIFont.normalFont(17)
             label.textAlignment = .Center
             label.textColor = .blackColor()
@@ -206,7 +205,7 @@ extension SaveTransactionViewController: FormViewDelegate {
             if identifier == "Friend" {
                 
                 if let username = transaction.toUser?.appropriateDisplayName() {
-                 
+                    
                     label.text = username
                 }
                 else {
@@ -217,7 +216,7 @@ extension SaveTransactionViewController: FormViewDelegate {
             }
             
             if identifier == "User" {
-             
+                
                 if let username = transaction.fromUser?.appropriateDisplayName() {
                     
                     label.text = username
@@ -231,12 +230,12 @@ extension SaveTransactionViewController: FormViewDelegate {
             
             return cell
         }
-//        else if identifier == "Location" {
-//            
-//            cell.textLabel?.text = "Location"
-//            cell.detailTextLabel?.text = "None"
-//            cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-//        }
+            //        else if identifier == "Location" {
+            //
+            //            cell.textLabel?.text = "Location"
+            //            cell.detailTextLabel?.text = "None"
+            //            cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+            //        }
         else if identifier == "PurchaseInfo" {
             
             let cell = TransactionPurchaseInfoTableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "Cell")
@@ -249,7 +248,7 @@ extension SaveTransactionViewController: FormViewDelegate {
     }
     
     
-    func formViewDateChanged(identifier: String, date: NSDate) {
+    override func formViewDateChanged(identifier: String, date: NSDate) {
         
         if identifier == "TransactionDate" {
             
@@ -257,26 +256,26 @@ extension SaveTransactionViewController: FormViewDelegate {
         }
     }
     
-    func formViewTextFieldEditingChanged(identifier: String, text: String) {
+    override func formViewTextFieldEditingChanged(identifier: String, text: String) {
         
         if identifier == "Title" {
-
+            
             transaction.title = text
         }
     }
     
-    func formViewTextFieldCurrencyEditingChanged(identifier: String, value: Double) {
+    override func formViewTextFieldCurrencyEditingChanged(identifier: String, value: Double) {
         
         if identifier == "Amount" {
-
+            
             transaction.localeAmount = value
         }
     }
     
-    func formViewButtonTapped(identifier: String) {
+    override func formViewButtonTapped(identifier: String) {
         
         if identifier == "Delete" {
-
+            
             UIAlertController.showAlertControllerWithButtonTitle("Delete", confirmBtnStyle: UIAlertActionStyle.Destructive, message: "Delete transaction: \(self.transaction.title!) for \(Formatter.formatCurrencyAsString(transaction.localeAmount))?", completion: { (response) -> () in
                 
                 if response == AlertResponse.Confirm {
@@ -307,7 +306,7 @@ extension SaveTransactionViewController: FormViewDelegate {
         }
     }
     
-    func formViewDidSelectRow(identifier: String) {
+    override func formViewDidSelectRow(identifier: String) {
         
         if allowEditing {
             
@@ -341,14 +340,13 @@ extension SaveTransactionViewController: FormViewDelegate {
         return allowEditing
     }
     
-    func formViewElementDidChange(identifier: String, value: AnyObject?) {
+    override func formViewElementDidChange(identifier: String, value: AnyObject?) {
         
         showOrHideSaveButton()
         itemDidChange = true
     }
-}
 
-extension SaveTransactionViewController: UITableViewDelegate {
+    // MARK: - Table view
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
@@ -367,9 +365,9 @@ extension SaveTransactionViewController: UITableViewDelegate {
         
         if section == 0 {
             
-            var view = UIView()
+            let view = UIView()
             
-            var label = UILabel()
+            let label = UILabel()
             label.font = UIFont(name: "Helvetica-Light", size: 14)
             label.textAlignment = NSTextAlignment.Center
             
@@ -410,7 +408,9 @@ extension SaveTransactionViewController: UITableViewDelegate {
         
         return nil
     }
+
 }
+
 
 extension SaveTransactionViewController: SelectUserDelegate {
     

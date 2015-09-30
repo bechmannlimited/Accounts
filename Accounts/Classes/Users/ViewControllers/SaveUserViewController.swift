@@ -72,7 +72,7 @@ class SaveUserViewController: ACFormViewController {
         
         if let id = User.currentUser()?.facebookId {
             
-            return (userInfo["displayName"] as! String).isEmpty == false && valid
+            return id.isEmpty == false && valid
         }
         
         return valid
@@ -145,9 +145,6 @@ class SaveUserViewController: ACFormViewController {
             }
         }
     }
-}
-
-extension SaveUserViewController: FormViewDelegate {
     
     override func formViewElements() -> Array<Array<FormViewConfiguration>> {
         
@@ -156,19 +153,19 @@ extension SaveUserViewController: FormViewDelegate {
         sections.append([
             FormViewConfiguration.textField("Email", value: (userInfo["email"] as! String), identifier: "email"),
             FormViewConfiguration.textField("Display name", value: (userInfo["displayName"] as! String), identifier: "displayName")
-        ])
+            ])
         
         return sections
     }
     
-    func formViewElementDidChange(identifier: String, value: AnyObject?) {
-
+    override func formViewElementDidChange(identifier: String, value: AnyObject?) {
+        
         userInfo[identifier] = value
         showOrHideRegisterButton()
     }
 }
 
-extension SaveUserViewController: UITableViewDelegate {
+extension SaveUserViewController {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         

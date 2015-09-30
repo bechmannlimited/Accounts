@@ -113,7 +113,7 @@ class FriendInvitesViewController: ACBaseViewController {
     }
 }
 
-extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSource {
+extension FriendInvitesViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         

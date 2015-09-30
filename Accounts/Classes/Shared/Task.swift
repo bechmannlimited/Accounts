@@ -42,7 +42,7 @@ class Task: NSObject {
     
     func executeTaskInBackgroundWithIdentifier(identifier: String?, task: () -> (), completion: (() -> ())?) {
         
-        var cancelTimer: NSTimer?
+        //var cancelTimer: NSTimer?
         
         let backgroundQueue = NSOperationQueue()
         

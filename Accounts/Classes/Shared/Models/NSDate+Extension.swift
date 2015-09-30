@@ -6,10 +6,7 @@
 //  Copyright (c) 2015 Alex Bechmann. All rights reserved.
 //
 
-import Foundation
-
-extension NSDate: Equatable {}
-extension NSDate: Comparable {}
+import UIKit
 
 public func ==(lhs: NSDate, rhs: NSDate) -> Bool {
     return lhs.timeIntervalSince1970 == rhs.timeIntervalSince1970

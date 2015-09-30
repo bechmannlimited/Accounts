@@ -28,7 +28,7 @@ public protocol FormViewDelegate {
     func formViewElementIsEditable(identifier: String) -> Bool
 }
 
-public class FormViewController: BaseViewController {
+public class FormViewController: BaseViewController, FormViewDelegate {
     
     public var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     public var data: Array<Array<FormViewConfiguration>> = []
@@ -69,6 +69,46 @@ public class FormViewController: BaseViewController {
         tableView.allowsSelectionDuringEditing = true
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 44
+    }
+    
+    
+    public func formViewElements() -> Array<Array<FormViewConfiguration>> {
+        
+        return [[]]
+    }
+    
+    public func formViewElementIsEditable(identifier: String) -> Bool {
+        
+        return true
+    }
+    
+    public func formViewButtonTapped(identifier: String) {
+        
+    }
+    
+    public func formViewDateChanged(identifier: String, date: NSDate) {
+        
+    }
+    
+    public func formViewDidSelectRow(identifier: String) {
+        
+    }
+    
+    public func formViewElementDidChange(identifier: String, value: AnyObject?) {
+        
+    }
+    
+    public func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
+        
+        return UITableViewCell()
+    }
+    
+    public func formViewTextFieldCurrencyEditingChanged(identifier: String, value: Double) {
+        
+    }
+    
+    public func formViewTextFieldEditingChanged(identifier: String, text: String) {
+        
     }
 }
 
@@ -118,7 +158,7 @@ extension FormViewController: UITableViewDataSource {
             
             if config.formCellType == FormCellType.TextField || config.formCellType == FormCellType.TextFieldCurrency {
 
-                cell.textField.text = config.value as! String
+                cell.textField.text = config.value as! String!
                 
                 return cell
             }
@@ -140,7 +180,7 @@ extension FormViewController: UITableViewDataSource {
         }
         else if config.formCellType == FormCellType.None {
             
-            if let c = formViewDelegate?.formViewManuallySetCell?(tableView, cellForRowAtIndexPath: indexPath, identifier: config.identifier) {
+            if let c = formViewDelegate?.formViewManuallySetCell(tableView, cellForRowAtIndexPath: indexPath, identifier: config.identifier) {
                 
                 return c
             }
@@ -158,7 +198,7 @@ extension FormViewController: UITableViewDataSource {
         
         if config.formCellType == FormCellType.None {
             
-            formViewDelegate?.formViewDidSelectRow?(config.identifier)
+            formViewDelegate?.formViewDidSelectRow(config.identifier)
         }
         
         if let cell = tableView.cellForRowAtIndexPath(indexPath) as? FormViewTextFieldCell {
@@ -196,15 +236,3 @@ extension FormViewController: UITableViewDataSource {
     }
 }
 
-extension FormViewController: FormViewDelegate {
-    
-    public func formViewElements() -> Array<Array<FormViewConfiguration>> {
-        
-        return [[]]
-    }
-
-    public func formViewElementIsEditable(identifier: String) -> Bool {
-    
-        return true
-    }
-}

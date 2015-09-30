@@ -349,7 +349,7 @@ class FriendsViewController: ACBaseViewController {
     }
 }
 
-extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
+extension FriendsViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         

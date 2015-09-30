@@ -51,7 +51,7 @@ extension BaseViewController {
         noDataView.numberOfLines = 0
         noDataView.textAlignment = NSTextAlignment.Center
         
-        noDataView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        noDataView.translatesAutoresizingMaskIntoConstraints = false
         originView.addSubview(noDataView)
         
         noDataView.addHeightConstraint(relation: .Equal, constant: 400)
@@ -99,12 +99,12 @@ extension BaseViewController: UITableViewDelegate {
             
             if indexPath.row == 0 {
                 
-                cell.roundCorners(UIRectCorner.TopLeft | UIRectCorner.TopRight, cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
+                cell.roundCorners([UIRectCorner.TopLeft, UIRectCorner.TopRight], cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
             }
             
             if indexPath.row == numberOfRowsInSections - 1 {
                 
-                cell.roundCorners(UIRectCorner.BottomLeft | UIRectCorner.BottomRight, cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
+                cell.roundCorners([UIRectCorner.BottomLeft, UIRectCorner.BottomRight], cornerRadiusSize: kTableViewCellIpadCornerRadiusSize)
             }
             
             if indexPath.row == 0 && indexPath.row == numberOfRowsInSections - 1 {
@@ -116,7 +116,7 @@ extension BaseViewController: UITableViewDelegate {
         if let cell = cell as? FormViewTextFieldCell {
             
             cell.label.font = UIFont.normalFont(cell.label.font.pointSize)
-            cell.textField.font = UIFont.lightFont(cell.textField.font.pointSize)
+            cell.textField.font = UIFont.lightFont(cell.textField.font!.pointSize)
         }
         else if let cell = cell as? FriendTableViewCell {
             
@@ -129,7 +129,7 @@ extension BaseViewController: UITableViewDelegate {
         
         if let view = view as? UITableViewHeaderFooterView {
 
-            view.textLabel.font = UIFont.lightFont(view.textLabel.font.pointSize)
+            view.textLabel?.font = UIFont.lightFont(view.textLabel!.font!.pointSize)
             view.contentView.backgroundColor = kViewBackgroundColor
         }
     }

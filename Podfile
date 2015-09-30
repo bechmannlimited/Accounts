@@ -16,9 +16,9 @@ pod 'SupportKit'
 #pod 'ReachabilitySwift', git: 'https://github.com/ashleymills/Reachability.swift'
 #pod 'KFSwiftImageLoader', '~> 1.2'
 #pod 'GoogleMaps'
-#pod "AwesomeCache", "~> 1.0"
+#pod "AwesomeCache", :git => 'https://github.com/aschuch/AwesomeCache.git', :branch => 'swift-2.0'
 pod 'SwiftOverlays'
-#pod "AFDateHelper"
+pod "AFDateHelper"
 
 pod 'SwiftyJSON'
 pod 'Alamofire'

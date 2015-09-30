@@ -184,9 +184,8 @@ class SavePurchaseViewController: SaveItemViewController {
         purchase.splitTheBill(nil)
         setFriendAmountTextFields()
     }
-}
-
-extension SavePurchaseViewController: FormViewDelegate {
+    
+    // MARK: - FormViewDelegate
     
     override func formViewElements() -> Array<Array<FormViewConfiguration>> {
         
@@ -244,13 +243,13 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
-            ])
+                ])
         }
         
         return sections
     }
     
-    func formViewTextFieldEditingChanged(identifier: String, text: String) {
+    override func formViewTextFieldEditingChanged(identifier: String, text: String) {
         
         if identifier == "Title" {
             
@@ -270,7 +269,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 1)], withRowAnimation: .None)
     }
     
-    func formViewTextFieldCurrencyEditingChanged(identifier: String, value: Double) {
+    override func formViewTextFieldCurrencyEditingChanged(identifier: String, value: Double) {
         
         if identifier == "Amount" {
             
@@ -320,7 +319,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         enableOrDisableSplitButtons()
     }
     
-    func formViewButtonTapped(identifier: String) {
+    override func formViewButtonTapped(identifier: String) {
         
         if identifier == "Delete" {
             
@@ -354,7 +353,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         }
     }
     
-    func formViewDidSelectRow(identifier: String) {
+    override func formViewDidSelectRow(identifier: String) {
         
         if identifier == "Friends" {
             
@@ -373,7 +372,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         }
     }
     
-    func formViewDateChanged(identifier: String, date: NSDate) {
+    override func formViewDateChanged(identifier: String, date: NSDate) {
         
         if identifier == "DatePurchased" {
             
@@ -381,7 +380,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         }
     }
     
-    func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
+    override func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
         
         let cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "")
         
@@ -421,15 +420,17 @@ extension SavePurchaseViewController: FormViewDelegate {
         return allowEditing
     }
     
-    func formViewElementDidChange(identifier: String, value: AnyObject?) {
+    override func formViewElementDidChange(identifier: String, value: AnyObject?) {
         
         showOrHideSaveButton()
         enableOrDisableSplitButtons()
         itemDidChange = true
     }
+
 }
 
-extension SavePurchaseViewController: UITableViewDelegate {
+
+extension SavePurchaseViewController {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         

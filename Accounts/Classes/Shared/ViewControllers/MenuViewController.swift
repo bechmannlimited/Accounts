@@ -12,6 +12,7 @@ import SwiftyUserDefaults
 import SwiftyJSON
 import Parse
 import SwiftOverlays
+import AFDateHelper
 
 private let kProfileSection = 3
 private let kTestBotSection = 2
@@ -82,7 +83,7 @@ class MenuViewController: ACBaseViewController {
     }
 }
 
-extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
+extension MenuViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -122,14 +123,15 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
          
             cell.textLabel?.text = "Contact support team"
             
-            var date = NSDate()
+            let date = NSDate()
             
-            var dateFormatter: NSDateFormatter = NSDateFormatter()
+            let dateFormatter: NSDateFormatter = NSDateFormatter()
             dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+1")
             
             let localizedDateString = dateFormatter.stringFromDate(date)
+            
             let localizedDate = NSDate(fromString: localizedDateString, format: .Custom(dateFormatter.dateFormat))
-            let online = localizedDate >= localizedDate.dateAtStartOfDay().dateByAddingHours(9) && localizedDate <= localizedDate.dateAtStartOfDay().dateByAddingHours(21)
+            let online = localizedDate.timeIntervalSince1970 >= localizedDate.dateAtStartOfDay().dateByAddingHours(9).timeIntervalSince1970 && localizedDate.timeIntervalSince1970 <= localizedDate.dateAtStartOfDay().dateByAddingHours(21).timeIntervalSince1970
             
             cell.detailTextLabel?.text = online ? "online" : "offline"
             
@@ -176,8 +178,8 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         
         if indexPath == kCurrencyIndexPath {
             
-            let v = SelectCurrencyViewController()
-            navigationController?.pushViewController(v, animated: true)
+            //let v = SelectCurrencyViewController()
+            //navigationController?.pushViewController(v, animated: true)
         }
         else if indexPath == kLogoutIndexPath {
             
@@ -248,7 +250,7 @@ extension MenuViewController: UITableViewDelegate, UITableViewDataSource {
         }
         else if indexPath == kShareIndexPath {
             
-            let textToShare = "Download iou from the app store!"
+            _ = "Download iou from the app store!"
             
             if let myWebsite = NSURL(string: "itms://itunes.apple.com/us/app/iou-shared-expenses/id1024589247?ls=1&mt=8")
             {

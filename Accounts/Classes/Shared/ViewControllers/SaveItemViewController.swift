@@ -111,7 +111,7 @@ class SaveItemViewController: ACFormViewController {
     
 }
 
-extension SaveItemViewController: UITableViewDelegate {
+extension SaveItemViewController {
     
     override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
         

@@ -26,7 +26,7 @@ public class BaseViewController: UIViewController {
     
     var tableViews: Array<UITableView> = []
     
-    public var refreshRequest: JsonRequest?
+    //public var refreshRequest: JsonRequest?
     
     var tableViewConstraints = Dictionary<ConstraintReference, NSLayoutConstraint>()
     var tableViewOriginalInsetInfo = Dictionary<UITableView, (contentInset: UIEdgeInsets, scrollIndicatorInsets: UIEdgeInsets)>()
@@ -71,7 +71,7 @@ public class BaseViewController: UIViewController {
     public override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         
-        refreshRequest?.cancel()
+        //refreshRequest?.cancel()
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
     

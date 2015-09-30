@@ -26,13 +26,13 @@ class ABImageLoader: NSObject {
         var didReceiveRemoteImage = false
         var didReceiveCachedImage = false
         
-        let cache = Cache<UIImage>(name: "imageCache")
-        
-        if let image = cache[imageUrl] {
-            
-            completion(image: image)
-            didReceiveCachedImage = true
-        }
+//        let cache = Cache<UIImage>(name: "imageCache")
+//        
+//        if let image = cache[imageUrl] {
+//            
+//            completion(image: image)
+//            didReceiveCachedImage = true
+//        }
         
         let getRemoteImage: () -> () = {
             
@@ -40,7 +40,7 @@ class ABImageLoader: NSObject {
                 
                 if let image: UIImage = image {
                     
-                    cache[imageUrl] = image
+                    //cache[imageUrl] = image
                     completion(image: image)
                     didReceiveRemoteImage = true
                     self.requestTimes[imageUrl] = NSDate()
