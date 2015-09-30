@@ -428,7 +428,7 @@ class TransactionsViewController: ACBaseViewController {
                 }
             }
             if let indexPath = rowToDeselect {
-                
+                print(indexPath)
                 tableView.selectRowAtIndexPath(indexPath, animated: false, scrollPosition: UITableViewScrollPosition.None)
                 
                 if shouldDeselect {
@@ -477,6 +477,8 @@ class TransactionsViewController: ACBaseViewController {
         
         selectedTransactionID = nil
         selectedPurchaseID = nil
+        // ^ remove both these when findandscrolltoselected row is working
+        
         selectedRow = nil
         didJustDelete = false
         
@@ -542,6 +544,7 @@ class TransactionsViewController: ACBaseViewController {
                 self.view.hideLoader()
                 self.showOrHideTableOrNoDataView()
                 self.refreshBarButtonItem?.enabled = true
+                //self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
                 
                 UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
                     

@@ -189,8 +189,6 @@ class BouncyHeaderView: UIView {
 //            
 //            titleLabel.removeConstraint(c)
 //        }
-        
-        print(titleLabelHeight)
 
         titleLabel.removeConstraints(titleLabel.constraints)
         removeConstraints(titleLabel.constraints)

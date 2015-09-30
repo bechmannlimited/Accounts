@@ -58,7 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
         setupAppearances()
-
+        
         //parse
         User.registerSubclass()
         FriendRequest.registerSubclass()
@@ -132,9 +132,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 if userInfoJson["message"].stringValue.characterCount() > 0 {
                     
                     HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfoJson["message"].stringValue, isAutoHide: true, onTouch: { () -> Void in
-                        print("1")
+                        
                         if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentInvites.rawValue {
-                                print("2")
+                            
                             self.openInvitesView(userInfoJson, delay: 0)
                             
                             HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
@@ -175,13 +175,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         if let id = userInfoJson["objectId"].string {
             
-            SwiftOverlays.showBlockingWaitOverlayWithText("Retrieving details...")
-            
             Transaction.query()?.getObjectInBackgroundWithId(id, block: { (object, error) -> Void in
                 
                 ParseUtilities.showAlertWithErrorIfExists(error)
-                
-                SwiftOverlays.removeAllBlockingOverlays()
                 
                 if let transaction = object as? Transaction {
                     
@@ -194,17 +190,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     v.modalPresentationStyle = UIModalPresentationStyle.FormSheet
                     
                     var isActiveTransaction = false
-                    
-                    if let view = UIViewController.topMostController() as? SaveTransactionViewController {
+                    print(UIViewController.topMostController())
+                    if let nvc = UIViewController.topMostController() as? UINavigationController {
                         
-                        isActiveTransaction = view.transactionObjectId == transaction.objectId
+                        for view in nvc.viewControllers {
+                            
+                            if let view = view as? SaveTransactionViewController {
+                                
+                                if !isActiveTransaction {
+                                    
+                                    isActiveTransaction = view.transactionObjectId == transaction.objectId
+                                }
+                            }
+                        }
                     }
-                    
-                    if transaction.fromUser?.objectId == User.currentUser()?.objectId || transaction.toUser?.objectId == User.currentUser()?.objectId && !isActiveTransaction {
-                        
+
+                    if (transaction.fromUser?.objectId == User.currentUser()?.objectId || transaction.toUser?.objectId == User.currentUser()?.objectId) && !isActiveTransaction {
+           
                         Task.sharedTasker().executeTaskInBackground({ () -> () in
                             
-                            transaction.pin()
+                            v.transaction.fromUser?.fetchIfNeeded()
+                            v.transaction.toUser?.fetchIfNeeded()
+                            //v.transaction.pin()
                             //transaction = Transaction.query()?.getObjectWithId(transaction.objectId!)
                             
                         }, completion: { () -> () in
@@ -228,11 +235,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         v.modalPresentationStyle = UIModalPresentationStyle.FormSheet
         v.addCloseButton()
         
-        if let view = UIViewController.topMostController() as? FriendInvitesViewController {
+        var isActiveView = false
+        
+        if let nvc = UIViewController.topMostController() as? UINavigationController {
             
-            view.refresh(nil) // neccessary?
+            for view in nvc.viewControllers {
+                
+                if !isActiveView {
+                    
+                    if let view = view as? FriendInvitesViewController {
+                        
+                        view.refresh(nil) // neccessary?
+                        isActiveView = true
+                    }
+                }
+            }
         }
-        else {
+    
+        if !isActiveView {
             
             NSTimer.schedule(delay: delay, handler: { timer in
                 
