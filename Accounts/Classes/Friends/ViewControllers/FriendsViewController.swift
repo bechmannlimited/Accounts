@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import Parse
 import SwiftyJSON
 
@@ -82,7 +82,7 @@ class FriendsViewController: ACBaseViewController {
         refresh(nil)
         setEditing(false, animated: false)
         
-        if let indexPath = tableView.indexPathForSelectedRow() {
+        if let indexPath = tableView.indexPathForSelectedRow {
             
             tableView.deselectRowAtIndexPath(indexPath, animated: false)
         }
@@ -96,11 +96,11 @@ class FriendsViewController: ACBaseViewController {
     
     override func didReceivePushNotification(notification: NSNotification) {
         
-        println(notification.object)
+        print(notification.object)
         
         if let object: AnyObject = notification.object{
             
-            let value = JSON(notification.object![kPushNotificationTypeKey]!!).intValue
+            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
             
             if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestAccepted || PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved {
                 
@@ -126,7 +126,7 @@ class FriendsViewController: ACBaseViewController {
     
     func setupToolbar(){
         
-        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
         toolbar.sizeToFit()
         view.addSubview(toolbar)
         
@@ -144,7 +144,7 @@ class FriendsViewController: ACBaseViewController {
             }
         }
         
-        var previousInsets = tableView.contentInset
+        let previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
         
         toolbar.tintColor = kNavigationBarTintColor
@@ -168,7 +168,7 @@ class FriendsViewController: ACBaseViewController {
     
     func setBarButtonItems() {
         
-        var emptyBarButtonItem = UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: nil, action: nil)
+        let emptyBarButtonItem = UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: nil, action: nil)
         emptyBarButtonItem.width = 0
         
         addBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
@@ -179,7 +179,7 @@ class FriendsViewController: ACBaseViewController {
         friendInvitesBarButtonItem = UIBarButtonItem(title: invitesText, style: .Plain, target: self, action: "friendInvites")
         openMenuBarButtonItem = UIBarButtonItem(image: kMenuIcon, style: .Plain, target: self, action: "openMenu")
         
-        let editBarButtonItem = editButtonItem() //data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
+        //let editBarButtonItem = editButtonItem() //data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
         
         navigationItem.leftBarButtonItems = [
             openMenuBarButtonItem!
@@ -205,7 +205,7 @@ class FriendsViewController: ACBaseViewController {
             navigationItem.rightBarButtonItems = []
         }
         
-        addBarButtonItem?.enabled = User.currentUser()!.friends.count > 0
+        addBarButtonItem?.enabled = User.currentUser()?.friends.count > 0
     }
     
     func friendInvites() {
@@ -224,34 +224,37 @@ class FriendsViewController: ACBaseViewController {
     
     func setDataForTable() {
         
-        var rc = Array<Array<User>>()
+        //var rc = Array<Array<User>>()
         
         var friendsWhoOweMoney = Array<User>()
         var friendsWhoYouOweMoney = Array<User>()
         var friendsWhoAreEven = Array<User>()
-            
-        //owes you money
-        for friend in User.currentUser()!.friends {
-            
-            if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
-                
-                friendsWhoOweMoney.append(friend)
-            }
-        }
         
-        for friend in User.currentUser()!.friends {
+        if let currentUser = User.currentUser() {
             
-            if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
+            //owes you money
+            for friend in currentUser.friends {
                 
-                friendsWhoYouOweMoney.append(friend)
+                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
+                    
+                    friendsWhoOweMoney.append(friend)
+                }
             }
-        }
-        
-        for friend in User.currentUser()!.friends {
-
-            if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) == 0 {
+            
+            for friend in currentUser.friends {
                 
-                friendsWhoAreEven.append(friend)
+                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
+                    
+                    friendsWhoYouOweMoney.append(friend)
+                }
+            }
+            
+            for friend in currentUser.friends {
+                
+                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) == 0 {
+                    
+                    friendsWhoAreEven.append(friend)
+                }
             }
         }
         
@@ -336,9 +339,9 @@ class FriendsViewController: ACBaseViewController {
         
         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
             
-            self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
-            self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? self.colorForViewBackground() : kViewBackgroundColor
-            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
+            self.noDataView.layer.opacity = User.currentUser()?.friends.count > 0 ? 0 : 1
+            self.view.backgroundColor = User.currentUser()?.friends.count > 0 ? self.colorForViewBackground() : kViewBackgroundColor
+            self.tableView.separatorColor = User.currentUser()?.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
         })
     }
     
@@ -349,7 +352,7 @@ class FriendsViewController: ACBaseViewController {
     }
 }
 
-extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
+extension FriendsViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -380,7 +383,7 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         
         let friend = data[indexPath.section][indexPath.row]
         
-        var v = TransactionsViewController()
+        let v = TransactionsViewController()
         v.friend = friend
         navigationController?.pushViewController(v, animated: true)
     }

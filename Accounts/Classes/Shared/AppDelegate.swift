@@ -7,14 +7,12 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyUserDefaults
 import Alamofire
 import Parse
 import Bolts
 import ParseFacebookUtilsV4
-import KFSwiftImageLoader
-import GoogleMaps
 import SwiftyJSON
 import SwiftOverlays
 //import ParseCrashReporting
@@ -44,6 +42,7 @@ let kTableViewMaxWidth:CGFloat = 570
 let kTableViewCellIpadCornerRadiusSize = CGSize(width: 5, height: 5)
 
 let kAnimationDuration:NSTimeInterval = 0.5
+let kHeroImageAnimationDuration: NSTimeInterval = 0.35
 
 let kParseInstallationUserKey = "user"
 let kNotificationCenterPushNotificationKey = "pushNotificationUserInfoReceived"
@@ -60,7 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         
         setupAppearances()
-
+        
         //parse
         User.registerSubclass()
         FriendRequest.registerSubclass()
@@ -79,7 +78,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         SupportKit.initWithSettings(SKTSettings(appToken: "amtp9h7tc5dq2sby4q6yc5ke6"))
         
-        GMSServices.provideAPIKey("AIzaSyB7bF8J5Oe5E87ovtdy7l1MRvpe3Rc1zkU")
+        //GMSServices.provideAPIKey("AIzaSyB7bF8J5Oe5E87ovtdy7l1MRvpe3Rc1zkU")
         
         if let remoteNotification = launchOptions?[UIApplicationLaunchOptionsRemoteNotificationKey] as? [NSObject : AnyObject] {
             
@@ -93,7 +92,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         let application = UIApplication.sharedApplication()
         
-        let userNotificationTypes = UIUserNotificationType.Alert | UIUserNotificationType.Badge | UIUserNotificationType.Sound
+        let userNotificationTypes: UIUserNotificationType = [UIUserNotificationType.Alert, UIUserNotificationType.Badge, UIUserNotificationType.Sound]
         let settings = UIUserNotificationSettings(forTypes: userNotificationTypes, categories: nil)
         application.registerUserNotificationSettings(settings)
         application.registerForRemoteNotifications()
@@ -115,21 +114,44 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
         if error.code == 3010 {
-            println("Push notifications are not supported in the iOS Simulator.")
+            print("Push notifications are not supported in the iOS Simulator.")
         } else {
-            println("application:didFailToRegisterForRemoteNotificationsWithError: %@", error)
+            print("application:didFailToRegisterForRemoteNotificationsWithError: %@", error)
         }
     }
     
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
         
-        println(userInfo)
+        print(userInfo)
 
         if application.applicationState == UIApplicationState.Active && userInfo.indexForKey("iouEvent") != nil {
             
             let userInfoJson = JSON(userInfo)
             
-            if userInfoJson["iouEvent"].stringValue == IOUEvent.ItemSaved.rawValue {
+            if userInfoJson["iouEvent"].stringValue == IOUEvent.InviteEvent.rawValue {
+                
+                if userInfoJson["message"].stringValue.characterCount() > 0 {
+                    
+                    HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfoJson["message"].stringValue, isAutoHide: true, onTouch: { () -> Void in
+                        
+                        if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentInvites.rawValue {
+                            
+                            self.openInvitesView(userInfoJson, delay: 0)
+                            
+                            HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
+                            })
+                        }
+                        else {
+                            
+                            HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
+                            })
+                        }
+                    })
+                }
+                
+                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+            }
+            else if userInfoJson["iouEvent"].stringValue == IOUEvent.ItemSaved.rawValue {
                 
                 if userInfoJson["currentUserId"].stringValue != User.currentUser()?.objectId {
                     
@@ -147,24 +169,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 
                 NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
             }
-            else if userInfoJson["iouEvent"].stringValue == IOUEvent.InviteEvent.rawValue {
-                
-                if userInfoJson["message"].stringValue.characterCount() > 0 {
-                    
-                    HDNotificationView.showNotificationViewWithImage(AppTools.iconAssetNamed("iTunesArtwork"), title: "iou", message: userInfoJson["message"].stringValue, isAutoHide: true, onTouch: { () -> Void in
-                        
-                        if userInfoJson["iouCommand"].stringValue == IOUCommand.PresentInvites.rawValue {
-                            
-                            self.openInvitesView(userInfoJson, delay: 0)
-                            
-                            HDNotificationView.hideNotificationViewOnComplete({ () -> Void in
-                            })
-                        }
-                    })
-                }
-                
-                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
-            }
+            
         }
         else {
             
@@ -176,13 +181,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         if let id = userInfoJson["objectId"].string {
             
-            SwiftOverlays.showBlockingWaitOverlayWithText("Retrieving details...")
-            
             Transaction.query()?.getObjectInBackgroundWithId(id, block: { (object, error) -> Void in
                 
-                ParseUtilities.showAlertWithErrorIfExists(error)
-                
-                SwiftOverlays.removeAllBlockingOverlays()
+                //ParseUtilities.showAlertWithErrorIfExists(error)
                 
                 if let transaction = object as? Transaction {
                     
@@ -196,16 +197,50 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     
                     var isActiveTransaction = false
                     
-                    if let view = UIViewController.topMostController() as? SaveTransactionViewController {
+                    if let nvc = UIViewController.topMostController() as? UINavigationController {
                         
-                        isActiveTransaction = view.transactionObjectId == transaction.objectId
-                    }
-                    
-                    if transaction.fromUser?.objectId == User.currentUser()?.objectId || transaction.toUser?.objectId == User.currentUser()?.objectId && !isActiveTransaction {
-                        
-                        NSTimer.schedule(delay: delay, handler: { timer in
+                        for view in nvc.viewControllers {
                             
-                            UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+                            if let view = view as? SaveTransactionViewController {
+                                
+                                if !isActiveTransaction {
+                                    
+                                    isActiveTransaction = view.transactionObjectId == transaction.objectId
+                                }
+                            }
+                        }
+                    }
+
+                    if (transaction.fromUser?.objectId == User.currentUser()?.objectId || transaction.toUser?.objectId == User.currentUser()?.objectId) && !isActiveTransaction {
+           
+                        Task.sharedTasker().executeTaskInBackground({ () -> () in
+                            
+                            v.transaction.fromUser?.fetchIfNeeded()
+                            v.transaction.toUser?.fetchIfNeeded()
+                            
+                        }, completion: { () -> () in
+                            
+                            NSTimer.schedule(delay: delay, handler: { timer in
+                                
+                                if let nvc = UIViewController.topMostController() as? UINavigationController {
+                                    
+                                    for view in nvc.viewControllers {
+                                        
+                                        if let view = view as? SaveTransactionViewController {
+                                            
+                                            if !isActiveTransaction {
+                                                
+                                                isActiveTransaction = view.transactionObjectId == transaction.objectId
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                if !isActiveTransaction {
+                                    
+                                     UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+                                }
+                            })
                         })
                     }
                 }
@@ -219,17 +254,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         v.modalPresentationStyle = UIModalPresentationStyle.FormSheet
         v.addCloseButton()
         
-        if let view = UIViewController.topMostController() as? FriendInvitesViewController {
+        var isActiveView = false
+        var transactionViewIsOpen = false
+        
+        if let nvc = UIViewController.topMostController() as? UINavigationController {
             
-            view.refresh(nil) // neccessary?
+            for view in nvc.viewControllers {
+                
+                if !isActiveView {
+                    
+                    if let view = view as? FriendInvitesViewController {
+                        
+                        view.refresh(nil) // neccessary?
+                        isActiveView = true
+                    }
+                }
+                if !transactionViewIsOpen {
+                    
+                    if let _ = view as? SaveTransactionViewController {
+                        
+                        transactionViewIsOpen = true
+                    }
+                }
+            }
         }
-        else {
+     
+        NSTimer.schedule(delay: delay, handler: { timer in
             
-            NSTimer.schedule(delay: delay, handler: { timer in
+            if !isActiveView && !transactionViewIsOpen {
                 
                 UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
-            })
-        }
+            }
+        })
+        
     }
     
     func handleUserTappedOnNotification(userInfo: [NSObject : AnyObject], delay: NSTimeInterval) {
@@ -301,7 +358,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
         
         return FBSDKApplicationDelegate.sharedInstance().application(application, openURL: url, sourceApplication: sourceApplication, annotation: annotation)
     }

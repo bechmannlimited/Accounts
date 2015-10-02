@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 import Alamofire
 import Parse
@@ -16,6 +16,11 @@ enum TransactionType: NSNumber {
     
     case iou = 0
     case payment = 1
+}
+
+enum Currency: NSNumber {
+    
+    case GBP = 0
 }
 
 
@@ -31,6 +36,7 @@ class Transaction: PFObject {
     @NSManaged private var transactionType: NSNumber?
     @NSManaged var purchaseTransactionLinkUUID: String?
     @NSManaged var isDeleted: Bool
+    @NSManaged var currencyId: NSNumber? 
     
     var purchase: Purchase?
     
@@ -87,7 +93,7 @@ class Transaction: PFObject {
     
     class func withDefaultValues() -> Transaction{
         
-        var transaction = Transaction()
+        let transaction = Transaction()
         
         transaction.fromUser = User.currentUser()
         transaction.transactionDate = NSDate()
@@ -174,7 +180,7 @@ class Transaction: PFObject {
     
     func copyWithUsefulValues() -> Transaction {
         
-        var transaction = Transaction()
+        let transaction = Transaction()
         
         transaction.fromUser = fromUser
         transaction.toUser = toUser

@@ -43,7 +43,7 @@ class BoolSettingViewController: ACBaseViewController {
 
 }
 
-extension BoolSettingViewController: UITableViewDelegate, UITableViewDataSource {
+extension BoolSettingViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -57,7 +57,7 @@ extension BoolSettingViewController: UITableViewDelegate, UITableViewDataSource 
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as UITableViewCell!
         
         cell.textLabel?.text = "\(data[indexPath.row])"
         cell.accessoryType = data[indexPath.row] == currentValue ? .Checkmark : .None

@@ -7,8 +7,6 @@
 //
 
 import UIKit
-import ABToolKit
-import KFSwiftImageLoader
 
 private let kContentViewVerticalPadding: CGFloat = 10
 private let kContentViewHorizontalPadding: CGFloat = 15
@@ -54,13 +52,13 @@ class FriendTableViewCell: UITableViewCell {
     override func drawRect(rect: CGRect){
         super.drawRect(rect)
         
-        friendNameLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        friendNameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(friendNameLabel)
         
-        friendImageView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        friendImageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(friendImageView)
         
-        amountOwedLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        amountOwedLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(amountOwedLabel)
         
         accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
@@ -114,7 +112,7 @@ class FriendTableViewCell: UITableViewCell {
     
     private func showNoImageLabel() {
         
-        noImageLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        noImageLabel.translatesAutoresizingMaskIntoConstraints = false
         friendImageView.addSubview(noImageLabel)
         
         noImageLabel.fillSuperView(UIEdgeInsetsZero)
@@ -169,7 +167,7 @@ class FriendTableViewCell: UITableViewCell {
         })
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: {
-            (alert: UIAlertAction!) -> Void in
+            (alert: UIAlertAction) -> Void in
             
         })
         
@@ -196,7 +194,7 @@ class FriendTableViewCell: UITableViewCell {
             
             contextualTintColor = AccountColor.negativeColor()
         }
-        else if friend.localeDifferenceBetweenActiveUser.roundToPlaces(0) > 0 {
+        else if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
             
             contextualTintColor = AccountColor.positiveColor()
         }

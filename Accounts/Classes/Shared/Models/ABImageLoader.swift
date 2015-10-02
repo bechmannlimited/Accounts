@@ -7,11 +7,12 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import Alamofire
-import AwesomeCache
+import SwiftyUserDefaults
 
 private let kABImageLoaderSharedInstance = ABImageLoader()
+private let kImagePrefix = "DEFAULTS_IMAGE_"
 
 class ABImageLoader: NSObject {
    
@@ -24,15 +25,9 @@ class ABImageLoader: NSObject {
     
     func loadImageFromCacheThenNetwork(imageUrl: String, completion: (image: UIImage) -> ()) {
         
-        var didReceiveRemoteImage = false
-        var didReceiveCachedImage = false
-        
-        let cache = Cache<UIImage>(name: "imageCache")
-        
-        if let image = cache[imageUrl] {
+        if let imageData = Defaults["\(kImagePrefix)\(imageUrl)"].data {
             
-            completion(image: image)
-            didReceiveCachedImage = true
+            completion(image: UIImage(data: imageData)!)
         }
         
         let getRemoteImage: () -> () = {
@@ -41,9 +36,9 @@ class ABImageLoader: NSObject {
                 
                 if let image: UIImage = image {
                     
-                    cache[imageUrl] = image
+                    Defaults["\(kImagePrefix)\(imageUrl)"] = UIImagePNGRepresentation(image)
+                    
                     completion(image: image)
-                    didReceiveRemoteImage = true
                     self.requestTimes[imageUrl] = NSDate()
                 }
             })

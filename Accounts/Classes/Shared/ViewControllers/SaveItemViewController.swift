@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftOverlays
 
 class SaveItemViewController: ACFormViewController {
@@ -16,8 +16,18 @@ class SaveItemViewController: ACFormViewController {
     var isSaving = false
     var allowEditing = false
     var askToPopMessage = ""
+    var isInsidePopover = false
     
     var delegate: SaveItemDelegate?
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if kDevice == .Pad && !isInsidePopover{
+            
+            tableView.separatorColor = .clearColor()
+        }
+    }
     
     func pop() {
         
@@ -111,7 +121,7 @@ class SaveItemViewController: ACFormViewController {
     
 }
 
-extension SaveItemViewController: UITableViewDelegate {
+extension SaveItemViewController {
     
     override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
         

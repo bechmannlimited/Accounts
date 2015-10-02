@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 
 
 protocol SelectUsersDelegate {
@@ -29,10 +29,11 @@ class SelectUsersViewController: ACBaseViewController {
     var allowEditing = false
     var allowMultipleSelection = false
     var identifier = ""
+    var isInsidePopover = false
     
     var users: Array<User> = []
     
-    convenience init(identifier: String, users:Array<User>, selectUsersDelegate: SelectUsersDelegate?, allowEditing: Bool, usersToChooseFrom: Array<User>) {
+    convenience init(identifier: String, users:Array<User>, selectUsersDelegate: SelectUsersDelegate?, allowEditing: Bool, usersToChooseFrom: Array<User>, isInsidePopover: Bool) {
         self.init()
         
         self.identifier = identifier
@@ -40,11 +41,12 @@ class SelectUsersViewController: ACBaseViewController {
         self.allowEditing = allowEditing
         self.allowMultipleSelection = true
         self.users = usersToChooseFrom
+        self.isInsidePopover = isInsidePopover
         
         setSelectedUsers(users)
     }
     
-    convenience init(identifier: String, user:User?, selectUserDelegate: SelectUserDelegate?, allowEditing: Bool, usersToChooseFrom: Array<User>) {
+    convenience init(identifier: String, user:User?, selectUserDelegate: SelectUserDelegate?, allowEditing: Bool, usersToChooseFrom: Array<User>, isInsidePopover: Bool) {
         self.init()
         
         self.identifier = identifier
@@ -52,6 +54,7 @@ class SelectUsersViewController: ACBaseViewController {
         self.allowEditing = allowEditing
         self.allowMultipleSelection = false
         self.users = usersToChooseFrom
+        self.isInsidePopover = isInsidePopover
         
         if let user = user {
             
@@ -62,6 +65,11 @@ class SelectUsersViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        if kDevice == .Pad && !isInsidePopover {
+            
+            tableView = UITableView(frame: CGRectZero, style: .Grouped)
+        }
+        
         setupTableView(tableView, delegate: self, dataSource: self)
         setupTableViewRefreshControl(tableView)
         
@@ -99,7 +107,15 @@ class SelectUsersViewController: ACBaseViewController {
         
         refresh(nil)
         
-        tableView.backgroundColor = UIColor.whiteColor()
+        if kDevice == .Pad && !isInsidePopover {
+            
+            tableView.separatorColor = .clearColor()
+        }
+        else {
+            
+            tableView.backgroundColor = UIColor.whiteColor()
+        }
+        
     }
     
     override func refresh(refreshControl: UIRefreshControl?) {
@@ -156,7 +172,7 @@ class SelectUsersViewController: ACBaseViewController {
     }
 }
 
-extension SelectUsersViewController: UITableViewDelegate, UITableViewDataSource {
+extension SelectUsersViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -170,9 +186,9 @@ extension SelectUsersViewController: UITableViewDelegate, UITableViewDataSource 
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as UITableViewCell!
         
-        var user = users[indexPath.row]
+        let user = users[indexPath.row]
 //        
 //        if indexPath.row == kActiveUser.friends.count - 1 {
 //            
@@ -207,7 +223,7 @@ extension SelectUsersViewController: UITableViewDelegate, UITableViewDataSource 
             
             if allowMultipleSelection {
                 
-                if let v = userIsSelected[user.objectId!] {
+                if let _ = userIsSelected[user.objectId!] {
                     
                     userIsSelected.removeValueForKey(user.objectId!)
                 }

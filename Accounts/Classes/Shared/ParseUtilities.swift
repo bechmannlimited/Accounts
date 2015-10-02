@@ -42,7 +42,7 @@ public class ParseUtilities: NSObject {
         
         var pushData: [NSObject : AnyObject] = data != nil ? data! : [NSObject : AnyObject]()
         
-        var pushNotification = PFPush()
+        let pushNotification = PFPush()
         pushNotification.setQuery(query)
         
         pushData["alert"] = message
@@ -55,20 +55,20 @@ public class ParseUtilities: NSObject {
         pushNotification.sendPushInBackground()
     }
     
-    class func convertPFObjectToDictionary(object: PFObject) -> Dictionary<String, AnyObject?> {
-    
-        var itemDictionary = Dictionary<String, AnyObject?>()
-        
-        var copy: PFObject = PFObject(withoutDataWithClassName: object.parseClassName, objectId: object.objectId)
-        
-        for key in object.allKeys() {
-            
-            itemDictionary[key as! String] = object.objectForKey(key as! String)
-        }
-        
-        return itemDictionary
-    }
+//    class func convertPFObjectToDictionary(object: PFObject) -> Dictionary<String, AnyObject?> {
 //    
+//        var itemDictionary = Dictionary<String, AnyObject?>()
+//        
+//        var copy: PFObject = PFObject(withoutDataWithClassName: object.parseClassName, objectId: object.objectId)
+//        
+//        for key in object.allKeys() {
+//            
+//            itemDictionary[key as! String] = object.objectForKey(key as! String)
+//        }
+//        
+//        return itemDictionary
+//    }
+//
 //    class func findObjectsInLocalAndRemoteDataStore(query: PFQuery?) -> BFTask? {
 //        
 //        return query?.findObjectsInBackground().continueWithBlock({ (task) -> AnyObject! in

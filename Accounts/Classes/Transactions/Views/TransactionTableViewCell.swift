@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 
 let kPurchaseImage = AppTools.iconAssetNamed("1007-price-tag-toolbar.png")
 //private let kTransactionImage =AppTools.iconAssetNamed("922-suitcase-toolbar.png")
@@ -34,8 +34,8 @@ class TransactionTableViewCell: UITableViewCell {
         
         self.transaction = transaction
         
-        var amount = transaction.localeAmount
-        let dateString:String = transaction.transactionDate.toString(DateFormat.Date.rawValue)
+        let amount = transaction.localeAmount
+        //let dateString:String = transaction.transactionDate.toString(DateFormat.Date.rawValue)
         let tintColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.negativeColor() : AccountColor.positiveColor()
         let amountText = Formatter.formatCurrencyAsString(abs(amount))
         var iouText = ""
@@ -74,7 +74,7 @@ class TransactionTableViewCell: UITableViewCell {
         dateLabel.textColor = UIColor.grayColor()
         dateLabel.text = transaction.transactionDate.readableFormattedStringForDateRange()
         
-        dateLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        dateLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(dateLabel)
         
         dateLabel.addRightConstraint(toView: contentView, relation: .Equal, constant: 0)

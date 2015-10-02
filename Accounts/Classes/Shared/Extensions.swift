@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 
 extension String {
     
@@ -16,17 +16,17 @@ extension String {
         return str != nil ? str! : ""
     }
     
-    subscript (i: Int) -> Character {
-        return self[advance(self.startIndex, i)]
-    }
+//    subscript (i: Int) -> Character {
+//        return self.characters[self.characters.startIndex.advancedBy(i)]
+//    }
     
-    subscript (i: Int) -> String {
-        return String(self[i] as Character)
-    }
-    
-    subscript (r: Range<Int>) -> String {
-        return substringWithRange(Range(start: advance(startIndex, r.startIndex), end: advance(startIndex, r.endIndex)))
-    }
+//    subscript (i: Int) -> String {
+//        return String(self.characters[i] as Character)
+//    }
+//    
+//    subscript (r: Range<Int>) -> String {
+//        return substringWithRange(Range(start: startIndex.advancedBy(r.startIndex), end: startIndex.advancedBy(r.endIndex)))
+//    }
 }
 
 extension NSDate {
@@ -34,8 +34,8 @@ extension NSDate {
     func readableFormattedStringForDateRange() -> String {
         
         var rc = self.toString("dd/MM/yyyy HH:mm")
-        var dateRange = DateRange(startDate: self, endDate: NSDate())
-        var s = dateRange.months == 1 ? "" : "s"
+        let dateRange = DateRange(startDate: self, endDate: NSDate())
+        let s = dateRange.months == 1 ? "" : "s"
         rc = "\(dateRange.months) month\(s) ago"
         
         if dateRange.months < 1{
@@ -56,12 +56,12 @@ extension NSDate {
         }
         
         if dateRange.days < 1{
-            var s = dateRange.hours == 1 ? "" : "s"
+            let s = dateRange.hours == 1 ? "" : "s"
             rc = "\(dateRange.hours) hour\(s) ago"
         }
         
         if dateRange.days < 1 && dateRange.hours < 1 && dateRange.minutes < 60{
-            var s = dateRange.minutes == 1 ? "" : "s"
+            let s = dateRange.minutes == 1 ? "" : "s"
             rc = "\(dateRange.minutes) min\(s) ago"
         }
         
@@ -108,9 +108,9 @@ extension UIView {
     func screenShot(completion:(image: UIImage?) -> ()) {
         
         UIGraphicsBeginImageContext(bounds.size)
-        println("graphics context size: \(bounds.size)")
+        print("graphics context size: \(bounds.size)", terminator: "")
         drawViewHierarchyInRect(frame, afterScreenUpdates: true)
-        var image = UIGraphicsGetImageFromCurrentImageContext()
+        let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         //UIGraphicsPopContext()
         

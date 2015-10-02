@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 import Alamofire
 import Parse
@@ -66,11 +66,11 @@ class User: PFUser {
             Task.sharedTasker().executeTaskInBackground({ () -> () in
                 
                 for f in self.friends.filter({ (t) -> Bool in
-                    println(t.objectId)
+                    print(t.objectId)
                     return t.objectId == friend.objectId
                 }) {
                     
-                    self.friends.removeAtIndex(find(self.friends, f)!)
+                    self.friends.removeAtIndex(self.friends.indexOf(f)!)
                     self.relationForKey("friends").removeObject(f)
                 }
                 
@@ -177,7 +177,8 @@ class User: PFUser {
     
     func appropriateDisplayNamesAsArray() -> [String] {
         
-        return split(appropriateDisplayName()) {$0 == " "}
+        
+        return appropriateDisplayName().componentsSeparatedByString(" ")
     }
     
     func namePrioritizingDisplayName() -> String {
@@ -216,7 +217,7 @@ class User: PFUser {
 
         let execRemoteQuery: () -> () = {
             
-            if let facebookId = self.facebookId {
+            if let _ = self.facebookId {
                 
                 let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
                 graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
@@ -230,19 +231,19 @@ class User: PFUser {
                             var friendInfo = Dictionary<String, NSNumber>()
                             
                             var queries = [PFQuery]()
-                            var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
+                            let query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
                             
-                            if let facebookId = self.facebookId {
+                            //if let facebookId = self.facebookId {
                                 
                                 let friendsJson = JSON(result)["data"]
                                 
-                                for (index: String, friendJson: JSON) in friendsJson {
+                                for (_, friendJson): (String, JSON) in friendsJson {
                                     
                                     let friendQuery = User.query()
                                     friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
                                     queries.append(friendQuery!)
                                 }
-                            }
+                            //}
                             
                             if Settings.shouldShowTestBot() {
                                 
@@ -308,7 +309,7 @@ class User: PFUser {
                     var friendInfo = Dictionary<String, NSNumber>()
                     
                     var queries = [PFQuery]()
-                    var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
+                    let query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
                     
                     if Settings.shouldShowTestBot() {
                         
@@ -347,13 +348,12 @@ class User: PFUser {
                         self.saveInBackground()
                     }
                     
+                }, completion: { () -> () in
                     
-                    }, completion: { () -> () in
+                    if canContinue {
                         
-                        if canContinue {
-                            
-                            completion(completedRemoteRequest: true)
-                        }
+                        completion(completedRemoteRequest: true)
+                    }
                 })
             }
 
@@ -443,40 +443,49 @@ class User: PFUser {
         var unconfirmedInvites = Array<FriendRequest>()
         var unconfirmedSentInvites = Array<FriendRequest>()
         
-        let query1 = FriendRequest.query()
-        query1?.whereKey("fromUser", equalTo: User.currentUser()!)
-        
-        let query2 = FriendRequest.query()
-        query2?.whereKey("toUser", equalTo: User.currentUser()!)
-        
-        let query = PFQuery.orQueryWithSubqueries([query1!, query2!])
-        query.includeKey(kParse_FriendRequest_fromUser_Key)
-        query.includeKey(kParse_FriendRequest_toUser_Key)
-        query.whereKey(kParse_FriendRequest_friendRequestStatus_Key, notEqualTo: FriendRequestStatus.Confirmed.rawValue)
-        
-        query.findObjectsInBackgroundWithBlock({ (friendRequests, error) -> Void in
+        if let currentUser = User.currentUser() {
             
-            if let requests = friendRequests as? [FriendRequest] {
+            if currentUser.objectId == objectId {
                 
-                for friendRequest in requests {
+                let query1 = FriendRequest.query()
+                query1?.whereKey("fromUser", equalTo: currentUser)
+                
+                let query2 = FriendRequest.query()
+                query2?.whereKey("toUser", equalTo: currentUser)
+                
+                let query = PFQuery.orQueryWithSubqueries([query1!, query2!])
+                query.includeKey(kParse_FriendRequest_fromUser_Key)
+                query.includeKey(kParse_FriendRequest_toUser_Key)
+                query.whereKey(kParse_FriendRequest_friendRequestStatus_Key, notEqualTo: FriendRequestStatus.Confirmed.rawValue)
+                
+                query.findObjectsInBackgroundWithBlock({ (friendRequests, error) -> Void in
                     
-                    if friendRequest.fromUser?.objectId == self.objectId {
+                    if let requests = friendRequests as? [FriendRequest] {
                         
-                        unconfirmedSentInvites.append(friendRequest)
+                        for friendRequest in requests {
+                            
+                            if friendRequest.fromUser?.objectId == self.objectId {
+                                
+                                unconfirmedSentInvites.append(friendRequest)
+                            }
+                            else {
+                                
+                                unconfirmedInvites.append(friendRequest)
+                            }
+                        }
                     }
-                    else {
+                    
+                    self.allInvites = []
+                    self.allInvites.append(unconfirmedInvites)
+                    self.allInvites.append(unconfirmedSentInvites)
+                    
+                    if User.currentUser()?.objectId == self.objectId {
                         
-                        unconfirmedInvites.append(friendRequest)
+                        completion(invites: self.allInvites)
                     }
-                }
+                })
             }
-            
-            self.allInvites = []
-            self.allInvites.append(unconfirmedInvites)
-            self.allInvites.append(unconfirmedSentInvites)
-            
-            completion(invites: self.allInvites)
-        })
+        }
     }
     
     class func userListExcludingID(id: String?) -> Array<User> {

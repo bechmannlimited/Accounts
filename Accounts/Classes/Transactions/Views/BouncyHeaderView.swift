@@ -1,6 +1,6 @@
 
 import UIKit
-import ABToolKit
+ 
 
 private let kTitlePadding: CGFloat = 12
 
@@ -44,7 +44,7 @@ class BouncyHeaderView: UIView {
     
     func setupConstraints() {
         
-        setTranslatesAutoresizingMaskIntoConstraints(false)
+        translatesAutoresizingMaskIntoConstraints = false
         originView.addSubview(self)
         
         headerViewConstraints["Top"] = addTopConstraint(toView: superview, relation: .Equal, constant: 0)
@@ -61,7 +61,7 @@ class BouncyHeaderView: UIView {
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
         
-        var y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
+        let y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
         
         if y > 0 {
             
@@ -99,7 +99,7 @@ class BouncyHeaderView: UIView {
         //title
         if y > 0 {
             
-            var titleOpacity: CGFloat = y / 40
+            let titleOpacity: CGFloat = y / 40
             titleLabel.layer.opacity = 1 - Float(titleOpacity)
         }
         else{
@@ -134,7 +134,7 @@ class BouncyHeaderView: UIView {
 
     func setupHeroImage() {
         
-        heroImageView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        heroImageView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(heroImageView)
         
         heroImageConstraints["Top"] = heroImageView.addTopConstraint(toView: self, relation: .Equal, constant: 0)
@@ -154,7 +154,7 @@ class BouncyHeaderView: UIView {
             
             self.heroImageView.image = image
             
-            UIView.animateWithDuration(0.35, animations: { () -> Void in
+            UIView.animateWithDuration(kHeroImageAnimationDuration, animations: { () -> Void in
                 
                 self.heroImageView.layer.opacity = 1
                 
@@ -167,7 +167,7 @@ class BouncyHeaderView: UIView {
     
     func setupHeroImageBlurView() {
         
-        blurView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
         heroImageView.addSubview(blurView)
         blurView.fillSuperView(UIEdgeInsetsZero)
     }
@@ -178,7 +178,7 @@ class BouncyHeaderView: UIView {
         //titleLabel.removeFromSuperview()
         //titleLabel = UILabel()
         
-        titleLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(titleLabel)
         
         let font = UIFont(name: "AppleSDGothicNeo-Bold", size: 25)! //"AppleSDGothicNeo-Bold"
@@ -189,12 +189,10 @@ class BouncyHeaderView: UIView {
 //            
 //            titleLabel.removeConstraint(c)
 //        }
-        
-        println(titleLabelHeight)
 
-        titleLabel.removeConstraints(titleLabel.constraints())
-        removeConstraints(titleLabel.constraints())
-        heroImageView.removeConstraints(titleLabel.constraints())
+        titleLabel.removeConstraints(titleLabel.constraints)
+        removeConstraints(titleLabel.constraints)
+        heroImageView.removeConstraints(titleLabel.constraints)
         
         if let heightConstraint = heightConstraint {
             

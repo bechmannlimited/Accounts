@@ -8,7 +8,7 @@
 
 
 import UIKit
-import ABToolKit
+ 
 import Parse
 import SwiftOverlays
 
@@ -33,21 +33,6 @@ class FindFriendsViewController: ACBaseViewController {
         setupSearchBar()
     }
     
-//    func setupSearchController() {
-//        
-//        let searchBar = searchController.searchBar
-//        
-//        searchController.delegate = self
-//        searchBar.delegate = self
-//
-//        tableView.tableHeaderView = searchBar
-//        searchBar.sizeToFit()
-//
-//        searchController.dimsBackgroundDuringPresentation = false
-//        searchController.hidesNavigationBarDuringPresentation = false
-//        
-//        searchBar.tintColor = kNavigationBarTintColor
-//    }
     func setupSearchBar() {
         
         searchBar.delegate = self
@@ -58,13 +43,13 @@ class FindFriendsViewController: ACBaseViewController {
         searchBar.sizeToFit()
         
         searchBar.tintColor = kNavigationBarTintColor
-        searchBar.placeholder = "Search for a user"
+        searchBar.placeholder = "Search for a username, display name or email"
     }
     
     override func appDidResume() {
         //super.appDidResume()
         
-        getMatches(searchBar.text)
+        getMatches(searchBar.text!)
     }
     
     func getMatches(searchText: String) {
@@ -111,7 +96,7 @@ class FindFriendsViewController: ACBaseViewController {
                                 
                                 if invite.fromUser?.objectId == match.objectId {
                                     
-                                    if let index = find(matches, match) {
+                                    if let index = matches.indexOf(match) {
                                         
                                         matches.removeAtIndex(index)
                                     }
@@ -121,7 +106,7 @@ class FindFriendsViewController: ACBaseViewController {
                                 
                                 if invite.toUser?.objectId == match.objectId {
                                     
-                                    if let index = find(matches, match) {
+                                    if let index = matches.indexOf(match) {
                                         
                                         matches.removeAtIndex(index)
                                     }
@@ -131,7 +116,7 @@ class FindFriendsViewController: ACBaseViewController {
                                 
                                 if friend.objectId == match.objectId {
                                     
-                                    if let index = find(matches, match) {
+                                    if let index = matches.indexOf(match) {
                                         
                                         matches.removeAtIndex(index)
                                     }
@@ -188,7 +173,7 @@ class FindFriendsViewController: ACBaseViewController {
     }
 }
 
-extension FindFriendsViewController: UITableViewDelegate, UITableViewDataSource {
+extension FindFriendsViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -265,6 +250,6 @@ extension FindFriendsViewController: UISearchControllerDelegate, UISearchBarDele
     
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         
-        getMatches(searchBar.text)
+        getMatches(searchBar.text!)
     }
 }

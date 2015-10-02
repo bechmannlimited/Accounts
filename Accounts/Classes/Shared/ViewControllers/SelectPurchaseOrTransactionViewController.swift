@@ -8,7 +8,7 @@
 
 
 import UIKit
-import ABToolKit
+ 
 
 class SelectPurchaseOrTransactionViewController: ACBaseViewController {
 
@@ -22,6 +22,7 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
 
     var contextualFriend: User?
     var saveItemDelegate: SaveItemDelegate?
+    var isInsidePopover = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,7 +53,7 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     }
 }
 
-extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITableViewDataSource {
+extension SelectPurchaseOrTransactionViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -66,7 +67,7 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as! UITableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("Cell") as UITableViewCell!
         
         cell.textLabel?.text = data[indexPath.section].textLabelText
         cell.imageView?.image = data[indexPath.section].image
@@ -89,6 +90,7 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
                 transaction.fromUser = User.currentUser()
                 transaction.toUser = friend
 
+                v.isInsidePopover = kDevice == .Pad
                 v.purchase.transactions = []
                 v.purchase.transactions.append(transaction)
             }
@@ -112,6 +114,7 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDelegate, UITabl
                 v.transaction.type = TransactionType.payment
             }
 
+            v.isInsidePopover = kDevice == .Pad
             v.delegate = saveItemDelegate
             saveItemDelegate?.newItemViewControllerWasPresented(v)
             

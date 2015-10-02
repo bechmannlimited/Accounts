@@ -8,7 +8,7 @@
 
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 
 private let kUnconfirmedInvitesSection = 0
@@ -66,7 +66,7 @@ class FriendInvitesViewController: ACBaseViewController {
             
             for arr in self.invites {
                 
-                for invite in arr {
+                for _ in arr {
                     
                     count++
                 }
@@ -113,7 +113,7 @@ class FriendInvitesViewController: ACBaseViewController {
     }
 }
 
-extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSource {
+extension FriendInvitesViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -179,8 +179,8 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
         let friendRequest = invites[indexPath.section][indexPath.row]
-        let user = friendRequest.fromUser!
-        println(indexPath.section); println(kUnconfirmedInvitesSection)
+        //let user = friendRequest.fromUser!
+
         if indexPath.section == kUnconfirmedInvitesSection {
             
             tableView.beginUpdates()
