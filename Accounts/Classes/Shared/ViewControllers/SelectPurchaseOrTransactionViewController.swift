@@ -22,6 +22,7 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
 
     var contextualFriend: User?
     var saveItemDelegate: SaveItemDelegate?
+    var isInsidePopover = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -89,6 +90,7 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDataSource {
                 transaction.fromUser = User.currentUser()
                 transaction.toUser = friend
 
+                v.isInsidePopover = kDevice == .Pad
                 v.purchase.transactions = []
                 v.purchase.transactions.append(transaction)
             }
@@ -112,6 +114,7 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDataSource {
                 v.transaction.type = TransactionType.payment
             }
 
+            v.isInsidePopover = kDevice == .Pad
             v.delegate = saveItemDelegate
             saveItemDelegate?.newItemViewControllerWasPresented(v)
             

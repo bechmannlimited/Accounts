@@ -684,7 +684,7 @@ extension TransactionsViewController: UITableViewDataSource {
             v.transactionObjectId = transaction.objectId
             v.existingTransaction = transaction
             v.isExistingTransaction = true
-            
+            v.isInsidePopover = kDevice == .Pad
             v.delegate = self
             openView(v, sourceView: cell.contentView)
         }

@@ -16,13 +16,14 @@ class SaveItemViewController: ACFormViewController {
     var isSaving = false
     var allowEditing = false
     var askToPopMessage = ""
+    var isInsidePopover = false
     
     var delegate: SaveItemDelegate?
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        if kDevice == .Pad {
+        if kDevice == .Pad && !isInsidePopover{
             
             tableView.separatorColor = .clearColor()
         }

@@ -11,6 +11,7 @@ import Parse
 import ParseUI
 import ParseFacebookUtilsV4
 import SwiftyJSON
+import SwiftOverlays
 
 class StartViewController: ACBaseViewController {
     
@@ -84,6 +85,8 @@ class StartViewController: ACBaseViewController {
 
     func checkForGraphRequestAndGoToAppWithUser(user: PFUser){
         
+        SwiftOverlays.showBlockingWaitOverlayWithText(User.currentUser()?.facebookId != nil ? "Fetching facebook info..." : "Setting some things up...")
+        
         let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me", parameters: nil)
         graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
             
@@ -104,11 +107,13 @@ class StartViewController: ACBaseViewController {
                     
                 }, completion: { () -> () in
                     
+                    SwiftOverlays.removeAllBlockingOverlays()
                     self.goToAppAnimated(true)
                 })
             }
             else{
                 
+                SwiftOverlays.removeAllBlockingOverlays()
                 self.goToAppAnimated(true)
             }
         })
@@ -119,6 +124,8 @@ extension StartViewController: PFLogInViewControllerDelegate{
     
     func logInViewController(logInController: PFLogInViewController, didLogInUser user: PFUser) {
         
+        SwiftOverlays.showBlockingWaitOverlayWithText("Setting some things up...")
+        
         Task.sharedTasker().executeTaskInBackground({ () -> () in
             
             User.currentUser()?.fetch()
@@ -127,6 +134,7 @@ extension StartViewController: PFLogInViewControllerDelegate{
             
         }, completion: { () -> () in
 
+            SwiftOverlays.removeAllBlockingOverlays()
             self.checkForGraphRequestAndGoToAppWithUser(user)
         })
     }
@@ -141,6 +149,8 @@ extension StartViewController: PFSignUpViewControllerDelegate {
     
     func signUpViewController(signUpController: PFSignUpViewController, didSignUpUser user: PFUser) {
         
+        SwiftOverlays.showBlockingWaitOverlayWithText("Setting some things up...")
+        
         Task.sharedTasker().executeTaskInBackground({ () -> () in
             
             User.currentUser()?.fetch()
@@ -148,7 +158,8 @@ extension StartViewController: PFSignUpViewControllerDelegate {
             PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
             
         }, completion: { () -> () in
-                
+            
+            SwiftOverlays.removeAllBlockingOverlays()
             self.goToAppAnimated(true)
         })
     }

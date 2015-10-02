@@ -194,7 +194,7 @@ class FriendTableViewCell: UITableViewCell {
             
             contextualTintColor = AccountColor.negativeColor()
         }
-        else if friend.localeDifferenceBetweenActiveUser.roundToPlaces(0) > 0 {
+        else if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
             
             contextualTintColor = AccountColor.positiveColor()
         }

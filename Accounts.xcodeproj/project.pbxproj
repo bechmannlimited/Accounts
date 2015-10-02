@@ -55,7 +55,6 @@
 		E46BCE551B66D4E800CA09BF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE541B66D4E800CA09BF /* AudioToolbox.framework */; };
 		E46BCE571B66D4F100CA09BF /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE561B66D4F100CA09BF /* CFNetwork.framework */; };
 		E46BCE591B66D4F900CA09BF /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE581B66D4F900CA09BF /* CoreGraphics.framework */; };
-		E46BCE5B1B66D50100CA09BF /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE5A1B66D50100CA09BF /* CoreLocation.framework */; };
 		E46BCE5D1B66D50C00CA09BF /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE5C1B66D50C00CA09BF /* QuartzCore.framework */; };
 		E46BCE5F1B66D52500CA09BF /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE5E1B66D52500CA09BF /* Security.framework */; };
 		E46BCE611B66D52E00CA09BF /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE601B66D52E00CA09BF /* StoreKit.framework */; };
@@ -270,7 +269,6 @@
 				E46BCE611B66D52E00CA09BF /* StoreKit.framework in Frameworks */,
 				E46BCE5F1B66D52500CA09BF /* Security.framework in Frameworks */,
 				E46BCE5D1B66D50C00CA09BF /* QuartzCore.framework in Frameworks */,
-				E46BCE5B1B66D50100CA09BF /* CoreLocation.framework in Frameworks */,
 				E46BCE591B66D4F900CA09BF /* CoreGraphics.framework in Frameworks */,
 				E46BCE571B66D4F100CA09BF /* CFNetwork.framework in Frameworks */,
 				E46BCE551B66D4E800CA09BF /* AudioToolbox.framework in Frameworks */,

@@ -255,6 +255,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         v.addCloseButton()
         
         var isActiveView = false
+        var transactionViewIsOpen = false
         
         if let nvc = UIViewController.topMostController() as? UINavigationController {
             
@@ -268,16 +269,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         isActiveView = true
                     }
                 }
+                if !transactionViewIsOpen {
+                    
+                    if let _ = view as? SaveTransactionViewController {
+                        
+                        transactionViewIsOpen = true
+                    }
+                }
             }
         }
-    
-        if !isActiveView {
+     
+        NSTimer.schedule(delay: delay, handler: { timer in
             
-            NSTimer.schedule(delay: delay, handler: { timer in
+            if !isActiveView && !transactionViewIsOpen {
                 
                 UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
-            })
-        }
+            }
+        })
+        
     }
     
     func handleUserTappedOnNotification(userInfo: [NSObject : AnyObject], delay: NSTimeInterval) {

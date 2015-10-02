@@ -29,10 +29,11 @@ class SelectUsersViewController: ACBaseViewController {
     var allowEditing = false
     var allowMultipleSelection = false
     var identifier = ""
+    var isInsidePopover = false
     
     var users: Array<User> = []
     
-    convenience init(identifier: String, users:Array<User>, selectUsersDelegate: SelectUsersDelegate?, allowEditing: Bool, usersToChooseFrom: Array<User>) {
+    convenience init(identifier: String, users:Array<User>, selectUsersDelegate: SelectUsersDelegate?, allowEditing: Bool, usersToChooseFrom: Array<User>, isInsidePopover: Bool) {
         self.init()
         
         self.identifier = identifier
@@ -40,11 +41,12 @@ class SelectUsersViewController: ACBaseViewController {
         self.allowEditing = allowEditing
         self.allowMultipleSelection = true
         self.users = usersToChooseFrom
+        self.isInsidePopover = isInsidePopover
         
         setSelectedUsers(users)
     }
     
-    convenience init(identifier: String, user:User?, selectUserDelegate: SelectUserDelegate?, allowEditing: Bool, usersToChooseFrom: Array<User>) {
+    convenience init(identifier: String, user:User?, selectUserDelegate: SelectUserDelegate?, allowEditing: Bool, usersToChooseFrom: Array<User>, isInsidePopover: Bool) {
         self.init()
         
         self.identifier = identifier
@@ -52,6 +54,7 @@ class SelectUsersViewController: ACBaseViewController {
         self.allowEditing = allowEditing
         self.allowMultipleSelection = false
         self.users = usersToChooseFrom
+        self.isInsidePopover = isInsidePopover
         
         if let user = user {
             
@@ -62,7 +65,7 @@ class SelectUsersViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if kDevice == .Pad {
+        if kDevice == .Pad && !isInsidePopover {
             
             tableView = UITableView(frame: CGRectZero, style: .Grouped)
         }
@@ -104,7 +107,7 @@ class SelectUsersViewController: ACBaseViewController {
         
         refresh(nil)
         
-        if kDevice == .Pad {
+        if kDevice == .Pad && !isInsidePopover {
             
             tableView.separatorColor = .clearColor()
         }

@@ -359,7 +359,7 @@ class SavePurchaseViewController: SaveItemViewController {
             
             let usersToChooseFrom = User.userListExcludingID(purchase.user.objectId)
             
-            let v = SelectUsersViewController(identifier: identifier, users: purchase.usersInTransactions(), selectUsersDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+            let v = SelectUsersViewController(identifier: identifier, users: purchase.usersInTransactions(), selectUsersDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom, isInsidePopover: false)
             navigationController?.pushViewController(v, animated: true)
         }
         
@@ -367,7 +367,7 @@ class SavePurchaseViewController: SaveItemViewController {
             
             let usersToChooseFrom = User.userListExcludingID(nil)
             
-            let v = SelectUsersViewController(identifier: identifier, user: purchase.user, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+            let v = SelectUsersViewController(identifier: identifier, user: purchase.user, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom, isInsidePopover: false)
             navigationController?.pushViewController(v, animated: true)
         }
     }

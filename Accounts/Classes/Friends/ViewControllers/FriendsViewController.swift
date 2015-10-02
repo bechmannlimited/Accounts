@@ -205,7 +205,7 @@ class FriendsViewController: ACBaseViewController {
             navigationItem.rightBarButtonItems = []
         }
         
-        addBarButtonItem?.enabled = User.currentUser()!.friends.count > 0
+        addBarButtonItem?.enabled = User.currentUser()?.friends.count > 0
     }
     
     func friendInvites() {
@@ -229,29 +229,32 @@ class FriendsViewController: ACBaseViewController {
         var friendsWhoOweMoney = Array<User>()
         var friendsWhoYouOweMoney = Array<User>()
         var friendsWhoAreEven = Array<User>()
-            
-        //owes you money
-        for friend in User.currentUser()!.friends {
-            
-            if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
-                
-                friendsWhoOweMoney.append(friend)
-            }
-        }
         
-        for friend in User.currentUser()!.friends {
+        if let currentUser = User.currentUser() {
             
-            if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
+            //owes you money
+            for friend in currentUser.friends {
                 
-                friendsWhoYouOweMoney.append(friend)
+                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
+                    
+                    friendsWhoOweMoney.append(friend)
+                }
             }
-        }
-        
-        for friend in User.currentUser()!.friends {
-
-            if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) == 0 {
+            
+            for friend in currentUser.friends {
                 
-                friendsWhoAreEven.append(friend)
+                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
+                    
+                    friendsWhoYouOweMoney.append(friend)
+                }
+            }
+            
+            for friend in currentUser.friends {
+                
+                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) == 0 {
+                    
+                    friendsWhoAreEven.append(friend)
+                }
             }
         }
         
@@ -336,9 +339,9 @@ class FriendsViewController: ACBaseViewController {
         
         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
             
-            self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
-            self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? self.colorForViewBackground() : kViewBackgroundColor
-            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
+            self.noDataView.layer.opacity = User.currentUser()?.friends.count > 0 ? 0 : 1
+            self.view.backgroundColor = User.currentUser()?.friends.count > 0 ? self.colorForViewBackground() : kViewBackgroundColor
+            self.tableView.separatorColor = User.currentUser()?.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
         })
     }
     

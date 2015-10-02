@@ -348,13 +348,12 @@ class User: PFUser {
                         self.saveInBackground()
                     }
                     
+                }, completion: { () -> () in
                     
-                    }, completion: { () -> () in
+                    if canContinue {
                         
-                        if canContinue {
-                            
-                            completion(completedRemoteRequest: true)
-                        }
+                        completion(completedRemoteRequest: true)
+                    }
                 })
             }
 
@@ -444,40 +443,49 @@ class User: PFUser {
         var unconfirmedInvites = Array<FriendRequest>()
         var unconfirmedSentInvites = Array<FriendRequest>()
         
-        let query1 = FriendRequest.query()
-        query1?.whereKey("fromUser", equalTo: User.currentUser()!)
-        
-        let query2 = FriendRequest.query()
-        query2?.whereKey("toUser", equalTo: User.currentUser()!)
-        
-        let query = PFQuery.orQueryWithSubqueries([query1!, query2!])
-        query.includeKey(kParse_FriendRequest_fromUser_Key)
-        query.includeKey(kParse_FriendRequest_toUser_Key)
-        query.whereKey(kParse_FriendRequest_friendRequestStatus_Key, notEqualTo: FriendRequestStatus.Confirmed.rawValue)
-        
-        query.findObjectsInBackgroundWithBlock({ (friendRequests, error) -> Void in
+        if let currentUser = User.currentUser() {
             
-            if let requests = friendRequests as? [FriendRequest] {
+            if currentUser.objectId == objectId {
                 
-                for friendRequest in requests {
+                let query1 = FriendRequest.query()
+                query1?.whereKey("fromUser", equalTo: currentUser)
+                
+                let query2 = FriendRequest.query()
+                query2?.whereKey("toUser", equalTo: currentUser)
+                
+                let query = PFQuery.orQueryWithSubqueries([query1!, query2!])
+                query.includeKey(kParse_FriendRequest_fromUser_Key)
+                query.includeKey(kParse_FriendRequest_toUser_Key)
+                query.whereKey(kParse_FriendRequest_friendRequestStatus_Key, notEqualTo: FriendRequestStatus.Confirmed.rawValue)
+                
+                query.findObjectsInBackgroundWithBlock({ (friendRequests, error) -> Void in
                     
-                    if friendRequest.fromUser?.objectId == self.objectId {
+                    if let requests = friendRequests as? [FriendRequest] {
                         
-                        unconfirmedSentInvites.append(friendRequest)
+                        for friendRequest in requests {
+                            
+                            if friendRequest.fromUser?.objectId == self.objectId {
+                                
+                                unconfirmedSentInvites.append(friendRequest)
+                            }
+                            else {
+                                
+                                unconfirmedInvites.append(friendRequest)
+                            }
+                        }
                     }
-                    else {
+                    
+                    self.allInvites = []
+                    self.allInvites.append(unconfirmedInvites)
+                    self.allInvites.append(unconfirmedSentInvites)
+                    
+                    if User.currentUser()?.objectId == self.objectId {
                         
-                        unconfirmedInvites.append(friendRequest)
+                        completion(invites: self.allInvites)
                     }
-                }
+                })
             }
-            
-            self.allInvites = []
-            self.allInvites.append(unconfirmedInvites)
-            self.allInvites.append(unconfirmedSentInvites)
-            
-            completion(invites: self.allInvites)
-        })
+        }
     }
     
     class func userListExcludingID(id: String?) -> Array<User> {

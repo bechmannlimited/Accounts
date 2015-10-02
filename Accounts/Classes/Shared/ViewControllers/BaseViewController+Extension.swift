@@ -37,10 +37,11 @@ extension BaseViewController {
         UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.Default, animated: true)
     }
     
-    func isInsidePopover() -> Bool {
-
-        return view.frame != UIScreen.mainScreen().bounds
-    }
+//    func isInsidePopoverUsingTableView(tableView: UITableView) -> Bool {
+//
+//        return modalPresentationStyle == UIModalPresentationStyle.Popover
+//        return popoverPresentationController?.arrowDirection != UIPopoverArrowDirection.Unknown && kDevice == .Pad
+//    }
     
     func setupNoDataLabel(noDataView:UILabel, text: String, originView: UIView) {
         

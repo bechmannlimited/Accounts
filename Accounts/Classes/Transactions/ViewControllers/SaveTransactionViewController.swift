@@ -314,14 +314,14 @@ class SaveTransactionViewController: SaveItemViewController {
                 
                 let usersToChooseFrom = User.userListExcludingID(nil) // User.userListExcludingID(transaction.fromUser?.objectId)
                 
-                let v = SelectUsersViewController(identifier: identifier, user: transaction.toUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+                let v = SelectUsersViewController(identifier: identifier, user: transaction.toUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom, isInsidePopover: isInsidePopover)
                 navigationController?.pushViewController(v, animated: true)
             }
             else if identifier == "User" {
                 
                 let usersToChooseFrom = User.userListExcludingID(nil)
                 
-                let v = SelectUsersViewController(identifier: identifier, user: transaction.fromUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+                let v = SelectUsersViewController(identifier: identifier, user: transaction.fromUser, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom, isInsidePopover: isInsidePopover)
                 navigationController?.pushViewController(v, animated: true)
             }
             else if identifier == "Location" {
