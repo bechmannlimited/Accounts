@@ -49,6 +49,7 @@
 		E442C34A1B510FAF0061CAE6 /* Assets in Resources */ = {isa = PBXBuildFile; fileRef = E442C3491B510FAF0061CAE6 /* Assets */; };
 		E442C3501B52BE030061CAE6 /* ParseKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C34F1B52BE030061CAE6 /* ParseKeys.swift */; };
 		E442C3521B52C3150061CAE6 /* FriendRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C3511B52C3150061CAE6 /* FriendRequest.swift */; };
+		E44681501BC18E3E00056691 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E446814F1BC18E3E00056691 /* AboutViewController.swift */; settings = {ASSET_TAGS = (); }; };
 		E44881F51B7D145900043237 /* IOSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44881F41B7D145900043237 /* IOSession.swift */; };
 		E455C4EA1B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E455C4E91B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift */; };
 		E45F0B4A1B7F3DD8004D59E2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45F0B491B7F3DD8004D59E2 /* Constants.swift */; };
@@ -181,6 +182,7 @@
 		E442C3491B510FAF0061CAE6 /* Assets */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Assets; sourceTree = SOURCE_ROOT; };
 		E442C34F1B52BE030061CAE6 /* ParseKeys.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ParseKeys.swift; path = ../ParseKeys.swift; sourceTree = "<group>"; };
 		E442C3511B52C3150061CAE6 /* FriendRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendRequest.swift; sourceTree = "<group>"; };
+		E446814F1BC18E3E00056691 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AboutViewController.swift; path = About/ViewControllers/AboutViewController.swift; sourceTree = "<group>"; };
 		E44881F41B7D145900043237 /* IOSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IOSession.swift; sourceTree = "<group>"; };
 		E455C4E91B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionPurchaseInfoTableViewCell.swift; sourceTree = "<group>"; };
 		E45F0B491B7F3DD8004D59E2 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -395,6 +397,7 @@
 		E442C2ED1B510E940061CAE6 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				E446814E1BC18E0B00056691 /* About */,
 				E4F2E62D1BBB462E00CD7E94 /* ABToolKit */,
 				E407B96E1B83B5BA001E0183 /* External */,
 				E442C2EE1B510E940061CAE6 /* Friends */,
@@ -664,6 +667,22 @@
 				E442C3271B510E940061CAE6 /* Main.storyboard */,
 			);
 			path = Storyboards;
+			sourceTree = "<group>";
+		};
+		E446814E1BC18E0B00056691 /* About */ = {
+			isa = PBXGroup;
+			children = (
+				E44681511BC18E4600056691 /* ViewControllers */,
+			);
+			name = About;
+			sourceTree = "<group>";
+		};
+		E44681511BC18E4600056691 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				E446814F1BC18E3E00056691 /* AboutViewController.swift */,
+			);
+			name = ViewControllers;
 			sourceTree = "<group>";
 		};
 		E46A306E1B7C8A760056EF8F /* Extensions */ = {
@@ -1025,6 +1044,7 @@
 				E48C52381B6970860056A7E3 /* BouncyHeaderView.swift in Sources */,
 				E4F2E6751BBB463E00CD7E94 /* NSData+Extension.swift in Sources */,
 				E442C32A1B510E940061CAE6 /* FriendsViewController.swift in Sources */,
+				E44681501BC18E3E00056691 /* AboutViewController.swift in Sources */,
 				E442C33A1B510E940061CAE6 /* ACFormViewController.swift in Sources */,
 				E4F2E6791BBB463E00CD7E94 /* String+Extension.swift in Sources */,
 				E4F2E66F1BBB463E00CD7E94 /* Compressor.swift in Sources */,

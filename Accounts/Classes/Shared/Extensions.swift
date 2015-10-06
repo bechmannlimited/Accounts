@@ -35,6 +35,7 @@ extension NSDate {
         
         var rc = self.toString("dd/MM/yyyy HH:mm")
         let dateRange = DateRange(startDate: self, endDate: NSDate())
+        
         let s = dateRange.months == 1 ? "" : "s"
         rc = "\(dateRange.months) month\(s) ago"
         

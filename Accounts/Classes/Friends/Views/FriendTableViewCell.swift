@@ -219,7 +219,7 @@ class FriendTableViewCell: UITableViewCell {
         friendNameLabel.addLeftConstraint(toView: friendImageView, attribute: .Right, relation: .Equal, constant: kContentViewGap)
         friendNameLabel.addTopConstraint(toView: contentView, relation: .Equal, constant: kContentViewVerticalPadding)
         friendNameLabel.addBottomConstraint(toView: contentView, relation: .Equal, constant: -kContentViewVerticalPadding)
-        friendNameLabel.addRightConstraint(toView: detailTextLabel, attribute: .Left, relation: .Equal, constant: kContentViewGap)
+        friendNameLabel.addRightConstraint(toView: detailTextLabel, attribute: .Left, relation: .Equal, constant: -kContentViewGap)
     }
     
     func setupAmountOwedLabel() {

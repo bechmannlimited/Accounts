@@ -15,6 +15,7 @@ import SwiftOverlays
 import AFDateHelper
 
 private let kProfileSection = 3
+private let kAboutSection = 4
 private let kTestBotSection = 2
 //private let kShareSection = 2
 private let kFeedbackSection = 1
@@ -32,6 +33,8 @@ private let kTestBotIndexPath = NSIndexPath(forRow: 0, inSection: kTestBotSectio
 
 private let kFriendsIndexPath = NSIndexPath(forRow: 0, inSection: kFriendsSection)
 
+private let kAboutIndexPath = NSIndexPath(forItem: 0, inSection: kAboutSection)
+
 protocol MenuDelegate {
     
     func menuDidClose()
@@ -44,6 +47,7 @@ class MenuViewController: ACBaseViewController {
         [kFriendsIndexPath, kShareIndexPath],
         [kFeedbackIndexPath],
         [kTestBotIndexPath],
+        //[kAboutIndexPath],
         [kProfileIndexPath, kLogoutIndexPath]
     ]
     
@@ -170,6 +174,11 @@ extension MenuViewController: UITableViewDataSource {
                 cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             })
         }
+        else if indexPath == kAboutIndexPath {
+            
+            cell.textLabel?.text = "About"
+            cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+        }
         
         return cell
     }
@@ -283,6 +292,11 @@ extension MenuViewController: UITableViewDataSource {
             let v = FriendInvitesViewController()
             navigationController?.pushViewController(v, animated: true)
         }
+        else if indexPath == kAboutIndexPath {
+            
+            let v = AboutViewController()
+            navigationController?.pushViewController(v, animated: true)
+        }
     }
     
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -300,6 +314,10 @@ extension MenuViewController: UITableViewDataSource {
         if section == kFeedbackSection {
             
             return "Send a message to our support team at any time and we'll respond asap (online 09:00 - 21:00 GMT+1)"
+        }
+        else if section == kTestBotSection {
+            
+            return "Use ioubot to test out the app before all your friends get setup. "
         }
         else if section == kFriendsSection {
             

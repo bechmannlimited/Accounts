@@ -82,11 +82,31 @@ class TransactionTableViewCell: UITableViewCell {
         dateLabel.addBottomConstraint(toView: contentView, relation: .Equal, constant: 0)
         dateLabel.addWidthConstraint(relation: .Equal, constant: 100)
         
-        textLabel?.frame = CGRect(x: 0, y: 0, width: textLabel!.frame.width - 100, height: textLabel!.frame.height)
-        detailTextLabel?.frame = CGRect(x: 0, y: 0, width: detailTextLabel!.frame.width - 100, height: detailTextLabel!.frame.height)
-        
         textLabel?.font = UIFont.normalFont(textLabel!.font.pointSize)
         detailTextLabel?.font = UIFont.normalFont(detailTextLabel!.font.pointSize)
+    }
+    
+    var originalTextLabelFrame: CGRect?
+    var originalDetailTextLabelFrame: CGRect?
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        if originalDetailTextLabelFrame == nil {
+            
+            originalTextLabelFrame = textLabel?.frame
+            originalDetailTextLabelFrame = detailTextLabel?.frame
+        }
+        
+        if let originalTextLabelFrame = originalTextLabelFrame {
+            
+            textLabel?.frame = CGRect(x: originalTextLabelFrame.origin.x, y: originalTextLabelFrame.origin.y, width: contentView.frame.width - 135, height: originalTextLabelFrame.height)
+        }
+        
+        if let originalDetailTextLabelFrame = originalDetailTextLabelFrame {
+            
+            detailTextLabel?.frame = CGRect(x: originalDetailTextLabelFrame.origin.x, y: originalDetailTextLabelFrame.origin.y, width: contentView.frame.width - 135, height: originalDetailTextLabelFrame.height)
+        }
     }
 
 }
