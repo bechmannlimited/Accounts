@@ -15,6 +15,12 @@ import SwiftOverlays
 
 class StartViewController: ACBaseViewController {
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = AccountColor.blueColor()
+    }
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -37,6 +43,14 @@ class StartViewController: ACBaseViewController {
             
             loginViewController.delegate = self
             signUpViewController.delegate = self
+            
+            let helpButton = UIButton(frame: CGRect(x: 0, y: 20, width: 100, height: 40))
+            helpButton.setTitle("Get help", forState: UIControlState.Normal)
+            helpButton.setTitleColor(AccountColor.blueColor(), forState: UIControlState.Normal)
+            helpButton.setTitleColor(UIColor.grayColor(), forState: UIControlState.Highlighted)
+            helpButton.addTarget(self, action: "help", forControlEvents: UIControlEvents.TouchUpInside)
+            loginViewController.view.addSubview(helpButton)
+            
         }
         else{
             
@@ -48,6 +62,11 @@ class StartViewController: ACBaseViewController {
              
             }
         }
+    }
+    
+    func help() {
+        
+        SupportKit.show()
     }
     
     func titleView() -> UIView {

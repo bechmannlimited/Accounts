@@ -40,37 +40,42 @@ extension NSDate {
         let a = dateRange.months == 1 ? "a" : "\(dateRange.months)"
         rc = "\(a) month\(s) ago"
         
-        if dateRange.months < 1{
+        if dateRange.months < 1 {
+            
             var text = ""
+            
             switch dateRange.days{
             case 0:
-                text = "Today"
+                text = "today"
                 break
             case 1:
-                text = "Yesterday"
+                text = "yesterday"
                 break
                 
             default:
                 text = "\(dateRange.days) days ago"
                 break
             }
+            
             rc = text
         }
         
-        if dateRange.days < 1{
+        if dateRange.days < 1 {
+            
             let s = dateRange.hours == 1 ? "" : "s"
             let a = dateRange.hours == 1 ? "an" : "\(dateRange.hours)"
             rc = "\(a) hour\(s) ago"
         }
         
-        if dateRange.days < 1 && dateRange.hours < 1 && dateRange.minutes < 60{
+        if dateRange.days < 1 && dateRange.hours < 1 && dateRange.minutes < 60 {
+            
             let s = dateRange.minutes == 1 ? "" : "s"
             let a = dateRange.minutes == 1 ? "a" : "\(dateRange.minutes)"
             rc = "\(a) min\(s) ago"
         }
         
         if dateRange.days < 1 && dateRange.hours < 1 && dateRange.minutes == 0{
-            rc = "Just now"
+            rc = "just now"
         }
         
         return rc
