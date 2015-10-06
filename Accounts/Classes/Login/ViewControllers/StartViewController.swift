@@ -15,14 +15,10 @@ import SwiftOverlays
 
 class StartViewController: ACBaseViewController {
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        view.backgroundColor = AccountColor.blueColor()
-    }
-    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
+        
+        view.backgroundColor = AccountColor.blueColor()
         
         if PFUser.currentUser() == nil {
             
@@ -39,12 +35,14 @@ class StartViewController: ACBaseViewController {
             let signUpViewController = PFSignUpViewController()
             loginViewController.signUpController = signUpViewController
             
+            signUpViewController.signUpView?.logo = titleView()
+            
             self.presentViewController(loginViewController, animated: true, completion: nil)
             
             loginViewController.delegate = self
             signUpViewController.delegate = self
             
-            let helpButton = UIButton(frame: CGRect(x: 0, y: 20, width: 100, height: 40))
+            let helpButton = UIButton(frame: CGRect(x: -8, y: kDevice == .Pad ? 0 : 20, width: 100, height: 40))
             helpButton.setTitle("Get help", forState: UIControlState.Normal)
             helpButton.setTitleColor(AccountColor.blueColor(), forState: UIControlState.Normal)
             helpButton.setTitleColor(UIColor.grayColor(), forState: UIControlState.Highlighted)
