@@ -37,7 +37,8 @@ extension NSDate {
         let dateRange = DateRange(startDate: self, endDate: NSDate())
         
         let s = dateRange.months == 1 ? "" : "s"
-        rc = "\(dateRange.months) month\(s) ago"
+        let a = dateRange.months == 1 ? "a" : "\(dateRange.months)"
+        rc = "\(a) month\(s) ago"
         
         if dateRange.months < 1{
             var text = ""
@@ -58,12 +59,14 @@ extension NSDate {
         
         if dateRange.days < 1{
             let s = dateRange.hours == 1 ? "" : "s"
-            rc = "\(dateRange.hours) hour\(s) ago"
+            let a = dateRange.hours == 1 ? "an" : "\(dateRange.hours)"
+            rc = "\(a) hour\(s) ago"
         }
         
         if dateRange.days < 1 && dateRange.hours < 1 && dateRange.minutes < 60{
             let s = dateRange.minutes == 1 ? "" : "s"
-            rc = "\(dateRange.minutes) min\(s) ago"
+            let a = dateRange.minutes == 1 ? "a" : "\(dateRange.minutes)"
+            rc = "\(a) min\(s) ago"
         }
         
         if dateRange.days < 1 && dateRange.hours < 1 && dateRange.minutes == 0{
