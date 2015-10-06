@@ -44,7 +44,7 @@ class FriendsViewController: ACBaseViewController {
         title = "Friends"
         view.showLoader()
         
-        if kDevice == .Pad {
+        if view.frame.width > kTableViewMaxWidth {
             
             tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }

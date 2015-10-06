@@ -174,7 +174,7 @@ class FriendTableViewCell: UITableViewCell {
         optionMenu.addAction(deleteAction)
         optionMenu.addAction(cancelAction)
         
-        if kDevice == .Pad {
+        if frame.width > kTableViewMaxWidth {
             
             optionMenu.popoverPresentationController!.sourceView = self.contentView
             optionMenu.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 0, width: 70, height: contentView.frame.height)

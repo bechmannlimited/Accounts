@@ -65,7 +65,7 @@ class SelectUsersViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if kDevice == .Pad && !isInsidePopover {
+        if view.frame.width > kTableViewMaxWidth && !isInsidePopover {
             
             tableView = UITableView(frame: CGRectZero, style: .Grouped)
         }
@@ -107,7 +107,7 @@ class SelectUsersViewController: ACBaseViewController {
         
         refresh(nil)
         
-        if kDevice == .Pad && !isInsidePopover {
+        if view.frame.width > kTableViewMaxWidth && !isInsidePopover {
             
             tableView.separatorColor = .clearColor()
         }

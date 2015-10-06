@@ -23,7 +23,7 @@ class SaveItemViewController: ACFormViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        if kDevice == .Pad && !isInsidePopover{
+        if view.frame.width > kTableViewMaxWidth && !isInsidePopover{
             
             tableView.separatorColor = .clearColor()
         }

@@ -90,7 +90,7 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDataSource {
                 transaction.fromUser = User.currentUser()
                 transaction.toUser = friend
 
-                v.isInsidePopover = kDevice == .Pad
+                v.isInsidePopover = view.frame.width > kTableViewMaxWidth
                 v.purchase.transactions = []
                 v.purchase.transactions.append(transaction)
             }
@@ -114,7 +114,7 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDataSource {
                 v.transaction.type = TransactionType.payment
             }
 
-            v.isInsidePopover = kDevice == .Pad
+            v.isInsidePopover = view.frame.width > kTableViewMaxWidth
             v.delegate = saveItemDelegate
             saveItemDelegate?.newItemViewControllerWasPresented(v)
             

@@ -274,7 +274,7 @@ extension MenuViewController: UITableViewDataSource {
                 
                 let cell = tableView.cellForRowAtIndexPath(indexPath)!
                 
-                if kDevice == .Pad {
+                if view.frame.width > kTableViewMaxWidth {
                     
                     activityVC.popoverPresentationController!.sourceView = cell.contentView
                     activityVC.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 0, width: 140, height: cell.contentView.frame.height)

@@ -62,7 +62,7 @@ class TransactionsViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        if kDevice == .Pad {
+        if view.frame.width > kTableViewMaxWidth {
         
             tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
@@ -87,7 +87,7 @@ class TransactionsViewController: ACBaseViewController {
             setupBouncyHeaderView()
         }
         
-        if kDevice == .Pad {
+        if view.frame.width > kTableViewMaxWidth {
             
             tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top + 40, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
         }
@@ -155,7 +155,7 @@ class TransactionsViewController: ACBaseViewController {
                 imageView.addSubview(blurView)
                 
                 let cover = UIView()
-                cover.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(kDevice == .Pad ? 0.75 : 0.45)
+                cover.backgroundColor = UIColor.whiteColor().colorWithAlphaComponent(view.frame.width > kTableViewMaxWidth ? 0.75 : 0.45)
                 cover.frame = imageView.bounds
                 imageView.addSubview(cover)
             }
@@ -656,7 +656,7 @@ extension TransactionsViewController: UITableViewDataSource {
         
         cell.setupCell(transaction)
 
-        cell.backgroundColor = kDevice == .Pad ? UIColor.whiteColor() : UIColor.whiteColor().colorWithAlphaComponent(0.5)
+        cell.backgroundColor = view.frame.width > kTableViewMaxWidth ? UIColor.whiteColor() : UIColor.whiteColor().colorWithAlphaComponent(0.5)
         cell.layer.rasterizationScale = UIScreen.mainScreen().scale
         cell.layer.shouldRasterize = true
         
@@ -684,7 +684,7 @@ extension TransactionsViewController: UITableViewDataSource {
             v.transactionObjectId = transaction.objectId
             v.existingTransaction = transaction
             v.isExistingTransaction = true
-            v.isInsidePopover = kDevice == .Pad
+            v.isInsidePopover = view.frame.width > kTableViewMaxWidth
             v.delegate = self
             openView(v, sourceView: cell.contentView)
         }
