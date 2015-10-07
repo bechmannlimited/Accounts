@@ -18,7 +18,10 @@ class StartViewController: ACBaseViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        view.backgroundColor = AccountColor.blueColor()
+//        SKTUser.currentUser().firstName = nil
+//        SKTUser.currentUser().addProperties([ "objectId" : "" ])
+        
+        //view.backgroundColor = AccountColor.blueColor()
         
         if PFUser.currentUser() == nil {
             
