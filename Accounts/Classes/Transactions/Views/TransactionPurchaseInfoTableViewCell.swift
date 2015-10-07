@@ -34,7 +34,6 @@ class TransactionPurchaseInfoTableViewCell: UITableViewCell {
     
     func setViewForRetry() {
         
-        
         self.detailTextLabel?.text = "load failed..."
         accessoryView = button
     }

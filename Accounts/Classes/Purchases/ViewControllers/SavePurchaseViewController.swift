@@ -239,6 +239,10 @@ class SavePurchaseViewController: SaveItemViewController {
             //FormViewConfiguration.normalCell("Location")
             ])
         
+        sections.append([
+            FormViewConfiguration.switchCell("Secure", isOn: purchase.isSecure, identifier: "isSecure")
+        ])
+        
         if purchaseObjectId != nil {
             
             sections.append([
@@ -427,6 +431,13 @@ class SavePurchaseViewController: SaveItemViewController {
         itemDidChange = true
     }
 
+    override func formViewSwitchChanged(identifier: String, on: Bool) {
+        
+        if identifier == "isSecure" {
+            
+            purchase.isSecure = on
+        }
+    }
 }
 
 

@@ -686,7 +686,34 @@ extension TransactionsViewController: UITableViewDataSource {
             v.isExistingTransaction = true
             v.isInsidePopover = kDevice == .Pad
             v.delegate = self
-            openView(v, sourceView: cell.contentView)
+            
+            if #available(iOS 9.0, *) {
+                
+                if transaction.isSecure && NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) {
+                    
+                    NKTouchID.authenticateWithTouchId(reason: "Please verify yourself to open this transaction!", callback: { (success, error) in
+                        
+                        if success {
+                            
+                            self.openView(v, sourceView: cell.contentView)
+                        }
+                        else {
+                            
+                            self.deselectSelectedCell(tableView)
+                        }
+                    })
+                }
+                else {
+                    
+                    openView(v, sourceView: cell.contentView)
+                }
+            }
+            else {
+                
+                openView(v, sourceView: cell.contentView)
+            }
+            
+            
         }
         
         selectedRow = indexPath

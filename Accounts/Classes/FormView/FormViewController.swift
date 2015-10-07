@@ -21,6 +21,7 @@ public protocol FormViewDelegate {
     func formViewTextFieldEditingChanged(identifier: String, text: String)
     func formViewTextFieldCurrencyEditingChanged(identifier: String, value: Double)
     func formViewDateChanged(identifier: String, date: NSDate)
+    func formViewSwitchChanged(identifier: String, on: Bool)
     func formViewButtonTapped(identifier: String)
     func formViewDidSelectRow(identifier: String)
     func formViewElementDidChange(identifier: String, value: AnyObject?)
@@ -110,6 +111,10 @@ public class FormViewController: BaseViewController, FormViewDelegate {
     public func formViewTextFieldEditingChanged(identifier: String, text: String) {
         
     }
+    
+    public func formViewSwitchChanged(identifier: String, on: Bool) {
+        
+    }
 }
 
 extension FormViewController: UITableViewDataSource {
@@ -172,6 +177,15 @@ extension FormViewController: UITableViewDataSource {
         else if config.formCellType == FormCellType.Button {
             
             let cell = FormViewButtonCell()
+            
+            cell.formViewDelegate = formViewDelegate
+            cell.config = config
+            
+            return cell
+        }
+        else if config.formCellType == FormCellType.Switch {
+            
+            let cell = FormViewSwitchCell()
             
             cell.formViewDelegate = formViewDelegate
             cell.config = config

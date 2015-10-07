@@ -13,6 +13,7 @@ let kPurchaseImage = AppTools.iconAssetNamed("1007-price-tag-toolbar.png")
 //private let kTransactionImage =AppTools.iconAssetNamed("922-suitcase-toolbar.png")
 let kPaymentImage = AppTools.iconAssetNamed("826-money-1-toolbar")
 let kIouImage = AppTools.iconAssetNamed("922-suitcase-toolbar.png")
+let kSecureImage = AppTools.iconAssetNamed("744-locked-toolbar")
 
 class TransactionTableViewCell: UITableViewCell {
 
@@ -58,15 +59,16 @@ class TransactionTableViewCell: UITableViewCell {
             imageView?.image = kPurchaseImage
         }
         
-        if transaction.purchaseTransactionLinkUUID != nil {
-            
-            //imageView?.image = kPurchaseImage
-        }
-        
         imageView?.tintWithColor(tintColor)
         textLabel?.text = "\(transaction.title!)"
         detailTextLabel?.text = iouText
         accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+        
+        // if secure
+        if transaction.isSecure {
+            
+            secureCell()
+        }
         
         dateLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
         dateLabel.font = UIFont.lightFont(14)
@@ -84,6 +86,26 @@ class TransactionTableViewCell: UITableViewCell {
         
         textLabel?.font = UIFont.normalFont(textLabel!.font.pointSize)
         detailTextLabel?.font = UIFont.normalFont(detailTextLabel!.font.pointSize)
+    }
+    
+    func secureCell() {
+        
+        imageView?.image = kSecureImage
+        imageView?.tintWithColor(UIColor.darkGrayColor())
+        
+        textLabel?.text = "************"
+        detailTextLabel?.text = "********"
+        
+//        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.Light))
+//        blurView.translatesAutoresizingMaskIntoConstraints = false
+//        contentView.addSubview(blurView)
+//        
+//        blurView.layer.shouldRasterize = true
+//        blurView.layer.rasterizationScale = UIScreen.mainScreen().scale
+//        
+//        blurView.fillSuperView(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 50))
+        
+        contentView.bringSubviewToFront(imageView!)
     }
     
     var originalTextLabelFrame: CGRect?

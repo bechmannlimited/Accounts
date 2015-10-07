@@ -18,6 +18,7 @@ class Purchase: PFObject {
     @NSManaged var user: User
     @NSManaged var purchasedDate:NSDate?
     @NSManaged var purchaseTransactionLinkUUID: String?
+    @NSManaged var isSecure: Bool
     
     var amount: Double = 0
     var transactions: Array<Transaction> = []
@@ -95,6 +96,7 @@ class Purchase: PFObject {
             transaction.title = title
             transaction.purchase = self
             transaction.purchaseTransactionLinkUUID = purchaseTransactionLinkUUID
+            transaction.isSecure = isSecure
             
             if transaction.fromUser != transaction.toUser {
                 
@@ -520,6 +522,7 @@ class Purchase: PFObject {
         purchase.title = title
         purchase.purchasedDate = purchasedDate
         purchase.transactions = []
+        purchase.isSecure = isSecure
         
         for transaction in transactions {
             
@@ -536,6 +539,7 @@ class Purchase: PFObject {
         title = purchase.title
         purchasedDate = purchase.purchasedDate
         transactions = purchase.transactions
+        isSecure = purchase.isSecure
     }
 }
 

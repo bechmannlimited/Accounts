@@ -177,6 +177,10 @@ class SaveTransactionViewController: SaveItemViewController {
                 ])
         }
         
+        sections.append([
+            FormViewConfiguration.switchCell("Secure", isOn: transaction.isSecure, identifier: "isSecure")
+        ])
+        
         if isExistingTransaction && allowEditing {
             
             sections.append([
@@ -253,6 +257,14 @@ class SaveTransactionViewController: SaveItemViewController {
         if identifier == "TransactionDate" {
             
             transaction.transactionDate = date
+        }
+    }
+    
+    override func formViewSwitchChanged(identifier: String, on: Bool) {
+        
+        if identifier == "isSecure" {
+            
+            transaction.isSecure = on
         }
     }
     
