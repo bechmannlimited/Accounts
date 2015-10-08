@@ -92,43 +92,48 @@ class TransactionTableViewCell: UITableViewCell {
         
         imageView?.image = kSecureImage
         imageView?.tintWithColor(UIColor.darkGrayColor())
+        detailTextLabel?.textColor = AccountColor.blueColor()
         
         textLabel?.text = "************"
         detailTextLabel?.text = "********"
-        
-//        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.Light))
-//        blurView.translatesAutoresizingMaskIntoConstraints = false
-//        contentView.addSubview(blurView)
-//        
-//        blurView.layer.shouldRasterize = true
-//        blurView.layer.rasterizationScale = UIScreen.mainScreen().scale
-//        
-//        blurView.fillSuperView(UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 50))
-        
-        contentView.bringSubviewToFront(imageView!)
     }
     
     var originalTextLabelFrame: CGRect?
     var originalDetailTextLabelFrame: CGRect?
+    var originalImageViewFrame: CGRect?
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
         if originalDetailTextLabelFrame == nil {
             
+            originalImageViewFrame = imageView?.frame
+        }
+        
+        let imageWidth: CGFloat = 22
+        let imageMargins: CGFloat = imageView!.frame.origin.x * 2
+        
+        if let originalImageViewFrame = originalImageViewFrame {
+            
+            imageView?.frame = CGRect(x: originalImageViewFrame.origin.x, y: originalImageViewFrame.origin.y, width: imageWidth, height: originalImageViewFrame.height)
+        }
+        
+        if originalDetailTextLabelFrame == nil { // second if statement on purpose // altho might not be neccessary any more
+            
             originalTextLabelFrame = textLabel?.frame
             originalDetailTextLabelFrame = detailTextLabel?.frame
         }
         
+        imageView?.contentMode = UIViewContentMode.ScaleAspectFit
+        
         if let originalTextLabelFrame = originalTextLabelFrame {
             
-            textLabel?.frame = CGRect(x: originalTextLabelFrame.origin.x, y: originalTextLabelFrame.origin.y, width: contentView.frame.width - 135, height: originalTextLabelFrame.height)
+            textLabel?.frame = CGRect(x: imageWidth + imageMargins, y: originalTextLabelFrame.origin.y, width: contentView.frame.width - 145, height: originalTextLabelFrame.height)
         }
         
         if let originalDetailTextLabelFrame = originalDetailTextLabelFrame {
             
-            detailTextLabel?.frame = CGRect(x: originalDetailTextLabelFrame.origin.x, y: originalDetailTextLabelFrame.origin.y, width: contentView.frame.width - 135, height: originalDetailTextLabelFrame.height)
+            detailTextLabel?.frame = CGRect(x: imageWidth + imageMargins, y: originalDetailTextLabelFrame.origin.y, width: contentView.frame.width - 145, height: originalDetailTextLabelFrame.height)
         }
     }
-
 }

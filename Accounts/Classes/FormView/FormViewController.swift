@@ -27,6 +27,8 @@ public protocol FormViewDelegate {
     func formViewElementDidChange(identifier: String, value: AnyObject?)
     
     func formViewElementIsEditable(identifier: String) -> Bool
+    
+    func formViewElementWasDeniedEditing(identifier: String)
 }
 
 public class FormViewController: BaseViewController, FormViewDelegate {
@@ -113,6 +115,11 @@ public class FormViewController: BaseViewController, FormViewDelegate {
     }
     
     public func formViewSwitchChanged(identifier: String, on: Bool) {
+        
+    }
+    
+    public func formViewElementWasDeniedEditing(identifier: String) {
+        
         
     }
 }
@@ -210,16 +217,28 @@ extension FormViewController: UITableViewDataSource {
         
         selectedIndexPath = selectedIndexPath != indexPath ? indexPath : nil
         
-        if config.formCellType == FormCellType.None {
+        if (formViewDelegate?.formViewElementIsEditable(config.identifier) != nil ? formViewDelegate!.formViewElementIsEditable(config.identifier) : false) {
             
-            formViewDelegate?.formViewDidSelectRow(config.identifier)
-        }
-        
-        if let cell = tableView.cellForRowAtIndexPath(indexPath) as? FormViewTextFieldCell {
+            if config.formCellType == FormCellType.None {
+                
+                formViewDelegate?.formViewDidSelectRow(config.identifier)
+            }
             
-            cell.textField.becomeFirstResponder()
+            if let cell = tableView.cellForRowAtIndexPath(indexPath) as? FormViewTextFieldCell {
+                
+                cell.textField.becomeFirstResponder()
+            }
+            else if let cell = tableView.cellForRowAtIndexPath(indexPath) as? FormViewSwitchCell {
+                
+                cell.toggleSwitch()
+            }
+            
         }
-        
+        else {
+            
+            formViewDelegate?.formViewElementWasDeniedEditing(config.identifier)
+        }
+
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
         tableView.beginUpdates()
         tableView.endUpdates()

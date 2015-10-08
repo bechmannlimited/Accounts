@@ -421,6 +421,11 @@ class SavePurchaseViewController: SaveItemViewController {
     
     override func formViewElementIsEditable(identifier: String) -> Bool {
         
+        if identifier == "isSecure" {
+            
+            return User.currentUser()?.userType == UserType.ProUser.rawValue && allowEditing
+        }
+        
         return allowEditing
     }
     
@@ -565,6 +570,19 @@ extension SavePurchaseViewController {
         }
         
         showOrHideSaveButton()
+    }
+    
+    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        
+        if let indexPath = indexPathForFormViewCellIdentifier("isSecure"){
+            
+            if section == indexPath.section {
+                
+                return kIsSecureDescription
+            }
+        }
+        
+        return nil
     }
 }
 

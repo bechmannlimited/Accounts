@@ -349,6 +349,11 @@ class SaveTransactionViewController: SaveItemViewController {
     
     override func formViewElementIsEditable(identifier: String) -> Bool {
         
+        if identifier == "isSecure" {
+            
+            return User.currentUser()?.userType == UserType.ProUser.rawValue && allowEditing
+        }
+        
         return allowEditing
     }
     
@@ -415,6 +420,14 @@ class SaveTransactionViewController: SaveItemViewController {
                     
                     return "This transaction is linked with a bill that was split. The total of that bill is shown here. (read only)"
                 }
+            }
+        }
+        
+        if let indexPath = indexPathForFormViewCellIdentifier("isSecure"){
+            
+            if section == indexPath.section {
+                
+                return kIsSecureDescription
             }
         }
         
