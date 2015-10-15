@@ -67,7 +67,7 @@ class TransactionTableViewCell: UITableViewCell {
         // if secure
         if transaction.isSecure {
             
-            secureCell()
+            //secureCell()
         }
         
         dateLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 50)

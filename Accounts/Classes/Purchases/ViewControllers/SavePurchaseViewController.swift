@@ -239,9 +239,9 @@ class SavePurchaseViewController: SaveItemViewController {
             //FormViewConfiguration.normalCell("Location")
             ])
         
-        sections.append([
-            FormViewConfiguration.switchCell("Secure", isOn: purchase.isSecure, identifier: "isSecure")
-        ])
+//        sections.append([
+//            FormViewConfiguration.switchCell("Secure", isOn: purchase.isSecure, identifier: "isSecure")
+//        ])
         
         if purchaseObjectId != nil {
             

@@ -623,4 +623,26 @@ class User: PFUser {
         })
     }
 
+    func urlForProfilePicture() -> String {
+        
+        var url = ""
+        
+        if let id = facebookId {
+            
+            url = "https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)"
+            
+        }
+        
+        return url
+    }
+    
+    func getProfilePicture(completion: (image: UIImage) -> ()) {
+        
+        let url = urlForProfilePicture()
+        
+        ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+            
+            completion(image: image)
+        })
+    }
 }

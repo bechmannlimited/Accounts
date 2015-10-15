@@ -177,15 +177,15 @@ class SaveTransactionViewController: SaveItemViewController {
                 ])
         }
         
-        sections.append([
-            FormViewConfiguration.switchCell("Secure", isOn: transaction.isSecure, identifier: "isSecure")
-        ])
+//        sections.append([
+//            FormViewConfiguration.switchCell("Secure", isOn: transaction.isSecure, identifier: "isSecure")
+//        ])
         
         if isExistingTransaction && allowEditing {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
-                ])
+            ])
         }
         
         return sections

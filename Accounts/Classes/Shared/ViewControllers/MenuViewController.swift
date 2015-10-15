@@ -14,12 +14,12 @@ import Parse
 import SwiftOverlays
 import AFDateHelper
 
-private let kProfileSection = 4
+private let kProfileSection = 3
 private let kAboutSection = 09999
-private let kTestBotSection = 3
+private let kTestBotSection = 2
 //private let kShareSection = 2
-private let kFeedbackSection = 2
-private let kFriendsSection = 1
+private let kFeedbackSection = 1
+private let kFriendsSection = 0
 private let kSubscriptionSection = 0
 
 private let kProfileIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
@@ -47,7 +47,7 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
-        [kSubscriptionIndexPath],
+        //[kSubscriptionIndexPath],
         [kFriendsIndexPath, kShareIndexPath],
         [kFeedbackIndexPath],
         [kTestBotIndexPath],
@@ -242,6 +242,7 @@ extension MenuViewController: UITableViewDataSource {
                                 User.currentUser()?.unpin()
                                 PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
                                 PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
+                                SupportKit.logout()
                                 
                             }, completion: { () -> () in
                                 
@@ -282,7 +283,7 @@ extension MenuViewController: UITableViewDataSource {
             v.delegate = self
             navigationController?.pushViewController(v, animated: true)
         }
-        else if indexPath == kFeedbackIndexPath{
+        else if indexPath == kFeedbackIndexPath {
             
             SupportKit.show()
         }
