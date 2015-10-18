@@ -144,9 +144,9 @@ extension MenuViewController: UITableViewDataSource {
             let localizedDate = NSDate(fromString: localizedDateString, format: .Custom(dateFormatter.dateFormat))
             let online = localizedDate.timeIntervalSince1970 >= localizedDate.dateAtStartOfDay().dateByAddingHours(9).timeIntervalSince1970 && localizedDate.timeIntervalSince1970 <= localizedDate.dateAtStartOfDay().dateByAddingHours(21).timeIntervalSince1970
             
-            cell.detailTextLabel?.text = online ? "online" : "offline"
+            cell.detailTextLabel?.text = online ? "online" : "away"
             
-            let dotColor = online ? AccountColor.greenColor() : AccountColor.redColor()
+            let dotColor = online ? AccountColor.greenColor() : UIColor(hex: "#F7CA00")
             let dot = UIImageView(image: UIImage.imageWithColor(dotColor, size: CGSize(width: 7, height: 7)))
             dot.clipsToBounds = true
             dot.layer.cornerRadius = dot.frame.width / 2

@@ -49,6 +49,8 @@ class User: PFUser {
     @NSManaged var userType: NSNumber?
     @NSManaged var lastSyncedDataInfo: Dictionary<String, NSDate>?
     
+    var facebookFriendIds = Array<String>()
+    
     var proSubscriptionDialogIsActive: Bool = false
     
     func modelIsValid() -> Bool {
@@ -248,6 +250,7 @@ class User: PFUser {
                                 
                                 for (_, friendJson): (String, JSON) in friendsJson {
                                     
+                                    self.facebookFriendIds.append(friendJson["id"].stringValue)
                                     let friendQuery = User.query()
                                     friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
                                     queries.append(friendQuery!)

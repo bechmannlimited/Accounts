@@ -135,7 +135,14 @@ class FriendTableViewCell: UITableViewCell {
     
     func setupGestureRecognizer() {
         
-        if friend.objectId != kTestBotObjectId {
+        var isFaceBookFriend = false
+        
+        if let id = friend.facebookId {
+            
+            isFaceBookFriend = User.currentUser()?.facebookFriendIds.contains(id) == true
+        }
+        
+        if friend.objectId != kTestBotObjectId && isFaceBookFriend  == false { // TODO: - check if is a facebook friend.
             
             let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: "showFriendOptions:")
             addGestureRecognizer(gestureRecognizer)
