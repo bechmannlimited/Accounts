@@ -46,7 +46,7 @@ extension BaseViewController {
     func setupNoDataLabel(noDataView:UILabel, text: String, originView: UIView) {
         
         noDataView.text = text
-        noDataView.font = UIFont.lightFont(30) //HelveticaNeue-Light
+        noDataView.font = UIFont.lightFont(30) // HelveticaNeue-Light
         noDataView.textColor = UIColor.lightGrayColor()
         noDataView.lineBreakMode = NSLineBreakMode.ByWordWrapping
         noDataView.numberOfLines = 0
@@ -55,7 +55,7 @@ extension BaseViewController {
         noDataView.translatesAutoresizingMaskIntoConstraints = false
         originView.addSubview(noDataView)
         
-        noDataView.addHeightConstraint(relation: .Equal, constant: 400)
+        noDataView.addHeightConstraint(relation: .Equal, constant: 270)
         noDataView.addWidthConstraint(relation: .Equal, constant: 300)
         noDataView.addCenterXConstraint(toView: originView)
         noDataView.addTopConstraint(toView: originView, relation: .Equal, constant: 10)

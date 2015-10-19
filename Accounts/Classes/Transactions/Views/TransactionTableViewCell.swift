@@ -13,6 +13,7 @@ let kPurchaseImage = AppTools.iconAssetNamed("1007-price-tag-toolbar.png")
 //private let kTransactionImage =AppTools.iconAssetNamed("922-suitcase-toolbar.png")
 let kPaymentImage = AppTools.iconAssetNamed("826-money-1-toolbar")
 let kIouImage = AppTools.iconAssetNamed("922-suitcase-toolbar.png")
+let kSecureImage = AppTools.iconAssetNamed("744-locked-toolbar")
 
 class TransactionTableViewCell: UITableViewCell {
 
@@ -58,15 +59,16 @@ class TransactionTableViewCell: UITableViewCell {
             imageView?.image = kPurchaseImage
         }
         
-        if transaction.purchaseTransactionLinkUUID != nil {
-            
-            //imageView?.image = kPurchaseImage
-        }
-        
         imageView?.tintWithColor(tintColor)
         textLabel?.text = "\(transaction.title!)"
         detailTextLabel?.text = iouText
         accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
+        
+        // if secure
+        if transaction.isSecure {
+            
+            //secureCell()
+        }
         
         dateLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
         dateLabel.font = UIFont.lightFont(14)
@@ -86,27 +88,52 @@ class TransactionTableViewCell: UITableViewCell {
         detailTextLabel?.font = UIFont.normalFont(detailTextLabel!.font.pointSize)
     }
     
+    func secureCell() {
+        
+        imageView?.image = kSecureImage
+        imageView?.tintWithColor(UIColor.darkGrayColor())
+        detailTextLabel?.textColor = AccountColor.blueColor()
+        
+        textLabel?.text = "************"
+        detailTextLabel?.text = "********"
+    }
+    
     var originalTextLabelFrame: CGRect?
     var originalDetailTextLabelFrame: CGRect?
+    var originalImageViewFrame: CGRect?
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
         if originalDetailTextLabelFrame == nil {
             
+            originalImageViewFrame = imageView?.frame
+        }
+        
+        let imageWidth: CGFloat = 22
+        let imageMargins: CGFloat = imageView!.frame.origin.x * 2
+        
+        if let originalImageViewFrame = originalImageViewFrame {
+            
+            imageView?.frame = CGRect(x: originalImageViewFrame.origin.x, y: originalImageViewFrame.origin.y, width: imageWidth, height: originalImageViewFrame.height)
+        }
+        
+        if originalDetailTextLabelFrame == nil { // second if statement on purpose // altho might not be neccessary any more
+            
             originalTextLabelFrame = textLabel?.frame
             originalDetailTextLabelFrame = detailTextLabel?.frame
         }
         
+        imageView?.contentMode = UIViewContentMode.ScaleAspectFit
+        
         if let originalTextLabelFrame = originalTextLabelFrame {
             
-            textLabel?.frame = CGRect(x: originalTextLabelFrame.origin.x, y: originalTextLabelFrame.origin.y, width: contentView.frame.width - 135, height: originalTextLabelFrame.height)
+            textLabel?.frame = CGRect(x: imageWidth + imageMargins, y: originalTextLabelFrame.origin.y, width: contentView.frame.width - 145, height: originalTextLabelFrame.height)
         }
         
         if let originalDetailTextLabelFrame = originalDetailTextLabelFrame {
             
-            detailTextLabel?.frame = CGRect(x: originalDetailTextLabelFrame.origin.x, y: originalDetailTextLabelFrame.origin.y, width: contentView.frame.width - 135, height: originalDetailTextLabelFrame.height)
+            detailTextLabel?.frame = CGRect(x: imageWidth + imageMargins, y: originalDetailTextLabelFrame.origin.y, width: contentView.frame.width - 145, height: originalDetailTextLabelFrame.height)
         }
     }
-
 }

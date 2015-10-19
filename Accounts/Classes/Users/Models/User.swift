@@ -12,6 +12,13 @@ import SwiftyJSON
 import Alamofire
 import Parse
 import FBSDKCoreKit
+import SwiftOverlays
+
+enum UserType : NSNumber {
+    
+    case FreeUser = 0
+    case ProUser = 5
+}
 
 class User: PFUser {
     
@@ -39,8 +46,12 @@ class User: PFUser {
     @NSManaged var facebookId: String?
     @NSManaged var displayName: String?
     @NSManaged var friendsIdsWithDifference: Dictionary<String, NSNumber>?
-    
+    @NSManaged var userType: NSNumber?
     @NSManaged var lastSyncedDataInfo: Dictionary<String, NSDate>?
+    
+    var facebookFriendIds = Array<String>()
+    
+    var proSubscriptionDialogIsActive: Bool = false
     
     func modelIsValid() -> Bool {
         
@@ -239,6 +250,7 @@ class User: PFUser {
                                 
                                 for (_, friendJson): (String, JSON) in friendsJson {
                                     
+                                    self.facebookFriendIds.append(friendJson["id"].stringValue)
                                     let friendQuery = User.query()
                                     friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
                                     queries.append(friendQuery!)
@@ -259,20 +271,33 @@ class User: PFUser {
                                 self.friends = friends
                             }
                             
+                            var friendIds = Array<String>()
+                            
                             for friend in self.friends {
                                 
                                 friend.fetch()
+                                friendIds.append(friend.objectId!)
+                            }
+                            
+                            if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
                                 
-                                if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
+                                let responseJson = JSON(cloudResponse)
+                                
+                                for (key,differenceJson):(String, JSON) in responseJson {
                                     
-                                    let responseJson = JSON(cloudResponse)
-                                    friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                                    friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                                    for friend in self.friends {
+                                        
+                                        if friend.objectId == key {
+                                            
+                                            friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
+                                            friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                        }
+                                    }
                                 }
-                                else {
-                                    
-                                    canContinue = false
-                                }
+                            }
+                            else{
+                                
+                                canContinue = false
                             }
                             
                             if canContinue {
@@ -284,13 +309,12 @@ class User: PFUser {
                                 self.saveInBackground()
                             }
                             
+                        }, completion: { () -> () in
                             
-                            }, completion: { () -> () in
+                            if canContinue {
                                 
-                                if canContinue {
-                                    
-                                    completion(completedRemoteRequest: true)
-                                }
+                                completion(completedRemoteRequest: true)
+                            }
                         })
                     }
                     else{
@@ -325,18 +349,33 @@ class User: PFUser {
                         self.friends = friends
                     }
                     
+                    var friendIds = Array<String>()
+                    
                     for friend in self.friends {
                         
-                        if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
+                        friend.fetch()
+                        friendIds.append(friend.objectId!)
+                    }
+                    
+                    if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
+                        
+                        let responseJson = JSON(cloudResponse)
+                        
+                        for (key,differenceJson):(String, JSON) in responseJson {
                             
-                            let responseJson = JSON(cloudResponse)
-                            friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                            friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                            for friend in self.friends {
+                                
+                                if friend.objectId == key {
+                                    
+                                    friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
+                                    friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                }
+                            }
                         }
-                        else {
-                            
-                            canContinue = false
-                        }
+                    }
+                    else{
+                        
+                        canContinue = false
                     }
                     
                     if canContinue {
@@ -522,5 +561,118 @@ class User: PFUser {
         
         return user?.objectId == User.currentUser()?.objectId
     }
+    
+    // MARK: -  in app purchase
+    
+    func launchProSubscriptionDialogue (message: String, completion: () -> ()) {
+        
+        if User.isCurrentUser(self) {
+            
+            if User.currentUser()!.userType != UserType.ProUser.rawValue && !proSubscriptionDialogIsActive {
+                
+                proSubscriptionDialogIsActive = true
+                
+                UIAlertController.showAlertControllerWithButtonTitle("Get Pro", confirmBtnStyle: .Default, message: message, completion: { (response) -> () in
+                    
+                    if response == AlertResponse.Confirm {
+                        
+                        SwiftOverlays.showBlockingWaitOverlayWithText("Checking your subscription...")
+                        
+                        User.currentUser()?.fetchInBackgroundWithBlock({ (_, error) -> Void in
+                            
+                            SwiftOverlays.removeAllBlockingOverlays()
+                            ParseUtilities.showAlertWithErrorIfExists(error)
+                            
+                            if User.currentUser()?.userType != UserType.ProUser.rawValue && error == nil {
+                                
+                                SwiftOverlays.showBlockingWaitOverlayWithText("Fetching subscription details...")
+                                
+                                self.getPro({ (success, error) -> () in
+                                    
+                                    SwiftOverlays.removeAllBlockingOverlays()
+                                    
+                                    print("yo \(success)")
+                                    
+                                    if !success {
+                                        
+                                        UIAlertController.showAlertControllerWithButtonTitle("Ok", confirmBtnStyle: .Default, message: "In app purchase failed", completion: { (response) -> () in
+                                            
+                                            completion()
+                                        })
+                                    }
+                                    else {
+                                        
+                                        completion()
+                                    }
+                                    
+                                    self.proSubscriptionDialogIsActive = false
+                                })
+                            }
+                            else {
+                                
+                                if User.currentUser()?.userType == UserType.ProUser.rawValue {
+                                    
+                                    UIAlertController.showAlertControllerWithButtonTitle("Ok", confirmBtnStyle: .Default, message: "You are already a Pro user!", completion: { (response) -> () in
+                                        
+                                        completion()
+                                    })
+                                }
+                                else{
+                                    
+                                    completion()
+                                }
+                                
+                                self.proSubscriptionDialogIsActive = false
+                            }
+                        })
+                    }
+                    else {
+                        
+                        completion()
+                        self.proSubscriptionDialogIsActive = false
+                    }
+                    
+                })
+            }
+        }
+    }
+    
+    func getPro(completion: (success: Bool, error: NSError?) -> ()) {
+        
+        PFPurchase.buyProduct(kProSubscriptionProductID, block: { (error: NSError?) -> Void in
+            
+            if let error = error {
+                
+                print(error)
+                completion(success: false, error: error)
+            }
+            else {
+                
+                completion(success: true, error : error )
+            }
+        })
+    }
 
+    func urlForProfilePicture() -> String {
+        
+        var url = ""
+        
+        if let id = facebookId {
+            
+            url = "https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)"
+            
+        }
+        
+        return url
+    }
+    
+    func getProfilePicture(completion: (image: UIImage) -> ()) {
+        
+        let url = urlForProfilePicture()
+        
+        ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+            
+            completion(image: image)
+        })
+    }
 }

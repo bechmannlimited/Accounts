@@ -118,7 +118,16 @@ class SaveItemViewController: ACFormViewController {
         
     }
     
-    
+    override func formViewElementWasDeniedEditing(identifier: String) {
+
+        if identifier == "isSecure" {
+            
+            User.currentUser()?.launchProSubscriptionDialogue("Securing transactions requires a Pro subscription.", completion: ({
+                
+                
+            }))
+        }
+    }
 }
 
 extension SaveItemViewController {
@@ -129,5 +138,13 @@ extension SaveItemViewController {
     
         cell.textLabel?.font = UIFont.normalFont(cell.textLabel!.font.pointSize)
         cell.detailTextLabel?.font = UIFont.lightFont(cell.detailTextLabel!.font.pointSize)
+        
+        if let cell = cell as? FormViewSwitchCell {
+            
+            if cell.config.identifier == "isSecure" {
+                
+                cell.imageView?.image = kSecureImage
+            }
+        }
     }
 }

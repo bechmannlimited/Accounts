@@ -152,8 +152,9 @@ class SaveUserViewController: ACFormViewController {
         
         sections.append([
             FormViewConfiguration.textField("Email", value: (userInfo["email"] as! String), identifier: "email"),
-            FormViewConfiguration.textField("Display name", value: (userInfo["displayName"] as! String), identifier: "displayName")
-            ])
+            FormViewConfiguration.textField("Display name", value: (userInfo["displayName"] as! String), identifier: "displayName"),
+            FormViewConfiguration.normalCell("Image")
+        ])
         
         return sections
     }
@@ -163,24 +164,44 @@ class SaveUserViewController: ACFormViewController {
         userInfo[identifier] = value
         showOrHideRegisterButton()
     }
+    
+    override func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
+        
+        let cell = UITableViewCell(style: .Value1, reuseIdentifier: nil)
+        
+        if identifier == "Image" {
+            
+            cell.textLabel?.text = "Display picture"
+            cell.detailTextLabel?.text = "Tap to change"
+            User.currentUser()?.getProfilePicture({ (image) -> () in
+                
+                cell.imageView?.image = image
+            })
+        }
+        
+        return cell
+    }
 }
 
 extension SaveUserViewController {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = super.tableView(tableView, cellForRowAtIndexPath: indexPath) as! FormViewTextFieldCell
-        
-        if indexPath == kPasswordIndexPath || indexPath == kVerifyPasswordIndexPath {
+        if let cell = super.tableView(tableView, cellForRowAtIndexPath: indexPath) as? FormViewTextFieldCell {
             
-            cell.textField.secureTextEntry = true
+            if indexPath == kPasswordIndexPath || indexPath == kVerifyPasswordIndexPath {
+                
+                cell.textField.secureTextEntry = true
+            }
+            
+            if indexPath != kDisplayNameIndexPath {
+                
+                cell.textField.autocapitalizationType = UITextAutocapitalizationType.None
+            }
+            
+            return cell
         }
         
-        if indexPath != kDisplayNameIndexPath {
-            
-            cell.textField.autocapitalizationType = UITextAutocapitalizationType.None
-        }
-
-        return cell
+        return super.tableView(tableView, cellForRowAtIndexPath: indexPath)
     }
 }

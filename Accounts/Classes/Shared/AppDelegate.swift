@@ -85,6 +85,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             handleUserTappedOnNotification(remoteNotification, delay: 1)
         }
         
+        PFPurchase.addObserverForProduct(kProSubscriptionProductID) { (transaction) -> Void in
+            
+            print("purchase succssful - \(transaction)")
+            User.currentUser()?.userType = 5
+            User.currentUser()?.saveEventually()
+        }
+        
         return true
     }
     

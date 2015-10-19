@@ -14,6 +14,7 @@ public enum FormCellType {
     case DatePicker
     case TextField
     case TextFieldCurrency
+    case Switch
     case Button
 }
 
@@ -74,6 +75,11 @@ public class FormViewConfiguration {
         }
         
         return config
+    }
+    
+    public class func switchCell(labelText: String, isOn: Bool, identifier: String) -> FormViewConfiguration {
+        
+        return FormViewConfiguration(labelText: labelText, formCellType: FormCellType.Switch, value: isOn, identifier: identifier)
     }
     
     public class func button(buttonText: String, buttonTextColor: UIColor, identifier: String) -> FormViewConfiguration {

@@ -99,6 +99,11 @@ class StartViewController: ACBaseViewController {
         SKTUser.currentUser().firstName = User.currentUser()?.displayName
         SKTUser.currentUser().addProperties([ "objectId" : User.currentUser()!.objectId! ])
         
+        User.currentUser()?.fetchInBackgroundWithBlock({ (_, error) -> Void in
+            
+            print("completed customer fetch with error: \(error)")
+        })
+        
         let v = UIStoryboard.initialViewControllerFromStoryboardNamed("Main")
         UIViewController.topMostController().presentViewController(v, animated: animated, completion: nil)
     }
