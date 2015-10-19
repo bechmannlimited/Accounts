@@ -15,11 +15,12 @@ import SwiftOverlays
 import AFDateHelper
 
 private let kProfileSection = 3
-private let kAboutSection = 4
+private let kAboutSection = 09999
 private let kTestBotSection = 2
 //private let kShareSection = 2
 private let kFeedbackSection = 1
 private let kFriendsSection = 0
+private let kSubscriptionSection = 0
 
 private let kProfileIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
 private let kLogoutIndexPath = NSIndexPath(forRow: 1, inSection: kProfileSection)
@@ -35,6 +36,8 @@ private let kFriendsIndexPath = NSIndexPath(forRow: 0, inSection: kFriendsSectio
 
 private let kAboutIndexPath = NSIndexPath(forItem: 0, inSection: kAboutSection)
 
+private let kSubscriptionIndexPath = NSIndexPath(forItem: 0, inSection: kSubscriptionSection)
+
 protocol MenuDelegate {
     
     func menuDidClose()
@@ -44,6 +47,7 @@ class MenuViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     var data = [
+        //[kSubscriptionIndexPath],
         [kFriendsIndexPath, kShareIndexPath],
         [kFeedbackIndexPath],
         [kTestBotIndexPath],
@@ -106,7 +110,10 @@ extension MenuViewController: UITableViewDataSource {
             return UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "Cell")
         })
         
+        cell.textLabel?.text = ""
+        cell.detailTextLabel?.text = ""
         cell.accessoryView = nil
+        cell.accessoryType = UITableViewCellAccessoryType.None
         
         if indexPath == kCurrencyIndexPath {
             
@@ -137,9 +144,9 @@ extension MenuViewController: UITableViewDataSource {
             let localizedDate = NSDate(fromString: localizedDateString, format: .Custom(dateFormatter.dateFormat))
             let online = localizedDate.timeIntervalSince1970 >= localizedDate.dateAtStartOfDay().dateByAddingHours(9).timeIntervalSince1970 && localizedDate.timeIntervalSince1970 <= localizedDate.dateAtStartOfDay().dateByAddingHours(21).timeIntervalSince1970
             
-            cell.detailTextLabel?.text = online ? "online" : "offline"
+            cell.detailTextLabel?.text = online ? "online" : "away"
             
-            let dotColor = online ? AccountColor.greenColor() : AccountColor.redColor()
+            let dotColor = online ? AccountColor.greenColor() : UIColor(hex: "#F7CA00")
             let dot = UIImageView(image: UIImage.imageWithColor(dotColor, size: CGSize(width: 7, height: 7)))
             dot.clipsToBounds = true
             dot.layer.cornerRadius = dot.frame.width / 2
@@ -179,6 +186,28 @@ extension MenuViewController: UITableViewDataSource {
             cell.textLabel?.text = "About"
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
         }
+        else if indexPath == kSubscriptionIndexPath {
+            
+            cell.textLabel?.text = "Subscription"
+            
+            var s = ""
+            
+            if User.currentUser() != nil {
+                
+                s = User.currentUser()!.userType == UserType.ProUser.rawValue ? "Pro" : "Get Pro"
+            }
+            
+            User.currentUser()?.fetchInBackgroundWithBlock({ (_, error) -> Void in
+                
+                if error == nil && User.currentUser() != nil {
+                    
+                    s = User.currentUser()!.userType == UserType.ProUser.rawValue ? "Pro" : "Get Pro"
+                    cell.detailTextLabel?.text = s
+                }
+            })
+            
+            cell.detailTextLabel?.text = s
+        }
         
         return cell
     }
@@ -213,6 +242,7 @@ extension MenuViewController: UITableViewDataSource {
                                 User.currentUser()?.unpin()
                                 PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
                                 PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
+                                //SupportKit.logout()
                                 
                             }, completion: { () -> () in
                                 
@@ -253,7 +283,7 @@ extension MenuViewController: UITableViewDataSource {
             v.delegate = self
             navigationController?.pushViewController(v, animated: true)
         }
-        else if indexPath == kFeedbackIndexPath{
+        else if indexPath == kFeedbackIndexPath {
             
             SupportKit.show()
         }
@@ -296,6 +326,28 @@ extension MenuViewController: UITableViewDataSource {
             
             let v = AboutViewController()
             navigationController?.pushViewController(v, animated: true)
+        }
+        else if indexPath == kSubscriptionIndexPath {
+            
+            if User.currentUser() != nil {
+                
+                if User.currentUser()!.userType == UserType.ProUser.rawValue {
+                    
+                    tableView.deselectRowAtIndexPath(indexPath, animated: true)
+                }
+                else {
+                    
+                    User.currentUser()?.launchProSubscriptionDialogue("A Pro subscription will give you access to extra features including secure transactions!", completion: ({
+                    
+                        self.tableView.deselectRowAtIndexPath(indexPath, animated: true)
+                        self.tableView.reloadRowsAtIndexPaths([kSubscriptionIndexPath], withRowAnimation: UITableViewRowAnimation.None)
+                    }))
+                }
+            }
+            else {
+                
+                tableView.deselectRowAtIndexPath(indexPath, animated: true)
+            }
         }
     }
     

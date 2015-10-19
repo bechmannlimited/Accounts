@@ -239,6 +239,10 @@ class SavePurchaseViewController: SaveItemViewController {
             //FormViewConfiguration.normalCell("Location")
             ])
         
+//        sections.append([
+//            FormViewConfiguration.switchCell("Secure", isOn: purchase.isSecure, identifier: "isSecure")
+//        ])
+        
         if purchaseObjectId != nil {
             
             sections.append([
@@ -417,6 +421,11 @@ class SavePurchaseViewController: SaveItemViewController {
     
     override func formViewElementIsEditable(identifier: String) -> Bool {
         
+        if identifier == "isSecure" {
+            
+            return User.currentUser()?.userType == UserType.ProUser.rawValue && allowEditing
+        }
+        
         return allowEditing
     }
     
@@ -427,6 +436,13 @@ class SavePurchaseViewController: SaveItemViewController {
         itemDidChange = true
     }
 
+    override func formViewSwitchChanged(identifier: String, on: Bool) {
+        
+        if identifier == "isSecure" {
+            
+            purchase.isSecure = on
+        }
+    }
 }
 
 
@@ -554,6 +570,19 @@ extension SavePurchaseViewController {
         }
         
         showOrHideSaveButton()
+    }
+    
+    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        
+        if let indexPath = indexPathForFormViewCellIdentifier("isSecure"){
+            
+            if section == indexPath.section {
+                
+                return kIsSecureDescription
+            }
+        }
+        
+        return nil
     }
 }
 

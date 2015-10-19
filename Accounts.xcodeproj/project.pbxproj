@@ -71,6 +71,9 @@
 		E47FD8191B5FF042004B4C56 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47FD8181B5FF042004B4C56 /* Task.swift */; };
 		E48C52381B6970860056A7E3 /* BouncyHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */; };
 		E48C52681B6978CC0056A7E3 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E48C52671B6978CC0056A7E3 /* ViewController.swift */; };
+		E490EF861BC59E2300EE4739 /* FormViewSwitchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E490EF851BC59E2300EE4739 /* FormViewSwitchCell.swift */; settings = {ASSET_TAGS = (); }; };
+		E490EF881BC5A59400EE4739 /* NKTouchID.swift in Sources */ = {isa = PBXBuildFile; fileRef = E490EF871BC5A59400EE4739 /* NKTouchID.swift */; settings = {ASSET_TAGS = (); }; };
+		E490EF8A1BC5A8D400EE4739 /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E490EF891BC5A8D400EE4739 /* LocalAuthentication.framework */; };
 		E49BFC8E1B7F8DCA00142AFD /* TransactionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */; };
 		E4BA9C5C1B84FD2F00E8DFF6 /* NSDate+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */; };
 		E4E7CAD91B66D24E0027833E /* StartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E7CAD81B66D24E0027833E /* StartViewController.swift */; };
@@ -206,6 +209,9 @@
 		E47FD8181B5FF042004B4C56 /* Task.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Task.swift; path = ../Task.swift; sourceTree = "<group>"; };
 		E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BouncyHeaderView.swift; sourceTree = "<group>"; };
 		E48C52671B6978CC0056A7E3 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ViewController.swift; path = ../ViewController.swift; sourceTree = "<group>"; };
+		E490EF851BC59E2300EE4739 /* FormViewSwitchCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormViewSwitchCell.swift; sourceTree = "<group>"; };
+		E490EF871BC5A59400EE4739 /* NKTouchID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NKTouchID.swift; sourceTree = "<group>"; };
+		E490EF891BC5A8D400EE4739 /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
 		E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionTableViewCell.swift; sourceTree = "<group>"; };
 		E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+Extension.swift"; sourceTree = "<group>"; };
 		E4C2A43B1B68052000730BAB /* ABToolKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ABToolKit.framework; path = "Pods/../build/Debug-iphoneos/Pods/ABToolKit.framework"; sourceTree = "<group>"; };
@@ -262,6 +268,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E490EF8A1BC5A8D400EE4739 /* LocalAuthentication.framework in Frameworks */,
 				E44119C71B66DBA0006811AF /* libstdc++.6.dylib in Frameworks */,
 				E46BCE6B1B66D55B00CA09BF /* Social.framework in Frameworks */,
 				E46BCE691B66D55200CA09BF /* Accounts.framework in Frameworks */,
@@ -300,6 +307,7 @@
 		C946D9CE7B1653ED98184C2C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E490EF891BC5A8D400EE4739 /* LocalAuthentication.framework */,
 				E4C2A43B1B68052000730BAB /* ABToolKit.framework */,
 				E44119C51B66DA3B006811AF /* libstdc++.6.dylib */,
 				E46BCE6A1B66D55B00CA09BF /* Social.framework */,
@@ -572,6 +580,7 @@
 				E4EBCF031B8275EF00690A60 /* Font.swift */,
 				E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */,
 				E4242E4A1BB5ACAD00519763 /* IOUEvent.swift */,
+				E490EF871BC5A59400EE4739 /* NKTouchID.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -789,6 +798,7 @@
 				E4F2E6511BBB463E00CD7E94 /* FormViewConfiguration.swift */,
 				E4F2E6521BBB463E00CD7E94 /* FormViewController.swift */,
 				E4F2E6531BBB463E00CD7E94 /* FormViewTextFieldCell.swift */,
+				E490EF851BC59E2300EE4739 /* FormViewSwitchCell.swift */,
 			);
 			path = FormView;
 			sourceTree = "<group>";
@@ -1107,7 +1117,9 @@
 				E40958111B72D32C00B5289A /* UIAppearance+Swift.m in Sources */,
 				E4F2E6811BBB463E00CD7E94 /* UIView+Extension.swift in Sources */,
 				E4F2E6841BBB463E00CD7E94 /* FormViewCell.swift in Sources */,
+				E490EF861BC59E2300EE4739 /* FormViewSwitchCell.swift in Sources */,
 				E4F2E6801BBB463E00CD7E94 /* UITableView+Extension.swift in Sources */,
+				E490EF881BC5A59400EE4739 /* NKTouchID.swift in Sources */,
 				E47FD8121B5700AF004B4C56 /* Extensions.swift in Sources */,
 				E442C32B1B510E940061CAE6 /* SelectUsersViewController.swift in Sources */,
 				E4F2E67D1BBB463E00CD7E94 /* UIImageView+Extension.swift in Sources */,

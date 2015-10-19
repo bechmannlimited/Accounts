@@ -36,7 +36,8 @@ class Transaction: PFObject {
     @NSManaged private var transactionType: NSNumber?
     @NSManaged var purchaseTransactionLinkUUID: String?
     @NSManaged var isDeleted: Bool
-    @NSManaged var currencyId: NSNumber? 
+    @NSManaged var currencyId: NSNumber?
+    @NSManaged var isSecure: Bool
     
     var purchase: Purchase?
     
@@ -190,6 +191,7 @@ class Transaction: PFObject {
         transaction.purchase = purchase
         transaction.type = type
         transaction.purchaseTransactionLinkUUID = purchaseTransactionLinkUUID
+        transaction.isSecure = isSecure
         
         return transaction
     }
@@ -202,6 +204,7 @@ class Transaction: PFObject {
         title = transaction.title
         transactionDate = transaction.transactionDate
         purchase = transaction.purchase
+        isSecure = transaction.isSecure
     }
     
     class func calculateOfflineOweValuesWithTransaction(transaction: Transaction?){
