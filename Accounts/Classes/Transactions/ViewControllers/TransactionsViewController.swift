@@ -68,7 +68,10 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         setupTableView(tableView, delegate: self, dataSource: self)
-        setupNoDataLabel(noDataView, text: "Tap plus to split a bill, add an i.o.u or a payment", originView: tableView)
+        
+        let noDataMessage: String = friend.objectId == kTestBotObjectId ? "ioubot will allow you to test out some of the features of this app before you invite your friends. Tap plus to have a go!" : "Tap plus to split a bill, add an i.o.u or a payment"
+        
+        setupNoDataLabel(noDataView, text: noDataMessage, originView: tableView)
         tableView.addSubview(noDataView)
         setupTextLabelForSaveStatusInToolbarWithLabel()
         

@@ -242,7 +242,7 @@ extension MenuViewController: UITableViewDataSource {
                                 User.currentUser()?.unpin()
                                 PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
                                 PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
-                                SupportKit.logout()
+                                //SupportKit.logout()
                                 
                             }, completion: { () -> () in
                                 
