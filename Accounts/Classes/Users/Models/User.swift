@@ -271,20 +271,33 @@ class User: PFUser {
                                 self.friends = friends
                             }
                             
+                            var friendIds = Array<String>()
+                            
                             for friend in self.friends {
                                 
                                 friend.fetch()
+                                friendIds.append(friend.objectId!)
+                            }
+                            
+                            if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
                                 
-                                if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
+                                let responseJson = JSON(cloudResponse)
+                                
+                                for (key,differenceJson):(String, JSON) in responseJson {
                                     
-                                    let responseJson = JSON(cloudResponse)
-                                    friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                                    friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                                    for friend in self.friends {
+                                        
+                                        if friend.objectId == key {
+                                            
+                                            friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
+                                            friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                        }
+                                    }
                                 }
-                                else {
-                                    
-                                    canContinue = false
-                                }
+                            }
+                            else{
+                                
+                                canContinue = false
                             }
                             
                             if canContinue {
@@ -296,13 +309,12 @@ class User: PFUser {
                                 self.saveInBackground()
                             }
                             
+                        }, completion: { () -> () in
                             
-                            }, completion: { () -> () in
+                            if canContinue {
                                 
-                                if canContinue {
-                                    
-                                    completion(completedRemoteRequest: true)
-                                }
+                                completion(completedRemoteRequest: true)
+                            }
                         })
                     }
                     else{
@@ -337,18 +349,33 @@ class User: PFUser {
                         self.friends = friends
                     }
                     
+                    var friendIds = Array<String>()
+                    
                     for friend in self.friends {
                         
-                        if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
+                        friend.fetch()
+                        friendIds.append(friend.objectId!)
+                    }
+                    
+                    if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
+                        
+                        let responseJson = JSON(cloudResponse)
+                        
+                        for (key,differenceJson):(String, JSON) in responseJson {
                             
-                            let responseJson = JSON(cloudResponse)
-                            friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                            friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                            for friend in self.friends {
+                                
+                                if friend.objectId == key {
+                                    
+                                    friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
+                                    friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                }
+                            }
                         }
-                        else {
-                            
-                            canContinue = false
-                        }
+                    }
+                    else{
+                        
+                        canContinue = false
                     }
                     
                     if canContinue {
