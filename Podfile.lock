@@ -1,16 +1,12 @@
 PODS:
-  - ABToolKit (0.1.0):
-    - Alamofire (~> 1.2.1)
-    - SwiftyJSON (~> 2.2.0)
-  - AFDateHelper (2.0.4)
-  - Alamofire (1.2.3)
-  - AwesomeCache (1.0.2)
-  - Bolts (1.2.0):
-    - Bolts/AppLinks (= 1.2.0)
-    - Bolts/Tasks (= 1.2.0)
-  - Bolts/AppLinks (1.2.0):
+  - AFDateHelper (3.1.0)
+  - Alamofire (3.0.0)
+  - Bolts (1.3.0):
+    - Bolts/AppLinks (= 1.3.0)
+    - Bolts/Tasks (= 1.3.0)
+  - Bolts/AppLinks (1.3.0):
     - Bolts/Tasks
-  - Bolts/Tasks (1.2.0)
+  - Bolts/Tasks (1.3.0)
   - FBSDKCoreKit (4.1.0):
     - Bolts (~> 1.1)
     - FBSDKCoreKit/arc (= 4.1.0)
@@ -24,8 +20,6 @@ PODS:
     - FBSDKCoreKit
   - FBSDKShareKit (4.1.0):
     - FBSDKCoreKit
-  - GoogleMaps (1.10.1)
-  - KFSwiftImageLoader (1.2)
   - Parse (1.7.5.3):
     - Bolts/Tasks (>= 1.2.0)
   - ParseFacebookUtilsV4 (1.7.5.3):
@@ -35,66 +29,45 @@ PODS:
     - Parse (~> 1.7.5.3)
   - ParseUI (1.1.4):
     - Parse (~> 1.7)
-  - ReachabilitySwift (1.1)
-  - SupportKit (2.9.0)
+  - SupportKit (2.11.0)
   - SVPullToRefresh (0.4.1)
-  - SwiftOverlays (0.14)
-  - SwiftyJSON (2.2.1)
+  - SwiftOverlays (1.0)
+  - SwiftyJSON (2.3.0)
   - SwiftyUserDefaults (1.2.0)
 
 DEPENDENCIES:
-  - ABToolKit (from `/Users/alexbechmann/Documents/iOS/cocoapods/ABToolKit`)
   - AFDateHelper
-  - AwesomeCache (~> 1.0)
+  - Alamofire
   - FBSDKCoreKit (= 4.1.0)
   - FBSDKLoginKit (= 4.1.0)
   - FBSDKShareKit (= 4.1.0)
-  - GoogleMaps
-  - KFSwiftImageLoader (~> 1.2)
   - Parse
   - ParseFacebookUtilsV4 (~> 1.7.2)
   - ParseUI (~> 1.1.3)
-  - ReachabilitySwift (from `https://github.com/ashleymills/Reachability.swift`)
   - SupportKit
   - SVPullToRefresh
-  - SwiftOverlays (~> 0.14)
+  - SwiftOverlays
+  - SwiftyJSON
   - SwiftyUserDefaults (from `/Users/alexbechmann/Downloads/SwiftyUserDefaults-master`)
 
 EXTERNAL SOURCES:
-  ABToolKit:
-    :git: "/Users/alexbechmann/Documents/iOS/cocoapods/ABToolKit"
-  ReachabilitySwift:
-    :git: https://github.com/ashleymills/Reachability.swift
   SwiftyUserDefaults:
     :path: "/Users/alexbechmann/Downloads/SwiftyUserDefaults-master"
 
-CHECKOUT OPTIONS:
-  ABToolKit:
-    :commit: 4b2f6d8832d988a4676b67d7432581d778e46b9b
-    :git: "/Users/alexbechmann/Documents/iOS/cocoapods/ABToolKit"
-  ReachabilitySwift:
-    :commit: 7e0180c2761db33bc88eef310ef6d7a79c7ea40e
-    :git: https://github.com/ashleymills/Reachability.swift
-
 SPEC CHECKSUMS:
-  ABToolKit: 355705e90dd72b552de9216f3f638f509b89b7dc
-  AFDateHelper: ea0c7c81dbadcc2585a700f552d323beaf10b98d
-  Alamofire: 5550bf0b575ed1a4bf9be572f9463e1015cc169e
-  AwesomeCache: b04d03aa3dea589753a8aa06179df9181c76cb82
-  Bolts: d176cb1e0012175589e389a9db49b85e27787576
+  AFDateHelper: 346694fc5861bdef77d8115e3825182a3fc697d2
+  Alamofire: b61782387f81bcc538a0284cf2bb5d7995cd0a80
+  Bolts: 805a4a87413e49d4a0c2b7d469084cbc46b09342
   FBSDKCoreKit: 469ed167195f860dbd2b4c4bbaa33d2e90598db9
   FBSDKLoginKit: ff6224762732e3698f30942e4544321b8c7a23e6
   FBSDKShareKit: 8002faf0c564ff3625eadd16e506b0b0fbf3adef
-  GoogleMaps: ebf08677f181d9c2dcdbd1721d206f02beccc9b1
-  KFSwiftImageLoader: dba6081682622f392b277a6507d4f6d905a95c01
   Parse: 373adbb1ad2e34d383542c3b28f678c49ebe4881
   ParseFacebookUtilsV4: ea5db22e87b91cbf99b9d156642e2b97a4db7d51
   ParseUI: d1228541b02a36a7354c8f47747f5f7a89cf1ff0
-  ReachabilitySwift: 1e53abddb01111deac0d229dabdb8bb043567b18
-  SupportKit: bfc97bf2342bd14d16dc363af5c832f51291fd9b
+  SupportKit: 07e72f5e93c1055adcc810dd715aefc34e0ab279
   SVPullToRefresh: ba2e718695a43253d8bea6852d2960097dc15d8c
-  SwiftOverlays: 7df1e8cb3bba5e6f292fc231956d427f925fcd4e
-  SwiftyJSON: ae2d0a3d68025d136602a33c4ee215091ced3e33
+  SwiftOverlays: 6a47bab3ed2784c378f07b275269f9e8231526e6
+  SwiftyJSON: 8d6b61a70277ef2a5d710d372e06e7e2d87fb9e4
   SwiftyUserDefaults: 3b4413c26f5cc4f4ed114cf75c42dbef189f0c1e
 
-COCOAPODS: 0.37.1
+COCOAPODS: 0.38.2

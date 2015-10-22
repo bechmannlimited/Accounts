@@ -1,6 +1,6 @@
 
 import UIKit
-import ABToolKit
+ 
 
 private let kTitlePadding: CGFloat = 12
 
@@ -19,6 +19,7 @@ class BouncyHeaderView: UIView {
     
     var titleLabel = UILabel()
     var titleLabelHeight:CGFloat = 0
+    var heightConstraint : NSLayoutConstraint?
 
     func setupHeaderWithOriginView(originView: UIView, originTableView: UITableView){
         
@@ -43,7 +44,7 @@ class BouncyHeaderView: UIView {
     
     func setupConstraints() {
         
-        setTranslatesAutoresizingMaskIntoConstraints(false)
+        translatesAutoresizingMaskIntoConstraints = false
         originView.addSubview(self)
         
         headerViewConstraints["Top"] = addTopConstraint(toView: superview, relation: .Equal, constant: 0)
@@ -60,7 +61,7 @@ class BouncyHeaderView: UIView {
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
         
-        var y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
+        let y: CGFloat = scrollView.contentOffset.y + scrollView.contentInset.top
         
         if y > 0 {
             
@@ -98,7 +99,7 @@ class BouncyHeaderView: UIView {
         //title
         if y > 0 {
             
-            var titleOpacity: CGFloat = y / 40
+            let titleOpacity: CGFloat = y / 40
             titleLabel.layer.opacity = 1 - Float(titleOpacity)
         }
         else{
@@ -133,7 +134,7 @@ class BouncyHeaderView: UIView {
 
     func setupHeroImage() {
         
-        heroImageView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        heroImageView.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(heroImageView)
         
         heroImageConstraints["Top"] = heroImageView.addTopConstraint(toView: self, relation: .Equal, constant: 0)
@@ -153,7 +154,7 @@ class BouncyHeaderView: UIView {
             
             self.heroImageView.image = image
             
-            UIView.animateWithDuration(0.35, animations: { () -> Void in
+            UIView.animateWithDuration(kHeroImageAnimationDuration, animations: { () -> Void in
                 
                 self.heroImageView.layer.opacity = 1
                 
@@ -166,7 +167,7 @@ class BouncyHeaderView: UIView {
     
     func setupHeroImageBlurView() {
         
-        blurView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
         heroImageView.addSubview(blurView)
         blurView.fillSuperView(UIEdgeInsetsZero)
     }
@@ -174,13 +175,35 @@ class BouncyHeaderView: UIView {
     func setupTitle(title: String) {
         
         //TITLE
-        titleLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        //titleLabel.removeFromSuperview()
+        //titleLabel = UILabel()
+        
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
         self.addSubview(titleLabel)
         
         let font = UIFont(name: "AppleSDGothicNeo-Bold", size: 25)! //"AppleSDGothicNeo-Bold"
         titleLabelHeight = UILabel.heightForLabel(title, font: font, width: originView.frame.width - (kTitlePadding * 2))
         //println("\(titleLabelHeight) - \(self.bounds.width - (kTitlePadding * 2))")
-        titleLabel.addHeightConstraint(relation: .Equal, constant: titleLabelHeight)
+        
+//        if let c = headerViewConstraints["title_height"] {
+//            
+//            titleLabel.removeConstraint(c)
+//        }
+
+        titleLabel.removeConstraints(titleLabel.constraints)
+        removeConstraints(titleLabel.constraints)
+        heroImageView.removeConstraints(titleLabel.constraints)
+        
+        if let heightConstraint = heightConstraint {
+            
+            heightConstraint.constant = titleLabelHeight
+        }
+        else {
+            
+            heightConstraint = titleLabel.addHeightConstraint(relation: NSLayoutRelation.Equal, constant: titleLabelHeight)
+        }
+        
+        
         titleLabel.addLeftConstraint(toView: self, relation: .Equal, constant: kTitlePadding)
         titleLabel.addRightConstraint(toView: self, relation: .Equal, constant: -kTitlePadding)
         titleLabel.addBottomConstraint(toView: heroImageView, attribute: NSLayoutAttribute.Bottom, relation: .Equal, constant: -kTitlePadding)
@@ -193,5 +216,9 @@ class BouncyHeaderView: UIView {
         titleLabel.textAlignment = kDevice == .Pad ? .Center : NSTextAlignment.Left
         
         titleLabel.userInteractionEnabled = false
+        
+        titleLabel.setNeedsUpdateConstraints()
+        setNeedsUpdateConstraints()
+        heroImageView.setNeedsUpdateConstraints()
     }
 }

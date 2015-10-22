@@ -8,7 +8,7 @@
 
 
 import UIKit
-import ABToolKit
+ 
 import Parse
 import SwiftyJSON
 
@@ -69,7 +69,7 @@ class SavePurchaseViewController: SaveItemViewController {
     
     func setupToolbar() {
 
-        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
         toolbar.sizeToFit()
         view.addSubview(toolbar)
         
@@ -78,12 +78,12 @@ class SavePurchaseViewController: SaveItemViewController {
         toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
         toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
         
-        var previousInsets = tableView.contentInset
+        let previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
         
         toolbar.tintColor = kNavigationBarTintColor
         
-        var splitButton = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
+        let splitButton = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
         splitButtons.append(splitButton)
         toolbar.items = [splitButton]
     }
@@ -100,7 +100,7 @@ class SavePurchaseViewController: SaveItemViewController {
             }
         }
         
-        var isSplit = count > 0
+        let isSplit = count > 0
         
         for splitButton in splitButtons {
             
@@ -119,7 +119,7 @@ class SavePurchaseViewController: SaveItemViewController {
         isSaving = true
         updateUIForSavingOrDeleting()
         
-        var copyOfOriginalForIfSaveFails = existingPurchase?.copyWithUsefulValues()
+        //var copyOfOriginalForIfSaveFails = existingPurchase?.copyWithUsefulValues()
         
         let purchase = purchaseObjectId != nil ? existingPurchase : self.purchase
         
@@ -184,9 +184,8 @@ class SavePurchaseViewController: SaveItemViewController {
         purchase.splitTheBill(nil)
         setFriendAmountTextFields()
     }
-}
-
-extension SavePurchaseViewController: FormViewDelegate {
+    
+    // MARK: - FormViewDelegate
     
     override func formViewElements() -> Array<Array<FormViewConfiguration>> {
         
@@ -210,9 +209,9 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             if transaction.toUser?.objectId == purchase.user.objectId {
                 
-                var ex = User.isCurrentUser(transaction.toUser) ? "r" : "'s"
-                var verb = "\(ex) part"
-                var textLabelText = "(\(transaction.toUser!.appropriateShortDisplayName())\(verb))"
+                let ex = User.isCurrentUser(transaction.toUser) ? "r" : "'s"
+                let verb = "\(ex) part"
+                let textLabelText = "(\(transaction.toUser!.appropriateShortDisplayName())\(verb))"
                 
                 
                 transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
@@ -224,8 +223,8 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             if transaction.toUser?.objectId != purchase.user.objectId {
                 
-                var s: String = transaction.toUser?.objectId == User.currentUser()?.objectId ? "" : "s"
-                var textLabelText = "\(transaction.toUser!.appropriateShortDisplayName()) owe\(s)"
+                let s: String = transaction.toUser?.objectId == User.currentUser()?.objectId ? "" : "s"
+                let textLabelText = "\(transaction.toUser!.appropriateShortDisplayName()) owe\(s)"
                 
                 transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
             }
@@ -233,24 +232,28 @@ extension SavePurchaseViewController: FormViewDelegate {
         
         sections.append(transactionConfigs)
         
-        var purchasedDate = purchase.purchasedDate != nil ? purchase.purchasedDate : NSDate()
+        let purchasedDate = purchase.purchasedDate != nil ? purchase.purchasedDate : NSDate()
         
         sections.append([
             FormViewConfiguration.datePicker("Date Purchased", date: purchasedDate, identifier: "DatePurchased", format: nil),
             //FormViewConfiguration.normalCell("Location")
             ])
         
+//        sections.append([
+//            FormViewConfiguration.switchCell("Secure", isOn: purchase.isSecure, identifier: "isSecure")
+//        ])
+        
         if purchaseObjectId != nil {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
-            ])
+                ])
         }
         
         return sections
     }
     
-    func formViewTextFieldEditingChanged(identifier: String, text: String) {
+    override func formViewTextFieldEditingChanged(identifier: String, text: String) {
         
         if identifier == "Title" {
             
@@ -270,7 +273,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 1)], withRowAnimation: .None)
     }
     
-    func formViewTextFieldCurrencyEditingChanged(identifier: String, value: Double) {
+    override func formViewTextFieldCurrencyEditingChanged(identifier: String, value: Double) {
         
         if identifier == "Amount" {
             
@@ -320,7 +323,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         enableOrDisableSplitButtons()
     }
     
-    func formViewButtonTapped(identifier: String) {
+    override func formViewButtonTapped(identifier: String) {
         
         if identifier == "Delete" {
             
@@ -354,13 +357,13 @@ extension SavePurchaseViewController: FormViewDelegate {
         }
     }
     
-    func formViewDidSelectRow(identifier: String) {
+    override func formViewDidSelectRow(identifier: String) {
         
         if identifier == "Friends" {
             
             let usersToChooseFrom = User.userListExcludingID(purchase.user.objectId)
             
-            let v = SelectUsersViewController(identifier: identifier, users: purchase.usersInTransactions(), selectUsersDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+            let v = SelectUsersViewController(identifier: identifier, users: purchase.usersInTransactions(), selectUsersDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom, isInsidePopover: false)
             navigationController?.pushViewController(v, animated: true)
         }
         
@@ -368,12 +371,12 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             let usersToChooseFrom = User.userListExcludingID(nil)
             
-            let v = SelectUsersViewController(identifier: identifier, user: purchase.user, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom)
+            let v = SelectUsersViewController(identifier: identifier, user: purchase.user, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom, isInsidePopover: false)
             navigationController?.pushViewController(v, animated: true)
         }
     }
     
-    func formViewDateChanged(identifier: String, date: NSDate) {
+    override func formViewDateChanged(identifier: String, date: NSDate) {
         
         if identifier == "DatePurchased" {
             
@@ -381,7 +384,7 @@ extension SavePurchaseViewController: FormViewDelegate {
         }
     }
     
-    func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
+    override func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
         
         let cell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "")
         
@@ -389,7 +392,7 @@ extension SavePurchaseViewController: FormViewDelegate {
             
             cell.textLabel?.text = "Split with"
             
-            var friendCount = purchase.transactions.count - 1
+            //var friendCount = purchase.transactions.count - 1
             
             cell.detailTextLabel?.text = "Tap to select"
             cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
@@ -418,18 +421,32 @@ extension SavePurchaseViewController: FormViewDelegate {
     
     override func formViewElementIsEditable(identifier: String) -> Bool {
         
+        if identifier == "isSecure" {
+            
+            return User.currentUser()?.userType == UserType.ProUser.rawValue && allowEditing
+        }
+        
         return allowEditing
     }
     
-    func formViewElementDidChange(identifier: String, value: AnyObject?) {
+    override func formViewElementDidChange(identifier: String, value: AnyObject?) {
         
         showOrHideSaveButton()
         enableOrDisableSplitButtons()
         itemDidChange = true
     }
+
+    override func formViewSwitchChanged(identifier: String, on: Bool) {
+        
+        if identifier == "isSecure" {
+            
+            purchase.isSecure = on
+        }
+    }
 }
 
-extension SavePurchaseViewController: UITableViewDelegate {
+
+extension SavePurchaseViewController {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
@@ -456,7 +473,7 @@ extension SavePurchaseViewController: UITableViewDelegate {
                     
                     if let toolbar = cell.textField.inputAccessoryView as? UIToolbar {
                         
-                        var button = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
+                        let button = UIBarButtonItem(title: "Split bill equally", style: .Plain, target: self, action: "splitBillEqually")
                         splitButtons.append(button)
                         toolbar.items?.insert(button, atIndex: 0)
                         enableOrDisableSplitButtons()
@@ -553,6 +570,19 @@ extension SavePurchaseViewController: UITableViewDelegate {
         }
         
         showOrHideSaveButton()
+    }
+    
+    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        
+        if let indexPath = indexPathForFormViewCellIdentifier("isSecure"){
+            
+            if section == indexPath.section {
+                
+                return kIsSecureDescription
+            }
+        }
+        
+        return nil
     }
 }
 

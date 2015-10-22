@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import Parse
 import SwiftyJSON
 
@@ -49,7 +49,8 @@ class FriendsViewController: ACBaseViewController {
             tableView.separatorStyle = UITableViewCellSeparatorStyle.None
         }
         
-        setupNoDataLabel(noDataView, text: "Your Facebook friends who have this app, will appear here!", originView: tableView) //To get started, invite some friends!
+        let text = User.currentUser()?.facebookId != nil ? "Your Facebook friends who have this app, will appear here!" : "Tap settings and send a friend invite to get started!"
+        setupNoDataLabel(noDataView, text: text, originView: tableView) //To get started, invite some friends!
         setupTextLabelForSaveStatusInToolbarWithLabel()
         setupToolbar()
         
@@ -81,7 +82,7 @@ class FriendsViewController: ACBaseViewController {
         refresh(nil)
         setEditing(false, animated: false)
         
-        if let indexPath = tableView.indexPathForSelectedRow() {
+        if let indexPath = tableView.indexPathForSelectedRow {
             
             tableView.deselectRowAtIndexPath(indexPath, animated: false)
         }
@@ -95,11 +96,11 @@ class FriendsViewController: ACBaseViewController {
     
     override func didReceivePushNotification(notification: NSNotification) {
         
-        println(notification.object)
+        print(notification.object)
         
         if let object: AnyObject = notification.object{
             
-            let value = JSON(notification.object![kPushNotificationTypeKey]!!).intValue
+            let value = JSON(object[kPushNotificationTypeKey]!!).intValue
             
             if PushNotificationType(rawValue: value) == PushNotificationType.FriendRequestAccepted || PushNotificationType(rawValue: value) == PushNotificationType.ItemSaved {
                 
@@ -125,7 +126,7 @@ class FriendsViewController: ACBaseViewController {
     
     func setupToolbar(){
         
-        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
         toolbar.sizeToFit()
         view.addSubview(toolbar)
         
@@ -134,7 +135,16 @@ class FriendsViewController: ACBaseViewController {
         toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
         toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
         
-        var previousInsets = tableView.contentInset
+        if var height = navigationController?.navigationBar.frame.height {
+            
+            if NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) {
+                
+                height += UIApplication.sharedApplication().statusBarFrame.height
+                tableView.contentInset = UIEdgeInsets(top: height, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
+            }
+        }
+        
+        let previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
         
         toolbar.tintColor = kNavigationBarTintColor
@@ -158,7 +168,7 @@ class FriendsViewController: ACBaseViewController {
     
     func setBarButtonItems() {
         
-        var emptyBarButtonItem = UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: nil, action: nil)
+        let emptyBarButtonItem = UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: nil, action: nil)
         emptyBarButtonItem.width = 0
         
         addBarButtonItem =  UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "add")
@@ -169,7 +179,7 @@ class FriendsViewController: ACBaseViewController {
         friendInvitesBarButtonItem = UIBarButtonItem(title: invitesText, style: .Plain, target: self, action: "friendInvites")
         openMenuBarButtonItem = UIBarButtonItem(image: kMenuIcon, style: .Plain, target: self, action: "openMenu")
         
-        let editBarButtonItem = editButtonItem() //data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
+        //let editBarButtonItem = editButtonItem() //data[2].count > 0 ? editButtonItem() : UIBarButtonItem(barButtonSystemItem: .FixedSpace, target: self, action: nil)
         
         navigationItem.leftBarButtonItems = [
             openMenuBarButtonItem!
@@ -195,7 +205,7 @@ class FriendsViewController: ACBaseViewController {
             navigationItem.rightBarButtonItems = []
         }
         
-        addBarButtonItem?.enabled = User.currentUser()!.friends.count > 0
+        addBarButtonItem?.enabled = User.currentUser()?.friends.count > 0
     }
     
     func friendInvites() {
@@ -214,34 +224,37 @@ class FriendsViewController: ACBaseViewController {
     
     func setDataForTable() {
         
-        var rc = Array<Array<User>>()
+        //var rc = Array<Array<User>>()
         
         var friendsWhoOweMoney = Array<User>()
         var friendsWhoYouOweMoney = Array<User>()
         var friendsWhoAreEven = Array<User>()
-            
-        //owes you money
-        for friend in User.currentUser()!.friends {
-            
-            if friend.localeDifferenceBetweenActiveUser < 0 {
-                
-                friendsWhoOweMoney.append(friend)
-            }
-        }
         
-        for friend in User.currentUser()!.friends {
+        if let currentUser = User.currentUser() {
             
-            if friend.localeDifferenceBetweenActiveUser > 0 {
+            //owes you money
+            for friend in currentUser.friends {
                 
-                friendsWhoYouOweMoney.append(friend)
+                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
+                    
+                    friendsWhoOweMoney.append(friend)
+                }
             }
-        }
-        
-        for friend in User.currentUser()!.friends {
             
-            if friend.localeDifferenceBetweenActiveUser == 0 {
+            for friend in currentUser.friends {
                 
-                friendsWhoAreEven.append(friend)
+                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
+                    
+                    friendsWhoYouOweMoney.append(friend)
+                }
+            }
+            
+            for friend in currentUser.friends {
+                
+                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) == 0 {
+                    
+                    friendsWhoAreEven.append(friend)
+                }
             }
         }
         
@@ -265,7 +278,6 @@ class FriendsViewController: ACBaseViewController {
         
         User.currentUser()?.getFriends({ (completedRemoteRequest) -> () in
             
-            println("is in this closure")
             refreshControl?.endRefreshing()
             self.setDataForTable()
             self.tableView.reloadData()
@@ -284,16 +296,6 @@ class FriendsViewController: ACBaseViewController {
         //getInvites()
     }
     
-//    func getInvites(){
-//        
-//        User.currentUser()?.getInvites({ (invites) -> () in
-//            
-//            self.hasCheckedForInvites = true
-//            self.invitesCount = invites[0].count
-//            //self.setBarButtonItems()
-//        })
-//    }
-    
     func refreshFromBarButton(){
         
         refresh(nil)
@@ -302,7 +304,7 @@ class FriendsViewController: ACBaseViewController {
     func openMenu() {
         
         let view = MenuViewController()
-        //view.delegate = self
+        view.delegate = self
         
         let v = UINavigationController(rootViewController:view)
         v.modalPresentationStyle = UIModalPresentationStyle.FormSheet
@@ -337,9 +339,9 @@ class FriendsViewController: ACBaseViewController {
         
         UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
             
-            self.noDataView.layer.opacity = User.currentUser()!.friends.count > 0 ? 0 : 1
-            self.view.backgroundColor = User.currentUser()!.friends.count > 0 ? self.colorForViewBackground() : kViewBackgroundColor
-            self.tableView.separatorColor = User.currentUser()!.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
+            self.noDataView.layer.opacity = User.currentUser()?.friends.count > 0 ? 0 : 1
+            self.view.backgroundColor = User.currentUser()?.friends.count > 0 ? self.colorForViewBackground() : kViewBackgroundColor
+            self.tableView.separatorColor = User.currentUser()?.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
         })
     }
     
@@ -350,7 +352,7 @@ class FriendsViewController: ACBaseViewController {
     }
 }
 
-extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
+extension FriendsViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -368,17 +370,19 @@ extension FriendsViewController: UITableViewDelegate, UITableViewDataSource {
         
         let friend = data[indexPath.section][indexPath.row]
         (cell as FriendTableViewCell).setup(friend)
+        (cell as FriendTableViewCell).delegate = self
+        (cell as FriendTableViewCell).currentIndexPath = indexPath
         
         //cell.layer.rasterizationScale = UIScreen.mainScreen().scale
         //cell.layer.shouldRasterize = true
+        
         return cell
     }
 
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
         let friend = data[indexPath.section][indexPath.row]
-        
-        var v = TransactionsViewController()
+        let v = TransactionsViewController()
         v.friend = friend
         navigationController?.pushViewController(v, animated: true)
     }
@@ -528,5 +532,33 @@ extension FriendsViewController: SaveItemDelegate {
     func dismissPopover() {
         
         
+    }
+}
+
+extension FriendsViewController: FriendTableViewCellDelegate {
+    
+    func didRemoveFriend(friend: User, indexPath: NSIndexPath?) {
+        
+        if let indexPath = indexPath {
+            
+            tableView.beginUpdates()
+            //User.currentUser()?.friends.removeAtIndex(find(User.currentUser()!.friends, friend)!)
+            data[indexPath.section].removeAtIndex(indexPath.row)
+            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Top)
+            tableView.endUpdates()
+        }
+        
+        NSTimer.schedule(delay: 0.5, handler: { timer in
+        
+            self.refresh(nil)
+        })
+    }
+}
+
+extension FriendsViewController: MenuDelegate {
+    
+    func menuDidClose() {
+        
+        refresh(nil)
     }
 }

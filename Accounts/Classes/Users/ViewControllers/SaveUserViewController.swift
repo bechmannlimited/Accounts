@@ -8,46 +8,47 @@
 
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 import Parse
 import Bolts
+import SwiftOverlays
 
 private let kDisplayNameIndexPath = NSIndexPath(forRow: 2, inSection: 0)
 private let kPasswordIndexPath = NSIndexPath(forRow: 0, inSection: 1)
 private let kVerifyPasswordIndexPath = NSIndexPath(forRow: 1, inSection: 1)
 
+protocol SaveUserDelegate {
+    
+    func didSaveUser()
+}
+
 class SaveUserViewController: ACFormViewController {
     
-    var user = User.object()
+    var delegate: SaveUserDelegate?
+    var userInfo = Dictionary<String, AnyObject>()
+    var originalUserInfo = Dictionary<String, AnyObject>()
     var isLoading = false
+    var didSave = false
     
     override func viewDidLoad() {
         
-        user.username = User.currentUser()?.username
-        user.email = User.currentUser()?.email
-        user.displayName = User.currentUser()?.displayName
+        //userInfo["username"] = String.emptyIfNull(User.currentUser()!.username)
+        userInfo["email"] = String.emptyIfNull(User.currentUser()!.email)
+        userInfo["displayName"] = String.emptyIfNull(User.currentUser()!.displayName)
+        //userInfo["password"] = ""
+        //userInfo["passwordForVerification"] = ""
+        
+        for item in userInfo {
+            
+            originalUserInfo[item.0] = item.1
+        }
         
         title = "Edit profile"
         
         showOrHideRegisterButton()
         
         super.viewDidLoad()
-    }
-    
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        if view.frame.width >= kTableViewMaxWidth {
-            
-            tableView.separatorStyle = UITableViewCellSeparatorStyle.None
-        }
-    }
-    
-    override func setupView() {
-        super.setupView()
-        
-        view.backgroundColor = UIColor.groupTableViewBackgroundColor()
     }
     
     func showOrHideRegisterButton() {
@@ -57,7 +58,25 @@ class SaveUserViewController: ACFormViewController {
         navigationItem.rightBarButtonItem = saveButton
         navigationItem.rightBarButtonItem?.tintColor = kNavigationBarPositiveActionColor
         
-        navigationItem.rightBarButtonItem?.enabled = user.modelIsValid() && !isLoading
+        navigationItem.rightBarButtonItem?.enabled = modelIsValid() && !isLoading
+    }
+    
+    func modelIsValid() -> Bool {
+        
+        //let username = userInfo["username"] as! String
+        //let password = userInfo["password"] as! String
+        //let passwordForVerification = userInfo["passwordForVerification"] as! String
+        //let email = userInfo["email"] as! String
+
+        let valid = (userInfo["displayName"] as! String).characterCount() <= 30
+        
+        if let id = User.currentUser()?.facebookId {
+            
+            return id.isEmpty == false && valid
+        }
+        
+        return valid
+        //return username.length() > 0 && password.length() > 0 && email.length() > 0 && password == passwordForVerification
     }
     
     func save() {
@@ -65,115 +84,124 @@ class SaveUserViewController: ACFormViewController {
         isLoading = true
         showOrHideRegisterButton()
         
-        User.currentUser()?.username = user.username
-        User.currentUser()?.email = user.email
-        User.currentUser()?.displayName = user.displayName
-        User.currentUser()?.password = user.password
+        for item in self.userInfo {
+            
+            User.currentUser()?[item.0] = item.1
+        }
+        
+        updateUIForSaving()
         
         User.currentUser()?.saveInBackgroundWithBlock({ (success, error) -> Void in
-            
-            if success {
-                
-                self.navigationController?.popViewControllerAnimated(true)
-            }
-            else if let error = error?.localizedDescription {
+
+            if let error = error?.localizedDescription {
                 
                 UIAlertView(title: "Error", message: error, delegate: nil, cancelButtonTitle: "OK").show()
+                
+                for item in self.originalUserInfo {
+                    
+                    User.currentUser()?[item.0] = item.1
+                }
+            }
+            else {
+                
+                self.navigationController?.popViewControllerAnimated(true)
+                self.didSave = true
+                self.delegate?.didSaveUser()
             }
             
             self.isLoading = false
             self.showOrHideRegisterButton()
+            self.updateUIForEditing()
         })
-
+    }
+    
+    func updateUIForSaving(){
+        
+        view.endEditing(true)
+        showSavingOverlay()
+        view.userInteractionEnabled = false
+        navigationController?.navigationBar.userInteractionEnabled = false
+        navigationItem.leftBarButtonItem?.enabled = false
+        navigationItem.rightBarButtonItem?.enabled = false
+    }
+    
+    func updateUIForEditing() {
+        
+        view.userInteractionEnabled = true
+        navigationController?.navigationBar.userInteractionEnabled = true
+        navigationItem.leftBarButtonItem?.enabled = true
+        navigationItem.rightBarButtonItem?.enabled = true
+        self.removeLoadingViews()
     }
     
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
         
-        User.currentUser()?.fetchIfNeeded()
+        if !didSave {
+            
+            for item in self.originalUserInfo {
+                
+                User.currentUser()?[item.0] = item.1
+            }
+        }
     }
-}
-
-extension SaveUserViewController: FormViewDelegate {
     
     override func formViewElements() -> Array<Array<FormViewConfiguration>> {
         
         var sections = Array<Array<FormViewConfiguration>>()
         
-        if User.currentUser()?.facebookId != nil {
-            
-            sections.append([
-                FormViewConfiguration.textField("Display name", value: String.emptyIfNull(user.displayName), identifier: "DisplayName")
-            ])
-        }
-        else{
-            
-            sections.append([
-                FormViewConfiguration.textField("Username", value: String.emptyIfNull(user.username) , identifier: "Username"),
-                FormViewConfiguration.textField("Email", value: String.emptyIfNull(user.email), identifier: "Email"),
-                FormViewConfiguration.textField("Display name", value: String.emptyIfNull(user.displayName), identifier: "DisplayName")
-            ])
-            sections.append([
-                
-                FormViewConfiguration.textField("Password", value: String.emptyIfNull(user.password), identifier: "Password"),
-                FormViewConfiguration.textField("Verify password", value: String.emptyIfNull(user.password), identifier: "PasswordForVerification")
-            ])
-        }
-        
+        sections.append([
+            FormViewConfiguration.textField("Email", value: (userInfo["email"] as! String), identifier: "email"),
+            FormViewConfiguration.textField("Display name", value: (userInfo["displayName"] as! String), identifier: "displayName"),
+            FormViewConfiguration.normalCell("Image")
+        ])
         
         return sections
     }
     
-    func formViewElementDidChange(identifier: String, value: AnyObject?) {
-
+    override func formViewElementDidChange(identifier: String, value: AnyObject?) {
+        
+        userInfo[identifier] = value
         showOrHideRegisterButton()
     }
     
-    func formViewTextFieldEditingChanged(identifier: String, text: String) {
+    override func formViewManuallySetCell(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath, identifier: String) -> UITableViewCell {
         
-        switch identifier {
+        let cell = UITableViewCell(style: .Value1, reuseIdentifier: nil)
+        
+        if identifier == "Image" {
             
-        case "Username":
-            user.username = text
-            break
-            
-        case "Password":
-            user.password = text
-            break;
-            
-        case "Email":
-            user.email = text
-            break
-            
-        case "DisplayName":
-            user.displayName = text
-            break
-            
-        case "PasswordForVerification":
-            user.passwordForVerification = text
-            break
-            
-        default: break;
+            cell.textLabel?.text = "Display picture"
+            cell.detailTextLabel?.text = "Tap to change"
+            User.currentUser()?.getProfilePicture({ (image) -> () in
+                
+                cell.imageView?.image = image
+            })
         }
+        
+        return cell
     }
 }
 
-extension SaveUserViewController: UITableViewDelegate {
+extension SaveUserViewController {
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell = super.tableView(tableView, cellForRowAtIndexPath: indexPath) as! FormViewTextFieldCell
-        
-        if indexPath == kPasswordIndexPath || indexPath == kVerifyPasswordIndexPath {
+        if let cell = super.tableView(tableView, cellForRowAtIndexPath: indexPath) as? FormViewTextFieldCell {
             
-            cell.textField.secureTextEntry = true
+            if indexPath == kPasswordIndexPath || indexPath == kVerifyPasswordIndexPath {
+                
+                cell.textField.secureTextEntry = true
+            }
+            
+            if indexPath != kDisplayNameIndexPath {
+                
+                cell.textField.autocapitalizationType = UITextAutocapitalizationType.None
+            }
+            
+            return cell
         }
         
-        if indexPath != kDisplayNameIndexPath {
-            
-            cell.textField.autocapitalizationType = UITextAutocapitalizationType.None
-        }
-
-        return cell
+        return super.tableView(tableView, cellForRowAtIndexPath: indexPath)
     }
 }

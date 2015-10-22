@@ -8,7 +8,7 @@
 
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 
 private let kUnconfirmedInvitesSection = 0
@@ -35,14 +35,12 @@ class FriendInvitesViewController: ACBaseViewController {
         tableView.allowsSelectionDuringEditing = true
         tableView.setEditing(true, animated: false)
         
-        addCloseButton()
+        //addCloseButton()
         view.showLoader()
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "findFriends")
         
         setupNoDataLabel(noDataView, text: "Tap plus to send someone a friend invitation", originView: view)
-        
-       
     }
     
     override func didReceivePushNotification(notification: NSNotification) {
@@ -68,7 +66,7 @@ class FriendInvitesViewController: ACBaseViewController {
             
             for arr in self.invites {
                 
-                for invite in arr {
+                for _ in arr {
                     
                     count++
                 }
@@ -82,12 +80,12 @@ class FriendInvitesViewController: ACBaseViewController {
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        if isInsidePopover() {
-            
-            navigationController?.view.backgroundColor = UIColor.clearColor()
-            view.backgroundColor = UIColor.clearColor()
-            tableView.backgroundColor = UIColor.clearColor()
-        }
+//        if isInsidePopover() {
+//            
+//            navigationController?.view.backgroundColor = UIColor.clearColor()
+//            view.backgroundColor = UIColor.clearColor()
+//            tableView.backgroundColor = UIColor.clearColor()
+//        }
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -115,7 +113,7 @@ class FriendInvitesViewController: ACBaseViewController {
     }
 }
 
-extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSource {
+extension FriendInvitesViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -144,8 +142,24 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
             
             user = invites[indexPath.section][indexPath.row].toUser
         }
+        
+        var text = ""
+        
+        if user?.facebookId != nil {
+            
+            text = user!.appropriateDisplayName()
+        }
+        else{
+            
+            text = "\(String.emptyIfNull(user?.username))"
+            
+            if user?.displayName?.isEmpty == false {
+                
+                text = "\(String.emptyIfNull(user?.username)) (\(String.emptyIfNull(user?.displayName)))"
+            }
+        }
 
-        cell.textLabel?.text = user!.appropriateDisplayName()
+        cell.textLabel?.text = text
         
         if indexPath.section == kUnconfirmedInvitesSection {
             
@@ -165,8 +179,8 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
         let friendRequest = invites[indexPath.section][indexPath.row]
-        let user = friendRequest.fromUser!
-        
+        //let user = friendRequest.fromUser!
+
         if indexPath.section == kUnconfirmedInvitesSection {
             
             tableView.beginUpdates()
@@ -226,7 +240,7 @@ extension FriendInvitesViewController: UITableViewDelegate, UITableViewDataSourc
             
                 self.refresh(nil)
                 
-                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.toUser!], message: "", data: [kPushNotificationTypeKey: PushNotificationType.FriendRequestDeleted.rawValue])
+                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.toUser!], message: "", data: [kPushNotificationTypeKey: PushNotificationType.FriendRequestDeleted.rawValue], iouEvent: IOUEvent.InviteEvent)
             })
         }
         else{

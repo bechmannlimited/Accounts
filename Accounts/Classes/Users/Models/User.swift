@@ -7,11 +7,18 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 import Alamofire
 import Parse
 import FBSDKCoreKit
+import SwiftOverlays
+
+enum UserType : NSNumber {
+    
+    case FreeUser = 0
+    case ProUser = 5
+}
 
 class User: PFUser {
     
@@ -39,8 +46,12 @@ class User: PFUser {
     @NSManaged var facebookId: String?
     @NSManaged var displayName: String?
     @NSManaged var friendsIdsWithDifference: Dictionary<String, NSNumber>?
-    
+    @NSManaged var userType: NSNumber?
     @NSManaged var lastSyncedDataInfo: Dictionary<String, NSDate>?
+    
+    var facebookFriendIds = Array<String>()
+    
+    var proSubscriptionDialogIsActive: Bool = false
     
     func modelIsValid() -> Bool {
         
@@ -54,37 +65,69 @@ class User: PFUser {
     
     func removeFriend(friend:User, completion: (success: Bool) -> ()) {
     
-        let friendRequest = FriendRequest()
-        friendRequest.fromUser = User.currentUser()
-        friendRequest.toUser = friend
-        friendRequest.friendRequestStatus = FriendRequestStatus.RequestingDeletion.rawValue
-        
-        friend.unpinInBackground()
-        
-        friendRequest.saveInBackgroundWithBlock { (success, error) -> Void in
+        let params: [NSObject : AnyObject] = [
+            "fromUserId" : User.currentUser()!.objectId!,
+            "toUserId": friend.objectId!,
+            "friendRequestStatus" : FriendRequestStatus.RequestingDeletion.rawValue
+        ]
+        PFCloud.callFunctionInBackground("SaveFriendRequest", withParameters: params, block: { (response, error) -> Void in
             
-            completion(success: success)
-        }
+            ParseUtilities.showAlertWithErrorIfExists(error)
+         
+            Task.sharedTasker().executeTaskInBackground({ () -> () in
+                
+                for f in self.friends.filter({ (t) -> Bool in
+                    print(t.objectId)
+                    return t.objectId == friend.objectId
+                }) {
+                    
+                    self.friends.removeAtIndex(self.friends.indexOf(f)!)
+                    self.relationForKey("friends").removeObject(f)
+                }
+                
+                self.friendsIdsWithDifference?.removeValueForKey(friend.objectId!)
+                friend.unpin()
+                self.save()
+                
+            }, completion: { () -> () in
+                
+                completion(success: true)
+            })
+        })
+        
+//        PFCloud.callFunctionInBackground("RemoveFriend", withParameters: [
+//            "fromUserId" : objectId!,
+//            "toUserId" : friend.objectId!
+//        ]) { (response, error) -> Void in
+//            
+//            ParseUtilities.showAlertWithErrorIfExists(error)
+//            
+//            completion(success: error != nil)
+//        }
     }
     
     func appropriateDisplayName() -> String {
-    
-        var rc = ""
         
         if objectId == User.currentUser()?.objectId {
             
-            rc = "You"
+            return "You"
         }
         else if let name = displayName {
             
-            rc = name
+            if name.isEmpty == false {
+                
+                return name
+            }
         }
-        else {
+        else if let name = username {
             
-            rc = String.emptyIfNull(username)
+            if name.isEmpty == false {
+                
+                return name
+            }
         }
         
-        return rc
+        return String.emptyIfNull(username)
     }
     
 //    func imageUrl() -> String? {
@@ -145,87 +188,216 @@ class User: PFUser {
     
     func appropriateDisplayNamesAsArray() -> [String] {
         
-        return split(appropriateDisplayName()) {$0 == " "}
+        
+        return appropriateDisplayName().componentsSeparatedByString(" ")
+    }
+    
+    func namePrioritizingDisplayName() -> String {
+        
+        if displayName?.isEmpty == false {
+            
+            return displayName!
+        }
+        else if username?.isEmpty == false {
+            
+            return username!
+        }
+        
+        return ""
+    }
+    
+    func pendingInvitesCount() -> Int {
+        
+        var count = 0
+        
+        for list in allInvites {
+            
+            for invite in list {
+                
+                if invite.toUser?.objectId == objectId {
+                    
+                    count++
+                }
+            }
+        }
+        
+        return count
     }
     
     func getFriends(completion:(completedRemoteRequest:Bool) -> ()) {
 
         let execRemoteQuery: () -> () = {
             
-            let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
-            graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
+            if let _ = self.facebookId {
                 
-                if error == nil{
+                let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
+                graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
                     
-                    var canContinue = true
+                    print("fbsdk get users me/friends error?: \(error)")
                     
-                    Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
+                    if error == nil {
                         
-                        var friendInfo = Dictionary<String, NSNumber>()
+                        var canContinue = true
                         
-                        var queries = [PFQuery]()
-                        var query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
-                        
-                        if let facebookId = self.facebookId {
+                        Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
                             
-                            let friendsJson = JSON(result)["data"]
+                            var friendInfo = Dictionary<String, NSNumber>()
                             
-                            for (index: String, friendJson: JSON) in friendsJson {
+                            var queries = [PFQuery]()
+                            let query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
+                            
+                            //if let facebookId = self.facebookId {
                                 
-                                let friendQuery = User.query()
-                                friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
-                                queries.append(friendQuery!)
+                                let friendsJson = JSON(result)["data"]
+                                
+                                for (_, friendJson): (String, JSON) in friendsJson {
+                                    
+                                    self.facebookFriendIds.append(friendJson["id"].stringValue)
+                                    let friendQuery = User.query()
+                                    friendQuery?.whereKey("facebookId", equalTo: friendJson["id"].stringValue)
+                                    queries.append(friendQuery!)
+                                }
+                            //}
+                            
+                            if Settings.shouldShowTestBot() {
+                                
+                                let botQuery = User.query()
+                                botQuery?.whereKey("objectId", equalTo: kTestBotObjectId)
+                                queries.append(botQuery!)
                             }
-                        }
-                     
-                        if Settings.shouldShowTestBot() {
                             
-                            let botQuery = User.query()
-                            botQuery?.whereKey("objectId", equalTo: kTestBotObjectId)
-                            queries.append(botQuery!)
-                        }
-                        
-                        queries.append(query1!)  // must add friends relation back to user
-                        
-                        self.friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as! [User]
-                        
-                        for friend in self.friends {
+                            queries.append(query1!)  // must add friends relation back to user
                             
-                            if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) {
+                            if let friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as? [User] {
+                                
+                                self.friends = friends
+                            }
+                            
+                            var friendIds = Array<String>()
+                            
+                            for friend in self.friends {
+                                
+                                friend.fetch()
+                                friendIds.append(friend.objectId!)
+                            }
+                            
+                            if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
                                 
                                 let responseJson = JSON(cloudResponse)
-                                friend.localeDifferenceBetweenActiveUser = responseJson.doubleValue
-                                friendInfo[friend.objectId!] = NSNumber(double: responseJson.doubleValue)
+                                
+                                for (key,differenceJson):(String, JSON) in responseJson {
+                                    
+                                    for friend in self.friends {
+                                        
+                                        if friend.objectId == key {
+                                            
+                                            friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
+                                            friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                        }
+                                    }
+                                }
                             }
-                            else {
+                            else{
                                 
                                 canContinue = false
                             }
-                        }
-                        
-                        if canContinue {
                             
-                            PFObject.pinAll(self.friends)
+                            if canContinue {
+                                
+                                PFObject.pinAll(self.friends)
+                                
+                                self.friendsIdsWithDifference = friendInfo
+                                self.pinInBackground()
+                                self.saveInBackground()
+                            }
                             
-                            self.friendsIdsWithDifference = friendInfo
-                            self.pinInBackground()
-                            self.saveInBackground()
-                        }
-
-                        
-                    }, completion: { () -> () in
-                        
-                        if canContinue {
+                        }, completion: { () -> () in
                             
-                            completion(completedRemoteRequest: true)
-                        }
-                    })
-                }
-                else{
+                            if canContinue {
+                                
+                                completion(completedRemoteRequest: true)
+                            }
+                        })
+                    }
+                    else{
+                        
+                        connection.cancel()
+                    }
+                })
+            }
+            
+            else {
+                
+                var canContinue = true
+                
+                Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
                     
-                    connection.cancel()
-                }
-            })
+                    var friendInfo = Dictionary<String, NSNumber>()
+                    
+                    var queries = [PFQuery]()
+                    let query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
+                    
+                    if Settings.shouldShowTestBot() {
+                        
+                        let botQuery = User.query()
+                        botQuery?.whereKey("objectId", equalTo: kTestBotObjectId)
+                        queries.append(botQuery!)
+                    }
+                    
+                    queries.append(query1!)  // must add friends relation back to user
+
+                    if let friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as? [User] {
+                        
+                        self.friends = friends
+                    }
+                    
+                    var friendIds = Array<String>()
+                    
+                    for friend in self.friends {
+                        
+                        friend.fetch()
+                        friendIds.append(friend.objectId!)
+                    }
+                    
+                    if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
+                        
+                        let responseJson = JSON(cloudResponse)
+                        
+                        for (key,differenceJson):(String, JSON) in responseJson {
+                            
+                            for friend in self.friends {
+                                
+                                if friend.objectId == key {
+                                    
+                                    friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
+                                    friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                }
+                            }
+                        }
+                    }
+                    else{
+                        
+                        canContinue = false
+                    }
+                    
+                    if canContinue {
+                        
+                        PFObject.pinAll(self.friends)
+                        
+                        self.friendsIdsWithDifference = friendInfo
+                        self.pinInBackground()
+                        self.saveInBackground()
+                    }
+                    
+                }, completion: { () -> () in
+                    
+                    if canContinue {
+                        
+                        completion(completedRemoteRequest: true)
+                    }
+                })
+            }
+
         }
         
         var ids = [String]()
@@ -268,102 +440,93 @@ class User: PFUser {
             completion(completedRemoteRequest: false)
             execRemoteQuery()
         }
-
     }
     
     func sendFriendRequest(friend:User, completion:(success:Bool) -> ()) {
-                
-        Task.sharedTasker().executeTaskInBackground({ () -> () in
+        
+        let friendRequest = FriendRequest()
+        friendRequest.fromUser = User.currentUser()
+        friendRequest.toUser = friend
+        
+        let params: [NSObject : AnyObject] = [
+            "fromUserId" : friendRequest.fromUser!.objectId!,
+            "toUserId": friendRequest.toUser!.objectId!,
+            "friendRequestStatus" : FriendRequestStatus.Pending.rawValue
+        ]
+        
+        PFCloud.callFunctionInBackground("SaveFriendRequest", withParameters: params) { (response, error) -> Void in
             
-            let friendRequest = FriendRequest()
-            friendRequest.fromUser = User.currentUser()
-            friendRequest.toUser = friend
+            ParseUtilities.showAlertWithErrorIfExists(error)
             
-            //check to see if they accepted it meanwhile
-            let query = FriendRequest.query()
-            query?.whereKey("fromUser", equalTo: friendRequest.toUser!)
-            query?.whereKey("toUser", equalTo: friendRequest.fromUser!)
-            
-            var acceptedFriendRequest = false
-            
-            if let match = query?.findObjects()?.first as? FriendRequest {
-                
-                if match.friendRequestStatus == FriendRequestStatus.Pending.rawValue {
-                    
-                    match.friendRequestStatus = FriendRequestStatus.Confirmed.rawValue
-                    PFObject.saveAllInBackground([[match, User.currentUser()!]])
-                    acceptedFriendRequest = true
-                    
-                    ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
-                }
-            }
-            
-            if !acceptedFriendRequest {
-                
-                friendRequest.friendRequestStatus = FriendRequestStatus.Pending.rawValue
-                friendRequest.save()
-                
-                ParseUtilities.sendPushNotificationsInBackgroundToUsers([friend], message: "New friend request from \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestSent.rawValue])
-            }
-
-            
-        }, completion: { () -> () in
-            
-            completion(success:true)
-        })
+            completion(success: error == nil)
+        }
     }
     
     func addFriendFromRequest(friendRequest: FriendRequest, completion:(success: Bool) -> ()) {
         
-        friendRequest.friendRequestStatus = FriendRequestStatus.Confirmed.rawValue
+        let params: [NSObject : AnyObject] = [
+            "fromUserId" : friendRequest.fromUser!.objectId!,
+            "toUserId": friendRequest.toUser!.objectId!,
+            "friendRequestStatus" : FriendRequestStatus.Confirmed.rawValue
+        ]
         
-        PFObject.saveAllInBackground([friendRequest, User.currentUser()!], block: { (success, error) -> Void in
+        PFCloud.callFunctionInBackground("SaveFriendRequest", withParameters: params) { (response, error) -> Void in
+                
+            ParseUtilities.showAlertWithErrorIfExists(error)
             
-            completion(success: success)
-            
-            ParseUtilities.sendPushNotificationsInBackgroundToUsers([friendRequest.fromUser!], message: "Friend request accepted by \(User.currentUser()!.appropriateDisplayName())", data: [kPushNotificationTypeKey : PushNotificationType.FriendRequestAccepted.rawValue])
-        })
+            completion(success: error == nil)
+        }
     }
     
     func getInvites(completion:(invites:Array<Array<FriendRequest>>) -> ()) {
 
-        allInvites = Array<Array<FriendRequest>>()
+        allInvites = [[],[]]
         var unconfirmedInvites = Array<FriendRequest>()
         var unconfirmedSentInvites = Array<FriendRequest>()
         
-        let query1 = FriendRequest.query()
-        query1?.whereKey("fromUser", equalTo: User.currentUser()!)
-        
-        let query2 = FriendRequest.query()
-        query2?.whereKey("toUser", equalTo: User.currentUser()!)
-        
-        let query = PFQuery.orQueryWithSubqueries([query1!, query2!])
-        query.includeKey(kParse_FriendRequest_fromUser_Key)
-        query.includeKey(kParse_FriendRequest_toUser_Key)
-        query.whereKey(kParse_FriendRequest_friendRequestStatus_Key, notEqualTo: FriendRequestStatus.Confirmed.rawValue)
-        
-        query.findObjectsInBackgroundWithBlock({ (friendRequests, error) -> Void in
+        if let currentUser = User.currentUser() {
             
-            if let requests = friendRequests as? [FriendRequest] {
+            if currentUser.objectId == objectId {
                 
-                for friendRequest in requests {
+                let query1 = FriendRequest.query()
+                query1?.whereKey("fromUser", equalTo: currentUser)
+                
+                let query2 = FriendRequest.query()
+                query2?.whereKey("toUser", equalTo: currentUser)
+                
+                let query = PFQuery.orQueryWithSubqueries([query1!, query2!])
+                query.includeKey(kParse_FriendRequest_fromUser_Key)
+                query.includeKey(kParse_FriendRequest_toUser_Key)
+                query.whereKey(kParse_FriendRequest_friendRequestStatus_Key, notEqualTo: FriendRequestStatus.Confirmed.rawValue)
+                
+                query.findObjectsInBackgroundWithBlock({ (friendRequests, error) -> Void in
                     
-                    if friendRequest.fromUser?.objectId == self.objectId {
+                    if let requests = friendRequests as? [FriendRequest] {
                         
-                        unconfirmedSentInvites.append(friendRequest)
+                        for friendRequest in requests {
+                            
+                            if friendRequest.fromUser?.objectId == self.objectId {
+                                
+                                unconfirmedSentInvites.append(friendRequest)
+                            }
+                            else {
+                                
+                                unconfirmedInvites.append(friendRequest)
+                            }
+                        }
                     }
-                    else {
+                    
+                    self.allInvites = []
+                    self.allInvites.append(unconfirmedInvites)
+                    self.allInvites.append(unconfirmedSentInvites)
+                    
+                    if User.currentUser()?.objectId == self.objectId {
                         
-                        unconfirmedInvites.append(friendRequest)
+                        completion(invites: self.allInvites)
                     }
-                }
+                })
             }
-            
-            self.allInvites.append(unconfirmedInvites)
-            self.allInvites.append(unconfirmedSentInvites)
-            
-            completion(invites: self.allInvites)
-        })
+        }
     }
     
     class func userListExcludingID(id: String?) -> Array<User> {
@@ -375,6 +538,7 @@ class User: PFUser {
 
             allUsersInContext.append(friend)
         }
+        
         allUsersInContext.append(User.currentUser()!)
 
         for user in allUsersInContext {
@@ -399,5 +563,118 @@ class User: PFUser {
         
         return user?.objectId == User.currentUser()?.objectId
     }
+    
+    // MARK: -  in app purchase
+    
+    func launchProSubscriptionDialogue (message: String, completion: () -> ()) {
+        
+        if User.isCurrentUser(self) {
+            
+            if User.currentUser()!.userType != UserType.ProUser.rawValue && !proSubscriptionDialogIsActive {
+                
+                proSubscriptionDialogIsActive = true
+                
+                UIAlertController.showAlertControllerWithButtonTitle("Get Pro", confirmBtnStyle: .Default, message: message, completion: { (response) -> () in
+                    
+                    if response == AlertResponse.Confirm {
+                        
+                        SwiftOverlays.showBlockingWaitOverlayWithText("Checking your subscription...")
+                        
+                        User.currentUser()?.fetchInBackgroundWithBlock({ (_, error) -> Void in
+                            
+                            SwiftOverlays.removeAllBlockingOverlays()
+                            ParseUtilities.showAlertWithErrorIfExists(error)
+                            
+                            if User.currentUser()?.userType != UserType.ProUser.rawValue && error == nil {
+                                
+                                SwiftOverlays.showBlockingWaitOverlayWithText("Fetching subscription details...")
+                                
+                                self.getPro({ (success, error) -> () in
+                                    
+                                    SwiftOverlays.removeAllBlockingOverlays()
+                                    
+                                    print("yo \(success)")
+                                    
+                                    if !success {
+                                        
+                                        UIAlertController.showAlertControllerWithButtonTitle("Ok", confirmBtnStyle: .Default, message: "In app purchase failed", completion: { (response) -> () in
+                                            
+                                            completion()
+                                        })
+                                    }
+                                    else {
+                                        
+                                        completion()
+                                    }
+                                    
+                                    self.proSubscriptionDialogIsActive = false
+                                })
+                            }
+                            else {
+                                
+                                if User.currentUser()?.userType == UserType.ProUser.rawValue {
+                                    
+                                    UIAlertController.showAlertControllerWithButtonTitle("Ok", confirmBtnStyle: .Default, message: "You are already a Pro user!", completion: { (response) -> () in
+                                        
+                                        completion()
+                                    })
+                                }
+                                else{
+                                    
+                                    completion()
+                                }
+                                
+                                self.proSubscriptionDialogIsActive = false
+                            }
+                        })
+                    }
+                    else {
+                        
+                        completion()
+                        self.proSubscriptionDialogIsActive = false
+                    }
+                    
+                })
+            }
+        }
+    }
+    
+    func getPro(completion: (success: Bool, error: NSError?) -> ()) {
+        
+        PFPurchase.buyProduct(kProSubscriptionProductID, block: { (error: NSError?) -> Void in
+            
+            if let error = error {
+                
+                print(error)
+                completion(success: false, error: error)
+            }
+            else {
+                
+                completion(success: true, error : error )
+            }
+        })
+    }
 
+    func urlForProfilePicture() -> String {
+        
+        var url = ""
+        
+        if let id = facebookId {
+            
+            url = "https://graph.facebook.com/\(id)/picture?width=\(500)&height=\(500)"
+            
+        }
+        
+        return url
+    }
+    
+    func getProfilePicture(completion: (image: UIImage) -> ()) {
+        
+        let url = urlForProfilePicture()
+        
+        ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+            
+            completion(image: image)
+        })
+    }
 }

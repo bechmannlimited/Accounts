@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftOverlays
 
 class SaveItemViewController: ACFormViewController {
@@ -16,8 +16,18 @@ class SaveItemViewController: ACFormViewController {
     var isSaving = false
     var allowEditing = false
     var askToPopMessage = ""
+    var isInsidePopover = false
     
     var delegate: SaveItemDelegate?
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        if kDevice == .Pad && !isInsidePopover{
+            
+            tableView.separatorColor = .clearColor()
+        }
+    }
     
     func pop() {
         
@@ -78,12 +88,6 @@ class SaveItemViewController: ACFormViewController {
         navigationItem.leftBarButtonItem?.enabled = true
     }
     
-    func showLoadingOverlayWithText(text: String) {
-        
-        //SwiftOverlays.showBlockingWaitOverlayWithText(text)
-        self.showWaitOverlayWithText(text)
-    }
-    
     func updateUIForSavingOrDeleting() {
         
         tableView.userInteractionEnabled = false
@@ -114,24 +118,19 @@ class SaveItemViewController: ACFormViewController {
         
     }
     
-    func showSavingOverlay() {
-        
-        showLoadingOverlayWithText("Saving...")
-    }
-    
-    func showDeletingOverlay() {
-        
-        showLoadingOverlayWithText("Deleting...")
-    }
+    override func formViewElementWasDeniedEditing(identifier: String) {
 
-    func removeLoadingViews() {
-        
-        SwiftOverlays.removeAllBlockingOverlays()
-        self.removeAllOverlays()
+        if identifier == "isSecure" {
+            
+            User.currentUser()?.launchProSubscriptionDialogue("Securing transactions requires a Pro subscription.", completion: ({
+                
+                
+            }))
+        }
     }
 }
 
-extension SaveItemViewController: UITableViewDelegate {
+extension SaveItemViewController {
     
     override func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
         
@@ -139,5 +138,13 @@ extension SaveItemViewController: UITableViewDelegate {
     
         cell.textLabel?.font = UIFont.normalFont(cell.textLabel!.font.pointSize)
         cell.detailTextLabel?.font = UIFont.lightFont(cell.detailTextLabel!.font.pointSize)
+        
+        if let cell = cell as? FormViewSwitchCell {
+            
+            if cell.config.identifier == "isSecure" {
+                
+                cell.imageView?.image = kSecureImage
+            }
+        }
     }
 }

@@ -7,12 +7,15 @@
 //
 
 import UIKit
-import ABToolKit
-import KFSwiftImageLoader
 
 private let kContentViewVerticalPadding: CGFloat = 10
 private let kContentViewHorizontalPadding: CGFloat = 15
 private let kContentViewGap: CGFloat = 15
+
+protocol FriendTableViewCellDelegate {
+    
+    func didRemoveFriend(friend: User, indexPath: NSIndexPath?)
+}
 
 class FriendTableViewCell: UITableViewCell {
 
@@ -24,6 +27,8 @@ class FriendTableViewCell: UITableViewCell {
     var contextualTintColor = UIColor.grayColor()
     var noImageLabel = UILabel()
     var friendImageViewConstraints = Dictionary<String, NSLayoutConstraint>()
+    var delegate: FriendTableViewCellDelegate?
+    var currentIndexPath: NSIndexPath?
     
     convenience init(reuseIdentifier:String) {
         
@@ -47,13 +52,13 @@ class FriendTableViewCell: UITableViewCell {
     override func drawRect(rect: CGRect){
         super.drawRect(rect)
         
-        friendNameLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        friendNameLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(friendNameLabel)
         
-        friendImageView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        friendImageView.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(friendImageView)
         
-        amountOwedLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        amountOwedLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(amountOwedLabel)
         
         accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
@@ -64,6 +69,7 @@ class FriendTableViewCell: UITableViewCell {
         self.friend = friend
         setImageViewImage()
         setupLabelValues()
+        setupGestureRecognizer()
     }
     
     func setImageViewImage(){
@@ -86,7 +92,7 @@ class FriendTableViewCell: UITableViewCell {
             
             if friend.objectId == kTestBotObjectId {
                 
-                friendImageView.image = AppTools.iconAssetNamed("bender.jpg")
+                friendImageView.image = AppTools.iconAssetNamed("50981152_thumbnail.jpg")
                 completionHandler()
             }
             else if let id = friend.facebookId {
@@ -106,7 +112,7 @@ class FriendTableViewCell: UITableViewCell {
     
     private func showNoImageLabel() {
         
-        noImageLabel.setTranslatesAutoresizingMaskIntoConstraints(false)
+        noImageLabel.translatesAutoresizingMaskIntoConstraints = false
         friendImageView.addSubview(noImageLabel)
         
         noImageLabel.fillSuperView(UIEdgeInsetsZero)
@@ -121,21 +127,81 @@ class FriendTableViewCell: UITableViewCell {
     func setupLabelValues() {
         
         friendNameLabel.text = friend.appropriateDisplayName()
-        let amount = friend.localeDifferenceBetweenActiveUser //abs()
+        let amount = abs(friend.localeDifferenceBetweenActiveUser) //abs()
         
         detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
         detailTextLabel?.textColor = contextualTintColor
+    }
+    
+    func setupGestureRecognizer() {
+        
+        var isFaceBookFriend = false
+        
+        if let id = friend.facebookId {
+            
+            isFaceBookFriend = User.currentUser()?.facebookFriendIds.contains(id) == true
+        }
+        
+        if friend.objectId != kTestBotObjectId && isFaceBookFriend  == false { // TODO: - check if is a facebook friend.
+            
+            let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: "showFriendOptions:")
+            addGestureRecognizer(gestureRecognizer)
+        }
+    }
+    
+    func setupActionSheet() {
+        
+        
+    }
+    
+    func showFriendOptions(gestureRecognizor: UILongPressGestureRecognizer) {
+        
+        let optionMenu = UIAlertController(title: nil, message: "Options for \(friend.appropriateDisplayName())", preferredStyle: .ActionSheet)
+        
+        let deleteAction = UIAlertAction(title: "Remove friend", style: .Destructive, handler: {
+            (alert: UIAlertAction!) -> Void in
+            
+            UIAlertController.showAlertControllerWithButtonTitle("Remove", confirmBtnStyle: UIAlertActionStyle.Destructive, message: "Are you sure you want to remove \(self.friend.appropriateDisplayName()) from your friends list?", completion: { (response) -> () in
+                
+                if response == AlertResponse.Confirm {
+                    
+                    User.currentUser()?.removeFriend(self.friend, completion: { (success) -> () in
+                        
+                        self.delegate!.didRemoveFriend(self.friend, indexPath: self.currentIndexPath)
+                    })
+                }
+            })
+        })
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: {
+            (alert: UIAlertAction) -> Void in
+            
+        })
+        
+        optionMenu.addAction(deleteAction)
+        optionMenu.addAction(cancelAction)
+        
+        if kDevice == .Pad {
+            
+            optionMenu.popoverPresentationController!.sourceView = self.contentView
+            optionMenu.popoverPresentationController?.sourceRect = CGRect(x: 0, y: 0, width: 70, height: contentView.frame.height)
+        }
+        
+        if gestureRecognizor.state == UIGestureRecognizerState.Began {
+            
+            UIViewController.topMostController().presentViewController(optionMenu, animated: true, completion: nil)
+        }
     }
     
     func calculateTintColor() {
         
         contextualTintColor = UIColor.grayColor()
         
-        if friend.localeDifferenceBetweenActiveUser < 0 {
+        if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
             
             contextualTintColor = AccountColor.negativeColor()
         }
-        else if friend.localeDifferenceBetweenActiveUser > 0 {
+        else if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
             
             contextualTintColor = AccountColor.positiveColor()
         }
@@ -160,7 +226,7 @@ class FriendTableViewCell: UITableViewCell {
         friendNameLabel.addLeftConstraint(toView: friendImageView, attribute: .Right, relation: .Equal, constant: kContentViewGap)
         friendNameLabel.addTopConstraint(toView: contentView, relation: .Equal, constant: kContentViewVerticalPadding)
         friendNameLabel.addBottomConstraint(toView: contentView, relation: .Equal, constant: -kContentViewVerticalPadding)
-        friendNameLabel.addRightConstraint(toView: detailTextLabel, attribute: .Left, relation: .Equal, constant: kContentViewGap)
+        friendNameLabel.addRightConstraint(toView: detailTextLabel, attribute: .Left, relation: .Equal, constant: -kContentViewGap)
     }
     
     func setupAmountOwedLabel() {

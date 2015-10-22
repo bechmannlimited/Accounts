@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ABToolKit
+ 
 import SwiftyJSON
 import Parse
 import SVPullToRefresh
@@ -68,7 +68,10 @@ class TransactionsViewController: ACBaseViewController {
         }
         
         setupTableView(tableView, delegate: self, dataSource: self)
-        setupNoDataLabel(noDataView, text: "Tap plus to split a bill, add an i.o.u or a payment", originView: tableView)
+        
+        let noDataMessage: String = friend.objectId == kTestBotObjectId ? "ioubot will allow you to test out some of the features of this app before you invite your friends. Tap plus to have a go!" : "Tap plus to split a bill, add an i.o.u or a payment"
+        
+        setupNoDataLabel(noDataView, text: noDataMessage, originView: tableView)
         tableView.addSubview(noDataView)
         setupTextLabelForSaveStatusInToolbarWithLabel()
         
@@ -124,20 +127,13 @@ class TransactionsViewController: ACBaseViewController {
                 
                 if friend.objectId == kTestBotObjectId {
                     
-                    imageView.image = AppTools.iconAssetNamed("bender.jpg")
+                    imageView.image = AppTools.iconAssetNamed("50981152_thumbnail.jpg")
                     
-                    UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                    UIView.animateWithDuration(kHeroImageAnimationDuration, animations: { () -> Void in
                         
                         imageView.layer.opacity = 1
                         
                     }, completion: { (finished) -> Void in
-                        
-//                        imageView.screenShot({ (image) -> () in
-//                            
-//                            imageView.removeFromSuperview()
-//                            self.view.insertSubview(UIImageView(image: image), atIndex: 0)
-//                            self.blurViewHasBeenConverted = true
-//                        })
                     })
                 }
                 else if let id = friend.facebookId{
@@ -148,18 +144,11 @@ class TransactionsViewController: ACBaseViewController {
                         
                         imageView.image = image
                         
-                        UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
+                        UIView.animateWithDuration(kHeroImageAnimationDuration, animations: { () -> Void in
                             
                             imageView.layer.opacity = 1
                             
                         }, completion: { (finished) -> Void in
-                            
-//                            imageView.screenShot({ (image) -> () in
-//                                
-//                                imageView.removeFromSuperview()
-//                                self.view.insertSubview(UIImageView(image: image), atIndex: 0)
-//                                self.blurViewHasBeenConverted = true
-//                            })
                         })
                     })
                 }
@@ -222,7 +211,7 @@ class TransactionsViewController: ACBaseViewController {
         
         if friend.objectId == kTestBotObjectId {
             
-            headerView?.heroImageView.image = AppTools.iconAssetNamed("bender.jpg")
+            headerView?.heroImageView.image = AppTools.iconAssetNamed("50981152_thumbnail.jpg")
         }
         else if let id = friend.facebookId{
             
@@ -322,7 +311,7 @@ class TransactionsViewController: ACBaseViewController {
     
     func setupToolbar(){
         
-        toolbar.setTranslatesAutoresizingMaskIntoConstraints(false)
+        toolbar.translatesAutoresizingMaskIntoConstraints = false
         toolbar.sizeToFit()
         view.addSubview(toolbar)
         
@@ -331,7 +320,7 @@ class TransactionsViewController: ACBaseViewController {
         toolbar.addRightConstraint(toView: view, relation: .Equal, constant: 0)
         toolbar.addBottomConstraint(toView: view, relation: .Equal, constant: 0)
         
-        var previousInsets = tableView.contentInset
+        let previousInsets = tableView.contentInset
         tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
         
         toolbar.tintColor = kNavigationBarTintColor
@@ -349,7 +338,7 @@ class TransactionsViewController: ACBaseViewController {
         
         tableView.addInfiniteScrollingWithActionHandler { () -> Void in
             
-            var y: CGFloat = self.tableView.contentOffset.y + self.tableView.contentInset.top
+            let y: CGFloat = self.tableView.contentOffset.y + self.tableView.contentInset.top
             
             if y > 0 {
                 
@@ -388,7 +377,7 @@ class TransactionsViewController: ACBaseViewController {
             
             for transaction in transactions {
                 
-                let row = find(transactions, transaction)!
+                let row = transactions.indexOf(transaction)!
                 
                 if let purchaseID = selectedPurchaseID {
                     
@@ -428,18 +417,18 @@ class TransactionsViewController: ACBaseViewController {
                 }
             }
             if let indexPath = rowToDeselect {
-                
+                print(indexPath)
                 tableView.selectRowAtIndexPath(indexPath, animated: false, scrollPosition: UITableViewScrollPosition.None)
                 
                 if shouldDeselect {
                     
                     NSTimer.schedule(delay: kAnimationDuration, handler: { timer in
                         
-                        var cellRect = self.tableView.rectForRowAtIndexPath(indexPath)
+                        let cellRect = self.tableView.rectForRowAtIndexPath(indexPath)
                         
                         let rectToCheck = CGRect(x: self.tableView.bounds.origin.x, y: self.tableView.bounds.origin.y + 64, width: self.tableView.bounds.width, height: self.tableView.bounds.height - 64 - 44)
                         
-                        var completelyVisible = CGRectContainsRect(rectToCheck, cellRect)
+                        let completelyVisible = CGRectContainsRect(rectToCheck, cellRect)
                         
                         if !completelyVisible {
                             
@@ -477,6 +466,8 @@ class TransactionsViewController: ACBaseViewController {
         
         selectedTransactionID = nil
         selectedPurchaseID = nil
+        // ^ remove both these when findandscrolltoselected row is working
+        
         selectedRow = nil
         didJustDelete = false
         
@@ -493,7 +484,7 @@ class TransactionsViewController: ACBaseViewController {
                 refreshBarButtonItem?.enabled = true
             })
             
-            var remoteQuery = self.query()
+            let remoteQuery = self.query()
             remoteQuery?.limit = 16
             
             remoteQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
@@ -522,17 +513,17 @@ class TransactionsViewController: ACBaseViewController {
         
         self.refreshBarButtonItem?.enabled = false
         
-        var localQuery = query()?.fromLocalDatastore()
+        let localQuery = query()?.fromLocalDatastore()
         
         localQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
             
-            var transactionsNotAvailable = [Transaction]()
+            let transactionsNotAvailable = [Transaction]()
             
             if var transactions = objects as? [Transaction] {
                 
                 for transaction in transactionsNotAvailable {
                     
-                    let index = find(transactions, transaction)!
+                    let index = transactions.indexOf(transaction)!
                     transactions.removeAtIndex(index)
                 }
                 
@@ -542,6 +533,7 @@ class TransactionsViewController: ACBaseViewController {
                 self.view.hideLoader()
                 self.showOrHideTableOrNoDataView()
                 self.refreshBarButtonItem?.enabled = true
+                //self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
                 
                 UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
                     
@@ -623,7 +615,7 @@ class TransactionsViewController: ACBaseViewController {
         
         //setupBounceView()
         
-        tableView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
         tableView.addLeftConstraint(toView: view, attribute: NSLayoutAttribute.Left, relation: NSLayoutRelation.GreaterThanOrEqual, constant: -0)
         tableView.addRightConstraint(toView: view, attribute: NSLayoutAttribute.Right, relation: NSLayoutRelation.GreaterThanOrEqual, constant: -0)
@@ -644,7 +636,7 @@ class TransactionsViewController: ACBaseViewController {
     }
 }
 
-extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource {
+extension TransactionsViewController: UITableViewDataSource {
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
@@ -695,9 +687,34 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
             v.transactionObjectId = transaction.objectId
             v.existingTransaction = transaction
             v.isExistingTransaction = true
-            
+            v.isInsidePopover = kDevice == .Pad
             v.delegate = self
-            openView(v, sourceView: cell.contentView)
+            
+//            if #available(iOS 9.0, *) {
+//                
+//                if transaction.isSecure && NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) && NKTouchID.canUseTouchID() {
+//                    
+//                    NKTouchID.authenticateWithTouchId(reason: "Please verify yourself to open this transaction!", callback: { (success, error) in
+//                        
+//                        if success {
+//                            
+//                            self.openView(v, sourceView: cell.contentView)
+//                        }
+//                        else {
+//                            
+//                            self.deselectSelectedCell(tableView)
+//                        }
+//                    })
+//                }
+//                else {
+//                    
+//                    openView(v, sourceView: cell.contentView)
+//                }
+//            }
+//            else {
+            
+                openView(v, sourceView: cell.contentView)
+            //}  
         }
         
         selectedRow = indexPath
@@ -731,7 +748,7 @@ extension TransactionsViewController: UITableViewDelegate, UITableViewDataSource
     
     func reorderTransactions() {
         
-        transactions.sort { return $0.transactionDate > $1.transactionDate }
+        transactions.sortInPlace { return $0.transactionDate.timeIntervalSince1970 > $1.transactionDate.timeIntervalSince1970 }
     }
 }
 
@@ -765,7 +782,7 @@ extension TransactionsViewController: UIPopoverPresentationControllerDelegate {
     }
 }
 
-extension TransactionsViewController: UIScrollViewDelegate {
+extension TransactionsViewController {
     
     func scrollViewDidScroll(scrollView: UIScrollView) {
         

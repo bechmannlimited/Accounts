@@ -27,7 +27,7 @@ public class ParseUtilities: NSObject {
         
     }
     
-    class func sendPushNotificationsInBackgroundToUsers(users: [User], message: String, data: [NSObject : AnyObject]?) {
+    class func sendPushNotificationsInBackgroundToUsers(users: [User], message: String, data: [NSObject : AnyObject]?, iouEvent: IOUEvent) {
         
         let query = PFInstallation.query()
         var userIds:[String] = []
@@ -42,31 +42,33 @@ public class ParseUtilities: NSObject {
         
         var pushData: [NSObject : AnyObject] = data != nil ? data! : [NSObject : AnyObject]()
         
-        var pushNotification = PFPush()
+        let pushNotification = PFPush()
         pushNotification.setQuery(query)
         
         pushData["alert"] = message
         pushData["sound"] = "default"
         pushData["userIds"] = userIds
+        pushData["iouEvent"] = iouEvent.rawValue
+        pushData["message"] = message
             
         pushNotification.setData(pushData)
         pushNotification.sendPushInBackground()
     }
     
-    class func convertPFObjectToDictionary(object: PFObject) -> Dictionary<String, AnyObject?> {
-    
-        var itemDictionary = Dictionary<String, AnyObject?>()
-        
-        var copy: PFObject = PFObject(withoutDataWithClassName: object.parseClassName, objectId: object.objectId)
-        
-        for key in object.allKeys() {
-            
-            itemDictionary[key as! String] = object.objectForKey(key as! String)
-        }
-        
-        return itemDictionary
-    }
+//    class func convertPFObjectToDictionary(object: PFObject) -> Dictionary<String, AnyObject?> {
 //    
+//        var itemDictionary = Dictionary<String, AnyObject?>()
+//        
+//        var copy: PFObject = PFObject(withoutDataWithClassName: object.parseClassName, objectId: object.objectId)
+//        
+//        for key in object.allKeys() {
+//            
+//            itemDictionary[key as! String] = object.objectForKey(key as! String)
+//        }
+//        
+//        return itemDictionary
+//    }
+//
 //    class func findObjectsInLocalAndRemoteDataStore(query: PFQuery?) -> BFTask? {
 //        
 //        return query?.findObjectsInBackground().continueWithBlock({ (task) -> AnyObject! in
