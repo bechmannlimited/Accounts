@@ -382,7 +382,6 @@ extension FriendsViewController: UITableViewDataSource {
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         
         let friend = data[indexPath.section][indexPath.row]
-        
         let v = TransactionsViewController()
         v.friend = friend
         navigationController?.pushViewController(v, animated: true)

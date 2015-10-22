@@ -233,7 +233,9 @@ class User: PFUser {
                 let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
                 graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
                     
-                    if error == nil{
+                    print("fbsdk get users me/friends error?: \(error)")
+                    
+                    if error == nil {
                         
                         var canContinue = true
                         
