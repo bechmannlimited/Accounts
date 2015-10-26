@@ -51,6 +51,9 @@ class TransactionsViewController: ACBaseViewController {
     var popoverViewController: UIViewController?
     private var blurViewHasBeenConverted = false
     
+    var multiCurrencyTableViewDelegate = MultiCurrencyTableViewDelegate()
+    let tableHeaderView = UIView()
+    
     func clean() {
         
         PFObject.unpinAllInBackground(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase])
@@ -112,6 +115,24 @@ class TransactionsViewController: ACBaseViewController {
         refresh(nil)
         
         tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top - 64, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
+    }
+    
+    func setupMultiCurrencyTableHeaderView() {
+        
+        if transactions.count > 0 {
+            
+            tableHeaderView.frame = CGRect(x: 0, y: 0, width: 200, height: multiCurrencyTableViewDelegate.tableCellHeight * CGFloat(multiCurrencyTableViewDelegate.numberOfRowsInSection()))
+            
+            let multiCurrencyTableView = UITableView()
+            multiCurrencyTableView.translatesAutoresizingMaskIntoConstraints = false
+            tableHeaderView.addSubview(multiCurrencyTableView)
+            multiCurrencyTableView.fillSuperView(UIEdgeInsetsZero)
+            multiCurrencyTableView.delegate = multiCurrencyTableViewDelegate
+            multiCurrencyTableView.dataSource = multiCurrencyTableViewDelegate
+            
+            tableView.tableHeaderView = tableHeaderView
+            tableHeaderView.sizeToFit()
+        }
     }
     
     func setupBackgroundBlurView() {
@@ -533,6 +554,7 @@ class TransactionsViewController: ACBaseViewController {
                 self.view.hideLoader()
                 self.showOrHideTableOrNoDataView()
                 self.refreshBarButtonItem?.enabled = true
+                self.setupMultiCurrencyTableHeaderView()
                 //self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
                 
                 UIView.animateWithDuration(kAnimationDuration, animations: { () -> Void in
@@ -718,6 +740,11 @@ extension TransactionsViewController: UITableViewDataSource {
         }
         
         selectedRow = indexPath
+    }
+    
+    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        
+        return "Transactions"
     }
     
     func openView(view: UIViewController, sourceView: UIView?) {
