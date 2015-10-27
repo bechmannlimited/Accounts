@@ -239,9 +239,12 @@ extension MenuViewController: UITableViewDataSource {
                             
                             Task.sharedTasker().executeTaskInBackground({ () -> () in
                                 
-                                User.currentUser()?.unpin()
-                                PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
-                                PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
+                                do {
+                                    try User.currentUser()?.unpin()
+                                    try PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
+                                    try PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
+                                }
+                                catch {}
                                 //SupportKit.logout()
                                 
                             }, completion: { () -> () in

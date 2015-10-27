@@ -137,7 +137,8 @@ class FriendsViewController: ACBaseViewController {
         
         if var height = navigationController?.navigationBar.frame.height {
             
-            if NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) {
+            if NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) &&
+                !NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 1, patchVersion: 0)){
                 
                 height += UIApplication.sharedApplication().statusBarFrame.height
                 tableView.contentInset = UIEdgeInsets(top: height, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
@@ -273,7 +274,7 @@ class FriendsViewController: ACBaseViewController {
         
         NSTimer.schedule(delay: 10, handler: { timer in
             
-            refreshBarButtonItem?.enabled = true
+            self.refreshBarButtonItem?.enabled = true
         })
         
         User.currentUser()?.getFriends({ (completedRemoteRequest) -> () in

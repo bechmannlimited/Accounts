@@ -128,7 +128,7 @@ class StartViewController: ACBaseViewController {
                 
                 Task.sharedTasker().executeTaskInBackground({ () -> Void in
                     
-                    user.save()
+                    do { try user.save() } catch {}
                     
                 }, completion: { () -> () in
                     
@@ -153,9 +153,9 @@ extension StartViewController: PFLogInViewControllerDelegate{
         
         Task.sharedTasker().executeTaskInBackground({ () -> () in
             
-            User.currentUser()?.fetch()
-            PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
-            PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
+            do { try User.currentUser()?.fetch() } catch {}
+            do { try PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects()) } catch {}
+            do { try PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects()) } catch {}
             
         }, completion: { () -> () in
 
@@ -178,9 +178,9 @@ extension StartViewController: PFSignUpViewControllerDelegate {
         
         Task.sharedTasker().executeTaskInBackground({ () -> () in
             
-            User.currentUser()?.fetch()
-            PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects())
-            PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects())
+            do { try User.currentUser()?.fetch() } catch {}
+            do { try PFObject.unpinAll(User.query()?.fromLocalDatastore().findObjects()) } catch {}
+            do { try PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects()) } catch {}
             
         }, completion: { () -> () in
             

@@ -86,8 +86,13 @@ class User: PFUser {
                 }
                 
                 self.friendsIdsWithDifference?.removeValueForKey(friend.objectId!)
-                friend.unpin()
-                self.save()
+                
+                do {
+                    
+                    try friend.unpin()
+                    try self.save()
+                }
+                catch {}
                 
             }, completion: { () -> () in
                 
@@ -230,7 +235,7 @@ class User: PFUser {
             
             if let _ = self.facebookId {
                 
-                let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: nil)
+                let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: ["fields": "email"])
                 graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
                     
                     print("fbsdk get users me/friends error?: \(error)")
@@ -268,48 +273,52 @@ class User: PFUser {
                             
                             queries.append(query1!)  // must add friends relation back to user
                             
-                            if let friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as? [User] {
+                            do {
                                 
-                                self.friends = friends
-                            }
-                            
-                            var friendIds = Array<String>()
-                            
-                            for friend in self.friends {
-                                
-                                friend.fetch()
-                                friendIds.append(friend.objectId!)
-                            }
-                            
-                            if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
-                                
-                                let responseJson = JSON(cloudResponse)
-                                
-                                for (key,differenceJson):(String, JSON) in responseJson {
+                                if let friends = try PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as? [User] {
                                     
-                                    for friend in self.friends {
+                                    self.friends = friends
+                                }
+                                
+                                var friendIds = Array<String>()
+                                
+                                for friend in self.friends {
+                                    
+                                    try friend.fetch()
+                                    friendIds.append(friend.objectId!)
+                                }
+                                
+                                if let cloudResponse: AnyObject = try PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
+                                    
+                                    let responseJson = JSON(cloudResponse)
+                                    
+                                    for (key,differenceJson):(String, JSON) in responseJson {
                                         
-                                        if friend.objectId == key {
+                                        for friend in self.friends {
                                             
-                                            friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
-                                            friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                            if friend.objectId == key {
+                                                
+                                                friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
+                                                friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                            }
                                         }
                                     }
                                 }
-                            }
-                            else{
+                                else{
+                                    
+                                    canContinue = false
+                                }
                                 
-                                canContinue = false
+                                if canContinue {
+                                    
+                                    try PFObject.pinAll(self.friends)
+                                    
+                                    self.friendsIdsWithDifference = friendInfo
+                                    self.pinInBackground()
+                                    self.saveInBackground()
+                                }
                             }
-                            
-                            if canContinue {
-                                
-                                PFObject.pinAll(self.friends)
-                                
-                                self.friendsIdsWithDifference = friendInfo
-                                self.pinInBackground()
-                                self.saveInBackground()
-                            }
+                            catch {}
                             
                         }, completion: { () -> () in
                             
@@ -346,48 +355,54 @@ class User: PFUser {
                     
                     queries.append(query1!)  // must add friends relation back to user
 
-                    if let friends = PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as? [User] {
+                    do {
                         
-                        self.friends = friends
-                    }
-                    
-                    var friendIds = Array<String>()
-                    
-                    for friend in self.friends {
-                        
-                        friend.fetch()
-                        friendIds.append(friend.objectId!)
-                    }
-                    
-                    if let cloudResponse: AnyObject = PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
-                        
-                        let responseJson = JSON(cloudResponse)
-                        
-                        for (key,differenceJson):(String, JSON) in responseJson {
+                        if let friends = try PFQuery.orQueryWithSubqueries(queries).orderByAscending("objectId").findObjects() as? [User] {
                             
-                            for friend in self.friends {
+                            self.friends = friends
+                        }
+                        
+                        var friendIds = Array<String>()
+                        
+                        for friend in self.friends {
+                            
+                            try friend.fetch()
+                            friendIds.append(friend.objectId!)
+                        }
+                        
+                        if let cloudResponse: AnyObject = try PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
+                            
+                            let responseJson = JSON(cloudResponse)
+                            
+                            for (key,differenceJson):(String, JSON) in responseJson {
                                 
-                                if friend.objectId == key {
+                                for friend in self.friends {
                                     
-                                    friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
-                                    friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                    if friend.objectId == key {
+                                        
+                                        friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
+                                        friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                    }
                                 }
                             }
                         }
-                    }
-                    else{
+                        else{
+                            
+                            canContinue = false
+                        }
                         
-                        canContinue = false
+                        if canContinue {
+                            
+                            try PFObject.pinAll(self.friends)
+                            
+                            self.friendsIdsWithDifference = friendInfo
+                            self.pinInBackground()
+                            self.saveInBackground()
+                        }
                     }
+                    catch {}
                     
-                    if canContinue {
-                        
-                        PFObject.pinAll(self.friends)
-                        
-                        self.friendsIdsWithDifference = friendInfo
-                        self.pinInBackground()
-                        self.saveInBackground()
-                    }
+                    
                     
                 }, completion: { () -> () in
                     

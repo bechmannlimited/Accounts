@@ -1,49 +1,50 @@
 PODS:
   - AFDateHelper (3.1.0)
-  - Alamofire (3.0.0)
-  - Bolts (1.3.0):
-    - Bolts/AppLinks (= 1.3.0)
-    - Bolts/Tasks (= 1.3.0)
-  - Bolts/AppLinks (1.3.0):
+  - Alamofire (3.1.0)
+  - Bolts (1.4.0):
+    - Bolts/AppLinks (= 1.4.0)
+    - Bolts/Tasks (= 1.4.0)
+  - Bolts/AppLinks (1.4.0):
     - Bolts/Tasks
-  - Bolts/Tasks (1.3.0)
-  - FBSDKCoreKit (4.1.0):
+  - Bolts/Tasks (1.4.0)
+  - FBSDKCoreKit (4.7.0):
     - Bolts (~> 1.1)
-    - FBSDKCoreKit/arc (= 4.1.0)
-    - FBSDKCoreKit/no-arc (= 4.1.0)
-  - FBSDKCoreKit/arc (4.1.0):
+    - FBSDKCoreKit/arc (= 4.7.0)
+    - FBSDKCoreKit/no-arc (= 4.7.0)
+  - FBSDKCoreKit/arc (4.7.0):
     - Bolts (~> 1.1)
-  - FBSDKCoreKit/no-arc (4.1.0):
+  - FBSDKCoreKit/no-arc (4.7.0):
     - Bolts (~> 1.1)
     - FBSDKCoreKit/arc
-  - FBSDKLoginKit (4.1.0):
+  - FBSDKLoginKit (4.7.0.1):
     - FBSDKCoreKit
-  - FBSDKShareKit (4.1.0):
+  - FBSDKShareKit (4.7.0):
     - FBSDKCoreKit
-  - Parse (1.7.5.3):
-    - Bolts/Tasks (>= 1.2.0)
-  - ParseFacebookUtilsV4 (1.7.5.3):
-    - Bolts/Tasks (>= 1.2.0)
-    - FBSDKCoreKit (~> 4.0)
-    - FBSDKLoginKit (~> 4.0)
-    - Parse (~> 1.7.5.3)
-  - ParseUI (1.1.4):
-    - Parse (~> 1.7)
+  - Parse (1.9.1):
+    - Bolts/Tasks (>= 1.4.0)
+  - ParseFacebookUtilsV4 (1.9.0):
+    - Bolts/Tasks (>= 1.3.0)
+    - FBSDKCoreKit (~> 4.7)
+    - FBSDKLoginKit (~> 4.7)
+    - Parse (~> 1.9)
+  - ParseUI (1.1.6):
+    - Bolts/Tasks (~> 1.2)
+    - Parse (~> 1.8)
   - SupportKit (2.11.0)
   - SVPullToRefresh (0.4.1)
   - SwiftOverlays (1.0)
-  - SwiftyJSON (2.3.0)
+  - SwiftyJSON (2.3.1)
   - SwiftyUserDefaults (1.2.0)
 
 DEPENDENCIES:
   - AFDateHelper
   - Alamofire
-  - FBSDKCoreKit (= 4.1.0)
-  - FBSDKLoginKit (= 4.1.0)
-  - FBSDKShareKit (= 4.1.0)
+  - FBSDKCoreKit
+  - FBSDKLoginKit
+  - FBSDKShareKit
   - Parse
-  - ParseFacebookUtilsV4 (~> 1.7.2)
-  - ParseUI (~> 1.1.3)
+  - ParseFacebookUtilsV4
+  - ParseUI
   - SupportKit
   - SVPullToRefresh
   - SwiftOverlays
@@ -56,18 +57,18 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFDateHelper: 346694fc5861bdef77d8115e3825182a3fc697d2
-  Alamofire: b61782387f81bcc538a0284cf2bb5d7995cd0a80
-  Bolts: 805a4a87413e49d4a0c2b7d469084cbc46b09342
-  FBSDKCoreKit: 469ed167195f860dbd2b4c4bbaa33d2e90598db9
-  FBSDKLoginKit: ff6224762732e3698f30942e4544321b8c7a23e6
-  FBSDKShareKit: 8002faf0c564ff3625eadd16e506b0b0fbf3adef
-  Parse: 373adbb1ad2e34d383542c3b28f678c49ebe4881
-  ParseFacebookUtilsV4: ea5db22e87b91cbf99b9d156642e2b97a4db7d51
-  ParseUI: d1228541b02a36a7354c8f47747f5f7a89cf1ff0
+  Alamofire: 415bd7f56197722978759078486689f7ef913dce
+  Bolts: 0e9bce58b9b9f5e8a7a4d47b16d2fabec289072b
+  FBSDKCoreKit: eb580bfc2040ad44f4c0b4f4d0befb1d35bce59c
+  FBSDKLoginKit: 028c5a205990441123764609fe795e65027c447f
+  FBSDKShareKit: 1f927bb05e4d36a99d5d5bf2f4b1ff294ce3e15c
+  Parse: 54a965c8c19a6dde90284ab654dbcc77ef8c001b
+  ParseFacebookUtilsV4: aadebfaaaf4a45bf0a0992863bf48c8fc49189e3
+  ParseUI: 8a22e448c03f825203d8c379c80523517f68baa3
   SupportKit: 07e72f5e93c1055adcc810dd715aefc34e0ab279
   SVPullToRefresh: ba2e718695a43253d8bea6852d2960097dc15d8c
   SwiftOverlays: 6a47bab3ed2784c378f07b275269f9e8231526e6
-  SwiftyJSON: 8d6b61a70277ef2a5d710d372e06e7e2d87fb9e4
+  SwiftyJSON: 592b53bee5ef3dd9b3bebc6b9cb7ee35426ae8c3
   SwiftyUserDefaults: 3b4413c26f5cc4f4ed114cf75c42dbef189f0c1e
 
 COCOAPODS: 0.38.2
