@@ -222,8 +222,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
            
                         Task.sharedTasker().executeTaskInBackground({ () -> () in
                             
-                            v.transaction.fromUser?.fetchIfNeeded()
-                            v.transaction.toUser?.fetchIfNeeded()
+                            do { try v.transaction.fromUser?.fetchIfNeeded() } catch {}
+                            do { try v.transaction.toUser?.fetchIfNeeded() } catch {}
                             
                         }, completion: { () -> () in
                             

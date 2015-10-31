@@ -51,13 +51,13 @@ class TransactionsViewController: ACBaseViewController {
     var popoverViewController: UIViewController?
     private var blurViewHasBeenConverted = false
     
-    func clean() {
-        
-        PFObject.unpinAllInBackground(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase])
-        PFObject.unpinAllInBackground(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction])
-        //PFObject.unpinAll(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase], withName: self.pinLabel())
-        //PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction], withName: self.pinLabel())
-    }
+//    func clean() {
+//        
+//        PFObject.unpinAllInBackground(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase])
+//        PFObject.unpinAllInBackground(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction])
+//        //PFObject.unpinAll(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase], withName: self.pinLabel())
+//        //PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction], withName: self.pinLabel())
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -481,7 +481,7 @@ class TransactionsViewController: ACBaseViewController {
             
             NSTimer.schedule(delay: 10, handler: { timer in
                 
-                refreshBarButtonItem?.enabled = true
+                self.refreshBarButtonItem?.enabled = true
             })
             
             let remoteQuery = self.query()
@@ -493,8 +493,11 @@ class TransactionsViewController: ACBaseViewController {
                     
                     Task.sharedTasker().executeTaskInBackground({ () -> Void in
                         
-                        PFObject.unpinAll(self.query()?.fromLocalDatastore().findObjects())
-                        PFObject.pinAll(transactions)
+                        do {
+                            try PFObject.unpinAll(self.query()?.fromLocalDatastore().findObjects())
+                            try PFObject.pinAll(transactions)
+                        }
+                        catch { }
                         
                     }, completion: { () -> () in
                         
@@ -572,7 +575,7 @@ class TransactionsViewController: ACBaseViewController {
                     
                     Task.sharedTasker().executeTaskInBackground({ () -> Void in
                         
-                        PFObject.pinAll(transactions)
+                        do { try PFObject.pinAll(transactions) } catch {}
                         
                     }, completion: { () -> () in
                         

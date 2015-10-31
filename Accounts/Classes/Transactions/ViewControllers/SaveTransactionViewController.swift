@@ -52,9 +52,14 @@ class SaveTransactionViewController: SaveItemViewController {
             
             Task.sharedTasker().executeTaskInBackground({ () -> Void in
                 
-                self.transaction.fetchIfNeeded()
-                self.transaction.toUser?.fetchIfNeeded()
-                self.transaction.fromUser?.fetchIfNeeded()
+                do {
+                    
+                    try self.transaction.fetchIfNeeded()
+                    try self.transaction.toUser?.fetchIfNeeded()
+                    try self.transaction.fromUser?.fetchIfNeeded()
+                }
+                catch {}
+
                 self.isNew = false
                 
             }, completion: { () -> () in
