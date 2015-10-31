@@ -235,7 +235,7 @@ class User: PFUser {
             
             if let _ = self.facebookId {
                 
-                let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: ["fields": "email"])
+                let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me/friends", parameters: ["fields": "id"])
                 graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
                     
                     print("fbsdk get users me/friends error?: \(error)")

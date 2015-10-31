@@ -152,8 +152,8 @@ class SaveUserViewController: ACFormViewController {
         
         sections.append([
             FormViewConfiguration.textField("Email", value: (userInfo["email"] as! String), identifier: "email"),
-            FormViewConfiguration.textField("Display name", value: (userInfo["displayName"] as! String), identifier: "displayName"),
-            FormViewConfiguration.normalCell("Image")
+            FormViewConfiguration.textField("Display name", value: (userInfo["displayName"] as! String), identifier: "displayName")
+            //FormViewConfiguration.normalCell("Image")
         ])
         
         return sections
