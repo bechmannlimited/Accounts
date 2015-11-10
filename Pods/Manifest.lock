@@ -1,24 +1,24 @@
 PODS:
   - AFDateHelper (3.1.0)
-  - Alamofire (3.1.0)
+  - Alamofire (3.1.2)
   - Bolts (1.4.0):
     - Bolts/AppLinks (= 1.4.0)
     - Bolts/Tasks (= 1.4.0)
   - Bolts/AppLinks (1.4.0):
     - Bolts/Tasks
   - Bolts/Tasks (1.4.0)
-  - FBSDKCoreKit (4.7.0):
+  - FBSDKCoreKit (4.7.1):
     - Bolts (~> 1.1)
-    - FBSDKCoreKit/arc (= 4.7.0)
-    - FBSDKCoreKit/no-arc (= 4.7.0)
-  - FBSDKCoreKit/arc (4.7.0):
+    - FBSDKCoreKit/arc (= 4.7.1)
+    - FBSDKCoreKit/no-arc (= 4.7.1)
+  - FBSDKCoreKit/arc (4.7.1):
     - Bolts (~> 1.1)
-  - FBSDKCoreKit/no-arc (4.7.0):
+  - FBSDKCoreKit/no-arc (4.7.1):
     - Bolts (~> 1.1)
     - FBSDKCoreKit/arc
-  - FBSDKLoginKit (4.7.0.1):
+  - FBSDKLoginKit (4.7.1):
     - FBSDKCoreKit
-  - FBSDKShareKit (4.7.0):
+  - FBSDKShareKit (4.7.1):
     - FBSDKCoreKit
   - Parse (1.9.1):
     - Bolts/Tasks (>= 1.4.0)
@@ -30,7 +30,7 @@ PODS:
   - ParseUI (1.1.6):
     - Bolts/Tasks (~> 1.2)
     - Parse (~> 1.8)
-  - SupportKit (2.11.0)
+  - SupportKit (2.11.1)
   - SVPullToRefresh (0.4.1)
   - SwiftOverlays (1.0)
   - SwiftyJSON (2.3.1)
@@ -45,7 +45,7 @@ DEPENDENCIES:
   - Parse
   - ParseFacebookUtilsV4
   - ParseUI
-  - SupportKit
+  - SupportKit (~> 2.11.1)
   - SVPullToRefresh
   - SwiftOverlays
   - SwiftyJSON
@@ -57,15 +57,15 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   AFDateHelper: 346694fc5861bdef77d8115e3825182a3fc697d2
-  Alamofire: 415bd7f56197722978759078486689f7ef913dce
+  Alamofire: 7c16ca65f3c7e681fd925fd7f2dec7747ff96855
   Bolts: 0e9bce58b9b9f5e8a7a4d47b16d2fabec289072b
-  FBSDKCoreKit: eb580bfc2040ad44f4c0b4f4d0befb1d35bce59c
-  FBSDKLoginKit: 028c5a205990441123764609fe795e65027c447f
-  FBSDKShareKit: 1f927bb05e4d36a99d5d5bf2f4b1ff294ce3e15c
+  FBSDKCoreKit: 9141b70960a37930850370495fe565f4a27ac141
+  FBSDKLoginKit: c11ed3c2833472db3bb4a4aecf27af4a6f69b173
+  FBSDKShareKit: 213adf63e073f41a346b0e7a689805880dc5150e
   Parse: 54a965c8c19a6dde90284ab654dbcc77ef8c001b
   ParseFacebookUtilsV4: aadebfaaaf4a45bf0a0992863bf48c8fc49189e3
   ParseUI: 8a22e448c03f825203d8c379c80523517f68baa3
-  SupportKit: 07e72f5e93c1055adcc810dd715aefc34e0ab279
+  SupportKit: 3372cf5d6090de7bd035bee21589b0efb9016fd6
   SVPullToRefresh: ba2e718695a43253d8bea6852d2960097dc15d8c
   SwiftOverlays: 6a47bab3ed2784c378f07b275269f9e8231526e6
   SwiftyJSON: 592b53bee5ef3dd9b3bebc6b9cb7ee35426ae8c3
