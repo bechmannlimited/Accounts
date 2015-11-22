@@ -129,12 +129,21 @@ class FriendTableViewCell: UITableViewCell {
         friendNameLabel.text = friend.appropriateDisplayName()
         
         let amounts = friend.differencesBetweenActiveUser
-        print("amounts: \(friend.appropriateDisplayName()) \(amounts)")
         
-//        let amount = abs(friend.localeDifferenceBetweenActiveUser) //abs()
-//        
-//        detailTextLabel?.text = Formatter.formatCurrencyAsString(CurrencyEnum.GBP, value: amount)
-        detailTextLabel?.text = "hey"
+        var amountStrings: Array<String> = []
+        
+        for result in amounts {
+            
+            amountStrings.append(Formatter.formatCurrencyAsString(Currency.CurrencyFromString(result.0), value: Double(result.1)))
+        }
+        
+        detailTextLabel?.text = amountStrings.map{String($0)}.joinWithSeparator(",")
+        
+        if detailTextLabel?.text == "" {
+            
+            detailTextLabel?.text = "Your even"
+        }
+        
         detailTextLabel?.textColor = contextualTintColor
     }
     

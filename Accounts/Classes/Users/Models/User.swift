@@ -54,6 +54,7 @@ class User: PFUser {
     @NSManaged var friendsIdsWithDifferenceWithMultipleCurrencies: Dictionary<String, Dictionary<String, NSNumber>>?
     @NSManaged var userType: NSNumber?
     @NSManaged var lastSyncedDataInfo: Dictionary<String, NSDate>?
+    @NSManaged var preferredCurrencyId: NSNumber?
     
     var facebookFriendIds = Array<String>()
     
@@ -83,7 +84,7 @@ class User: PFUser {
             Task.sharedTasker().executeTaskInBackground({ () -> () in
                 
                 for f in self.friends.filter({ (t) -> Bool in
-                    print(t.objectId)
+                    
                     return t.objectId == friend.objectId
                 }) {
                     

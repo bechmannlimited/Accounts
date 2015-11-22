@@ -118,7 +118,7 @@ extension MenuViewController: UITableViewDataSource {
         
         if indexPath == kCurrencyIndexPath {
             
-            cell.textLabel?.text = "Preferred Currency"
+            cell.textLabel?.text = "Preferred currency"
             cell.detailTextLabel?.text = Currency.descriptionForCurrencyId(Settings.defaultCurrencyId())
             cell.accessoryType = .DisclosureIndicator
         }
@@ -435,6 +435,8 @@ extension MenuViewController: SelectCurrencyDelegate {
     func didSelectCurrencyId(id: NSNumber) {
         
         Settings.setDefaultCurrencyId(id)
+        User.currentUser()?.preferredCurrencyId = id
+        User.currentUser()?.saveInBackground()
         tableView.reloadData()
     }
 }

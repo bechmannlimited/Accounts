@@ -112,18 +112,23 @@ class StartViewController: ACBaseViewController {
         
         SwiftOverlays.showBlockingWaitOverlayWithText(User.currentUser()?.facebookId != nil ? "Fetching facebook info..." : "Setting some things up...")
         
-        let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me", parameters: nil)
+        let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me", parameters: ["fields": "id, name, email"])
         graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
             
             if let json: AnyObject = result {
                 
                 let result = JSON(json)
-                
+                print(result)
                 user["facebookId"] = result["id"].stringValue
                 
                 if user["displayName"] == nil {
                     
                     user["displayName"] = result["name"].stringValue
+                }
+                
+                if user["email"] == nil {
+                    
+                    user["email"] = result["email"].stringValue
                 }
                 
                 Task.sharedTasker().executeTaskInBackground({ () -> Void in
@@ -133,15 +138,25 @@ class StartViewController: ACBaseViewController {
                 }, completion: { () -> () in
                     
                     SwiftOverlays.removeAllBlockingOverlays()
+                    self.setPreferredCurrencyIdIfNecessary()
                     self.goToAppAnimated(true)
                 })
             }
             else{
                 
                 SwiftOverlays.removeAllBlockingOverlays()
+                self.setPreferredCurrencyIdIfNecessary()
                 self.goToAppAnimated(true)
             }
         })
+    }
+    
+    func setPreferredCurrencyIdIfNecessary() {
+        
+        if let id = User.currentUser()?.preferredCurrencyId {
+            
+            Settings.setDefaultCurrencyId(id)
+        }
     }
 }
 
@@ -160,6 +175,7 @@ extension StartViewController: PFLogInViewControllerDelegate{
         }, completion: { () -> () in
 
             SwiftOverlays.removeAllBlockingOverlays()
+            self.setPreferredCurrencyIdIfNecessary()
             self.checkForGraphRequestAndGoToAppWithUser(user)
         })
     }

@@ -38,6 +38,12 @@ class Currency: NSObject {
         }
     }
     
+    static func CurrencyFromString(str: String) -> CurrencyEnum {
+        
+        let number = NSNumberFormatter().numberFromString(str)
+        return CurrencyFromNSNumber(number)
+    }
+    
     static func localeForCurrencyId(id: NSNumber?) -> NSLocale {
         
         if let id = id {
@@ -88,7 +94,7 @@ class Currency: NSObject {
             
         case CurrencyEnum.DKK:
             
-            rc = "kr. "
+            rc = "kr "
             
             break;
             

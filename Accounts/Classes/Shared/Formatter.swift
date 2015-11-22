@@ -39,7 +39,7 @@ class Formatter: NSObject {
             
         case CurrencyEnum.DKK:
             
-            rc = "kr. \(value.toStringWithDecimalPlaces(2))"
+            rc = "kr \(value.toStringWithDecimalPlaces(2))"
             
             break;
             
