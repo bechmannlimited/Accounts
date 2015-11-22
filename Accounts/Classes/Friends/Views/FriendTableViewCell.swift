@@ -127,9 +127,14 @@ class FriendTableViewCell: UITableViewCell {
     func setupLabelValues() {
         
         friendNameLabel.text = friend.appropriateDisplayName()
-        let amount = abs(friend.localeDifferenceBetweenActiveUser) //abs()
         
-        detailTextLabel?.text = Formatter.formatCurrencyAsString(amount)
+        let amounts = friend.differencesBetweenActiveUser
+        print("amounts: \(friend.appropriateDisplayName()) \(amounts)")
+        
+//        let amount = abs(friend.localeDifferenceBetweenActiveUser) //abs()
+//        
+//        detailTextLabel?.text = Formatter.formatCurrencyAsString(CurrencyEnum.GBP, value: amount)
+        detailTextLabel?.text = "hey"
         detailTextLabel?.textColor = contextualTintColor
     }
     
@@ -197,14 +202,15 @@ class FriendTableViewCell: UITableViewCell {
         
         contextualTintColor = UIColor.grayColor()
         
-        if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
-            
-            contextualTintColor = AccountColor.negativeColor()
-        }
-        else if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
-            
-            contextualTintColor = AccountColor.positiveColor()
-        }
+        //TODO: do contextual colours
+//        if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
+//            
+//            contextualTintColor = AccountColor.negativeColor()
+//        }
+//        else if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
+//            
+//            contextualTintColor = AccountColor.positiveColor()
+//        }
     }
     
     

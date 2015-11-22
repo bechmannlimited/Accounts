@@ -9,29 +9,26 @@
 import UIKit
 import SwiftyUserDefaults
 
-let kCurrencySettingKey = "Currency"
+let kCurrencySettingKey = "CurrencyWithInt"
 private let kShowTestBotSettingKey = "ShowTestBot"
 
-private let kCurrencySettingLocaleDictionary: Dictionary<String, String> = [
-    "GBP": "en_GB",
-    "DKK": "da_DK"
-]
+
 
 class Settings: NSObject {
     
-    class func getCurrencyLocaleWithIdentifier() -> (locale: NSLocale, identifier: String) {
-        
-        if !Defaults.hasKey(kCurrencySettingKey) {
-            
-            Defaults[kCurrencySettingKey] = "GBP"
-        }
-        setDefaultValueIfNotExistsForKey(kCurrencySettingKey, value: "GBP")
-        
-        let currencyIdentifier: String = Defaults[kCurrencySettingKey].string!
-        
-        return (locale: NSLocale(localeIdentifier: kCurrencySettingLocaleDictionary[currencyIdentifier]!), identifier: currencyIdentifier)
-
-    }
+//    class func getCurrencyLocaleWithIdentifier() -> (locale: NSLocale, identifier: String) {
+//        
+//        if !Defaults.hasKey(kCurrencySettingKey) {
+//            
+//            Defaults[kCurrencySettingKey] = 0
+//        }
+//        setDefaultValueIfNotExistsForKey(kCurrencySettingKey, value: 0)
+//        
+//        let currencyIdentifier: String = Defaults[kCurrencySettingKey].string!
+//        
+//        return (locale: NSLocale(localeIdentifier: kCurrencySettingLocaleDictionary[currencyIdentifier]!), identifier: currencyIdentifier)
+//
+//    }
     
     class func setLocaleByIdentifier(identifier: String) {
         
@@ -44,6 +41,15 @@ class Settings: NSObject {
             
             Defaults[key] = value
         }
+    }
+    
+    class func defaultCurrencyId() -> NSNumber {
+        
+        setDefaultValueIfNotExistsForKey(kCurrencySettingKey, value: 0)
+        
+        let currencyId: NSNumber = NSNumber(integer: Defaults[kCurrencySettingKey].int!)
+        
+        return currencyId
     }
     
     class func shouldShowTestBot() -> Bool{
@@ -61,5 +67,10 @@ class Settings: NSObject {
     class func setShouldShowTestBot(on: Bool) {
         
         Defaults[kShowTestBotSettingKey] = on
+    }
+    
+    class func setDefaultCurrencyId(id: NSNumber) {
+        
+        Defaults[kCurrencySettingKey] = Int(id)
     }
 }

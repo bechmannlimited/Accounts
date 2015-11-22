@@ -233,30 +233,39 @@ class FriendsViewController: ACBaseViewController {
         
         if let currentUser = User.currentUser() {
             
+            // TEMP
+            
+            for friend in currentUser.friends {
+
+                friendsWhoOweMoney.append(friend)
+            }
+            
+            // /TEMP
+            
             //owes you money
-            for friend in currentUser.friends {
-                
-                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
-                    
-                    friendsWhoOweMoney.append(friend)
-                }
-            }
-            
-            for friend in currentUser.friends {
-                
-                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
-                    
-                    friendsWhoYouOweMoney.append(friend)
-                }
-            }
-            
-            for friend in currentUser.friends {
-                
-                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) == 0 {
-                    
-                    friendsWhoAreEven.append(friend)
-                }
-            }
+//            for friend in currentUser.friends {
+//                
+//                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) < 0 {
+//                    
+//                    friendsWhoOweMoney.append(friend)
+//                }
+//            }
+//            
+//            for friend in currentUser.friends {
+//                
+//                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) > 0 {
+//                    
+//                    friendsWhoYouOweMoney.append(friend)
+//                }
+//            }
+//            
+//            for friend in currentUser.friends {
+//                
+//                if friend.localeDifferenceBetweenActiveUser.roundToPlaces(2) == 0 {
+//                    
+//                    friendsWhoAreEven.append(friend)
+//                }
+//            }
         }
         
         data = [friendsWhoOweMoney, friendsWhoYouOweMoney, friendsWhoAreEven]
@@ -390,21 +399,21 @@ extension FriendsViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
 
-        if data[section].count > 0 {
-            
-            if section == 0 {
-                
-                return "People I owe"
-            }
-            else if section == 1 {
-                
-                return "People who owe me"
-            }
-            else if section == 2 {
-                
-                return "People I'm even with"
-            }
-        }
+//        if data[section].count > 0 {
+//            
+//            if section == 0 {
+//                
+//                return "People I owe"
+//            }
+//            else if section == 1 {
+//                
+//                return "People who owe me"
+//            }
+//            else if section == 2 {
+//                
+//                return "People I'm even with"
+//            }
+//        }
         
         return ""
     }
@@ -465,7 +474,8 @@ extension FriendsViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
 
-        return data[section].count > 0 ? 35 : 0
+        return 0
+        //return data[section].count > 0 ? 35 : 0 // use this with table header
     }
 }
 

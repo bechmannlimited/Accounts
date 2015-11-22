@@ -20,6 +20,13 @@ class Purchase: PFObject {
     @NSManaged var purchaseTransactionLinkUUID: String?
     @NSManaged var isSecure: Bool
     
+    @NSManaged var currencyId: NSNumber?
+    
+    func currency() -> CurrencyEnum {
+        
+        return Currency.CurrencyFromNSNumber(currencyId)
+    }
+    
     var amount: Double = 0
     var transactions: Array<Transaction> = []
     var preferredValues = Dictionary<String, Double>()
@@ -32,6 +39,7 @@ class Purchase: PFObject {
         purchase.transactions = []
         purchase.amount = 0
         purchase.title = ""
+        purchase.currencyId = Settings.defaultCurrencyId()
         
         return purchase
     }
@@ -40,30 +48,32 @@ class Purchase: PFObject {
         
         get {
             
-            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
-            
-            if currencyIdentifier == "DKK" {
-                
-                return self.amount * 10
-            }
-            else {
-                
-                return self.amount
-            }
+//            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
+//            
+//            if currencyIdentifier == "DKK" {
+//                
+//                return self.amount * 10
+//            }
+//            else {
+//                
+//                return self.amount
+//            }
+            return self.amount
         }
         
         set(newValue) {
             
-            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
-            
-            if currencyIdentifier == "DKK" {
-                
-                self.amount = newValue / 10
-            }
-            else {
-                
-                self.amount = newValue
-            }
+//            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
+//            
+//            if currencyIdentifier == "DKK" {
+//                
+//                self.amount = newValue / 10
+//            }
+//            else {
+//                
+//                self.amount = newValue
+//            }
+            self.amount = newValue
         }
     }
     
@@ -97,6 +107,7 @@ class Purchase: PFObject {
             transaction.purchase = self
             transaction.purchaseTransactionLinkUUID = purchaseTransactionLinkUUID
             transaction.isSecure = isSecure
+            transaction.currencyId = currencyId
             
             if transaction.fromUser != transaction.toUser {
                 
@@ -523,6 +534,7 @@ class Purchase: PFObject {
         purchase.purchasedDate = purchasedDate
         purchase.transactions = []
         purchase.isSecure = isSecure
+        purchase.currencyId = currencyId
         
         for transaction in transactions {
             
@@ -540,6 +552,7 @@ class Purchase: PFObject {
         purchasedDate = purchase.purchasedDate
         transactions = purchase.transactions
         isSecure = purchase.isSecure
+        currencyId = purchase.currencyId
     }
 }
 

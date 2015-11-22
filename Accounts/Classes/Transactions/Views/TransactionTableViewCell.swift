@@ -38,7 +38,7 @@ class TransactionTableViewCell: UITableViewCell {
         let amount = transaction.localeAmount
         //let dateString:String = transaction.transactionDate.toString(DateFormat.Date.rawValue)
         let tintColor = transaction.toUser?.objectId == User.currentUser()?.objectId ? AccountColor.negativeColor() : AccountColor.positiveColor()
-        let amountText = Formatter.formatCurrencyAsString(abs(amount))
+        let amountText = Formatter.formatCurrencyAsString(transaction.currency(), value: abs(amount))
         var iouText = ""
         
         detailTextLabel?.textColor = tintColor

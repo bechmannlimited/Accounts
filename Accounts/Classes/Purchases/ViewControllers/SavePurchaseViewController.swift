@@ -189,12 +189,12 @@ class SavePurchaseViewController: SaveItemViewController {
     
     override func formViewElements() -> Array<Array<FormViewConfiguration>> {
         
-        let locale: NSLocale? = Settings.getCurrencyLocaleWithIdentifier().locale
+        let locale: NSLocale? = Currency.localeForCurrencyId(purchase.currencyId)
         
         var sections = Array<Array<FormViewConfiguration>>()
         
         sections.append([
-            FormViewConfiguration.textFieldCurrency("Bill total", value: Formatter.formatCurrencyAsString(purchase.localeAmount), identifier: "Amount", locale: locale),
+            FormViewConfiguration.textFieldCurrency("Bill total", value: Formatter.formatCurrencyAsString(purchase.currency(), value: purchase.localeAmount), identifier: "Amount", currency: Currency.CurrencyFromNSNumber(purchase.currencyId)),
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(purchase.title), identifier: "Title"),
             FormViewConfiguration.normalCell("User"),
             
@@ -214,7 +214,7 @@ class SavePurchaseViewController: SaveItemViewController {
                 let textLabelText = "(\(transaction.toUser!.appropriateShortDisplayName())\(verb))"
                 
                 
-                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
+                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(purchase.currency(), value: transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", currency: Currency.CurrencyFromNSNumber(purchase.currencyId)))
             }
         }
         
@@ -226,7 +226,7 @@ class SavePurchaseViewController: SaveItemViewController {
                 let s: String = transaction.toUser?.objectId == User.currentUser()?.objectId ? "" : "s"
                 let textLabelText = "\(transaction.toUser!.appropriateShortDisplayName()) owe\(s)"
                 
-                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", locale: locale))
+                transactionConfigs.append(FormViewConfiguration.textFieldCurrency(textLabelText, value: Formatter.formatCurrencyAsString(purchase.currency(), value: transaction.amount), identifier: "transactionTo\(transaction.toUser!.objectId)", currency: Currency.CurrencyFromNSNumber(purchase.currencyId)))
             }
         }
         
@@ -236,6 +236,7 @@ class SavePurchaseViewController: SaveItemViewController {
         
         sections.append([
             FormViewConfiguration.datePicker("Date Purchased", date: purchasedDate, identifier: "DatePurchased", format: nil),
+            FormViewConfiguration.normalCell("Currency")
             //FormViewConfiguration.normalCell("Location")
             ])
         
@@ -265,10 +266,10 @@ class SavePurchaseViewController: SaveItemViewController {
         
         for transaction in self.purchase.transactions {
             
-            self.setTextFieldValueAndUpdateConfig("transactionTo\(transaction.toUser!.objectId)", value: Formatter.formatCurrencyAsString(transaction.amount), cell: self.billSplitCells[transaction.toUser!])
+            self.setTextFieldValueAndUpdateConfig("transactionTo\(transaction.toUser!.objectId)", value: Formatter.formatCurrencyAsString(purchase.currency(), value: transaction.amount), cell: self.billSplitCells[transaction.toUser!])
         }
         
-        self.setTextFieldValueAndUpdateConfig("Amount", value: Formatter.formatCurrencyAsString(self.purchase.amount), cell: self.formViewCells["Amount"])
+        self.setTextFieldValueAndUpdateConfig("Amount", value: Formatter.formatCurrencyAsString(purchase.currency(), value: self.purchase.amount), cell: self.formViewCells["Amount"])
         
         tableView.reloadRowsAtIndexPaths([NSIndexPath(forRow: 0, inSection: 1)], withRowAnimation: .None)
     }
@@ -291,7 +292,7 @@ class SavePurchaseViewController: SaveItemViewController {
                 
                 //purchase.calculateTotalFromTransactions()
                 //purchase.billSplitChanges[transaction.toUser!.objectId!] = value
-                setTextFieldValueAndUpdateConfig(identifier, value: Formatter.formatCurrencyAsString(value), cell: billSplitCells[transaction.toUser!])
+                setTextFieldValueAndUpdateConfig(identifier, value: Formatter.formatCurrencyAsString(purchase.currency(), value: value), cell: billSplitCells[transaction.toUser!])
             }
         }
         
@@ -327,7 +328,7 @@ class SavePurchaseViewController: SaveItemViewController {
         
         if identifier == "Delete" {
             
-            UIAlertController.showAlertControllerWithButtonTitle("Delete", confirmBtnStyle: UIAlertActionStyle.Destructive, message: "Delete purchase: \(purchase.title!) for \(Formatter.formatCurrencyAsString(purchase.localeAmount))?", completion: { (response) -> () in
+            UIAlertController.showAlertControllerWithButtonTitle("Delete", confirmBtnStyle: UIAlertActionStyle.Destructive, message: "Delete purchase: \(purchase.title!) for \(Formatter.formatCurrencyAsString(purchase.currency(), value: purchase.localeAmount))?", completion: { (response) -> () in
                 
                 if response == AlertResponse.Confirm {
                     
@@ -366,12 +367,17 @@ class SavePurchaseViewController: SaveItemViewController {
             let v = SelectUsersViewController(identifier: identifier, users: purchase.usersInTransactions(), selectUsersDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom, isInsidePopover: false)
             navigationController?.pushViewController(v, animated: true)
         }
-        
         if identifier == "User" {
             
             let usersToChooseFrom = User.userListExcludingID(nil)
             
             let v = SelectUsersViewController(identifier: identifier, user: purchase.user, selectUserDelegate: self, allowEditing: allowEditing, usersToChooseFrom: usersToChooseFrom, isInsidePopover: false)
+            navigationController?.pushViewController(v, animated: true)
+        }
+        else if identifier == "Currency" {
+            
+            let v = SelectCurrencyViewController(previousValue: purchase.currencyId)
+            v.delegate = self
             navigationController?.pushViewController(v, animated: true)
         }
     }
@@ -413,6 +419,14 @@ class SavePurchaseViewController: SaveItemViewController {
             cell.textLabel?.text = "Location"
             cell.detailTextLabel?.text = "None"
             
+            return cell
+        }
+        else if identifier == "Currency" {
+            
+            let cell = UITableViewCell(style: .Value1, reuseIdentifier: "Cell")
+            cell.textLabel?.text = "Currency"
+            cell.detailTextLabel?.text = "\(Currency.CurrencyFromNSNumber(purchase.currencyId))"
+            cell.accessoryType = .DisclosureIndicator
             return cell
         }
         
@@ -488,8 +502,6 @@ extension SavePurchaseViewController {
         
         
     }
-    
-   
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         super.tableView(tableView, didSelectRowAtIndexPath: indexPath)
@@ -638,6 +650,17 @@ extension SavePurchaseViewController: SelectUserDelegate {
             purchase.splitTheBill(nil)
         }
         
+        itemDidChange = true
+        showOrHideSaveButton()
+        reloadForm()
+    }
+}
+
+extension SavePurchaseViewController: SelectCurrencyDelegate {
+    
+    func didSelectCurrencyId(id: NSNumber) {
+        
+        purchase.currencyId = id
         itemDidChange = true
         showOrHideSaveButton()
         reloadForm()

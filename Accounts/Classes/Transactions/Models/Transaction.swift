@@ -18,12 +18,6 @@ enum TransactionType: NSNumber {
     case payment = 1
 }
 
-enum Currency: NSNumber {
-    
-    case GBP = 0
-}
-
-
 class Transaction: PFObject {
    
     @NSManaged var fromUser: User?
@@ -38,6 +32,11 @@ class Transaction: PFObject {
     @NSManaged var isDeleted: Bool
     @NSManaged var currencyId: NSNumber?
     @NSManaged var isSecure: Bool
+    
+    func currency() -> CurrencyEnum {
+        
+        return Currency.CurrencyFromNSNumber(currencyId)
+    }
     
     var purchase: Purchase?
     
@@ -65,40 +64,43 @@ class Transaction: PFObject {
         
         get {
             
-            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
-            
-            if currencyIdentifier == "DKK" {
-                
-                return self.amount * 10
-            }
-            else {
-                
-                return self.amount
-            }
+//            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
+//            
+//            if currencyIdentifier == "DKK" {
+//                
+//                return self.amount * 10
+//            }
+//            else {
+//                
+//                return self.amount
+//            }
+            return self.amount
         }
         
         set(newValue) {
             
-            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
-            
-            if currencyIdentifier == "DKK" {
-                
-                self.amount = newValue / 10
-            }
-            else {
-                
-                self.amount = newValue
-            }
+//            let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
+//            
+//            if currencyIdentifier == "DKK" {
+//                
+//                self.amount = newValue / 10
+//            }
+//            else {
+//                
+//                self.amount = newValue
+//            }
+            self.amount = newValue
         }
     }
     
-    class func withDefaultValues() -> Transaction{
+    class func withDefaultValues() -> Transaction {
         
         let transaction = Transaction()
         
         transaction.fromUser = User.currentUser()
         transaction.transactionDate = NSDate()
         transaction.title = ""
+        transaction.currencyId = Settings.defaultCurrencyId()
         
         return transaction
     }
@@ -192,6 +194,7 @@ class Transaction: PFObject {
         transaction.type = type
         transaction.purchaseTransactionLinkUUID = purchaseTransactionLinkUUID
         transaction.isSecure = isSecure
+        transaction.currencyId = currencyId
         
         return transaction
     }
@@ -205,38 +208,116 @@ class Transaction: PFObject {
         transactionDate = transaction.transactionDate
         purchase = transaction.purchase
         isSecure = transaction.isSecure
+        currencyId = transaction.currencyId
     }
     
     class func calculateOfflineOweValuesWithTransaction(transaction: Transaction?){
         
         if let transaction = transaction {
             
-            if transaction.fromUser?.objectId == User.currentUser()?.objectId  {
+            if let cId = transaction.currencyId {
                 
-                transaction.toUser?.localeDifferenceBetweenActiveUser += transaction.amount
-                User.currentUser()?.friendsIdsWithDifference?[transaction.toUser!.objectId!] = NSNumber(double: transaction.toUser!.localeDifferenceBetweenActiveUser)
-            }
-            else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
+                let currencyId = "\(cId)"
                 
-                transaction.fromUser?.localeDifferenceBetweenActiveUser -= transaction.amount
-                User.currentUser()?.friendsIdsWithDifference?[transaction.fromUser!.objectId!] = NSNumber(double: transaction.fromUser!.localeDifferenceBetweenActiveUser)
+                if transaction.fromUser?.objectId == User.currentUser()?.objectId  {
+                    
+                    let differences = User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]
+                    
+                    if differences != nil && differences!.keys.contains(currencyId) {
+                        
+                        var amount = JSON(transaction.toUser!.differencesBetweenActiveUser[currencyId]!).doubleValue
+                        amount += transaction.amount
+                        transaction.toUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.toUser!.objectId!] = transaction.toUser!.differencesBetweenActiveUser
+                    }
+                    else {
+                        
+                        let amount = transaction.amount
+                        transaction.toUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.toUser!.objectId!] = transaction.toUser!.differencesBetweenActiveUser
+                    }
+                }
+                else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
+                    
+                    let differences = User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]
+                    
+                    if differences != nil && differences!.keys.contains(currencyId) {
+                        
+                        let differences = User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]
+                        var amount = Double(differences![currencyId]!)
+                        //var amount = JSON(transaction.fromUser!.differencesBetweenActiveUser[currencyId]!).doubleValue
+                        amount -= transaction.amount
+                        transaction.fromUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.fromUser!.objectId!] = transaction.fromUser!.differencesBetweenActiveUser
+                    }
+                    else {
+                        
+                        let amount = -transaction.amount
+                        transaction.fromUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.fromUser!.objectId!] = transaction.fromUser!.differencesBetweenActiveUser
+                    }
+                }
             }
         }
     }
     
     class func calculateOfflineOweValuesByDeletingTransaction(transaction: Transaction?){
-        
+        //TODO: Remove key if value is 0
         if let transaction = transaction {
             
-            if transaction.fromUser?.objectId == User.currentUser()?.objectId  {
+            if let cId = transaction.currencyId {
                 
-                transaction.toUser?.localeDifferenceBetweenActiveUser -= transaction.amount
-                User.currentUser()?.friendsIdsWithDifference?[transaction.toUser!.objectId!] = NSNumber(double: transaction.toUser!.localeDifferenceBetweenActiveUser)
-            }
-            else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
+                let currencyId = "\(cId)"
+                    
+                if transaction.fromUser?.objectId == User.currentUser()?.objectId  {
+                    
+                    let differences = User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]
+                    
+                    if differences != nil && differences!.keys.contains(currencyId) {
+                        
+                        var amount = Double(differences![currencyId]!)
+                        //var amount = JSON(transaction.toUser!.differencesBetweenActiveUser[currencyId]!).doubleValue
+                        amount -= transaction.amount
+                        transaction.toUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.toUser!.objectId!] = transaction.toUser!.differencesBetweenActiveUser
+                    }
+                    else {
+                        
+                        let amount = -transaction.amount
+                        transaction.toUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.toUser!.objectId!] = transaction.toUser!.differencesBetweenActiveUser
+                    }
+                    
+//                    if User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]?[currencyId] == 0 {
+//    
+//                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]?.removeValueForKey(currencyId)
+//                    }
+                }
+                else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
+                    
+                    let differences = User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]
+                    
+                    if differences != nil && differences!.keys.contains(currencyId) {
+                        
+                        var amount = Double(differences![currencyId]!)
+                        //var amount = JSON(transaction.toUser!.differencesBetweenActiveUser[currencyId]!).doubleValue
+                        amount += transaction.amount
+                        transaction.fromUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.fromUser!.objectId!] = transaction.fromUser!.differencesBetweenActiveUser
+                    }
+                    else {
+                        
+                        let amount = transaction.amount
+                        transaction.fromUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.fromUser!.objectId!] = transaction.fromUser!.differencesBetweenActiveUser
+                    }
+                    
+//                    if User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]?[currencyId] == 0 {
+//                        
+//                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]?.removeValueForKey(currencyId)
+//                    }
+                }
                 
-                transaction.fromUser?.localeDifferenceBetweenActiveUser += transaction.amount
-                User.currentUser()?.friendsIdsWithDifference?[transaction.fromUser!.objectId!] = NSNumber(double: transaction.fromUser!.localeDifferenceBetweenActiveUser)
             }
         }
     }

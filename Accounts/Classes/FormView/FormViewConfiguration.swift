@@ -26,7 +26,8 @@ public class FormViewConfiguration {
     public var identifier: String = ""
     
     //currency
-    public var currencyLocale = NSLocale(localeIdentifier: "en_GB")
+    //public var currencyLocale = NSLocale(localeIdentifier: "en_GB")
+    var currency: CurrencyEnum = CurrencyEnum.GBP
     
     //button
     public var buttonTextColor = UIColor.blueColor()
@@ -62,17 +63,26 @@ public class FormViewConfiguration {
     
     public class func textFieldCurrency(labelText: String, value: String?, identifier: String) -> FormViewConfiguration {
         
-        return textFieldCurrency(labelText, value: value, identifier: identifier, locale: nil)
+        return textFieldCurrency(labelText, value: value, identifier: identifier, currency: CurrencyEnum.GBP)
     }
     
-    public class func textFieldCurrency(labelText: String, value: String?, identifier: String, locale: NSLocale?) -> FormViewConfiguration {
+//    public class func textFieldCurrency(labelText: String, value: String?, identifier: String, locale: NSLocale?) -> FormViewConfiguration {
+//        
+//        let config = FormViewConfiguration(labelText: labelText, formCellType: FormCellType.TextFieldCurrency, value: value, identifier: identifier)
+//        
+//        if let l = locale {
+//            
+//            config.currencyLocale = l
+//        }
+//        
+//        return config
+//    }
+
+    class func textFieldCurrency(labelText: String, value: String?, identifier: String, currency: CurrencyEnum) -> FormViewConfiguration {
         
         let config = FormViewConfiguration(labelText: labelText, formCellType: FormCellType.TextFieldCurrency, value: value, identifier: identifier)
         
-        if let l = locale {
-            
-            config.currencyLocale = l
-        }
+        config.currency = currency
         
         return config
     }

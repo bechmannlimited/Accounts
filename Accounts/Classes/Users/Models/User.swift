@@ -24,7 +24,10 @@ class User: PFUser {
     
     //var friends = [User]()
     var friends: [User] = []
-    var localeDifferenceBetweenActiveUser:Double = 0
+    //var localeDifferenceBetweenActiveUser:Double = 0
+    
+    //for a friend to see what they owe the active user
+    var differencesBetweenActiveUser: Dictionary<String, NSNumber> = Dictionary<String, NSNumber>()
     var allInvites = [[FriendRequest]]()
     var passwordForVerification = ""
     
@@ -45,7 +48,10 @@ class User: PFUser {
     
     @NSManaged var facebookId: String?
     @NSManaged var displayName: String?
-    @NSManaged var friendsIdsWithDifference: Dictionary<String, NSNumber>?
+    //@NSManaged var friendsIdsWithDifference: Dictionary<String, NSNumber>?
+    
+    // for current user to log what all friends owe
+    @NSManaged var friendsIdsWithDifferenceWithMultipleCurrencies: Dictionary<String, Dictionary<String, NSNumber>>?
     @NSManaged var userType: NSNumber?
     @NSManaged var lastSyncedDataInfo: Dictionary<String, NSDate>?
     
@@ -85,7 +91,7 @@ class User: PFUser {
                     self.relationForKey("friends").removeObject(f)
                 }
                 
-                self.friendsIdsWithDifference?.removeValueForKey(friend.objectId!)
+                self.friendsIdsWithDifferenceWithMultipleCurrencies?.removeValueForKey(friend.objectId!)
                 
                 do {
                     
@@ -246,7 +252,7 @@ class User: PFUser {
                         
                         Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
                             
-                            var friendInfo = Dictionary<String, NSNumber>()
+                            var friendInfo = Dictionary<String, Dictionary<String, NSNumber>>()
                             
                             var queries = [PFQuery]()
                             let query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
@@ -288,7 +294,7 @@ class User: PFUser {
                                     friendIds.append(friend.objectId!)
                                 }
                                 
-                                if let cloudResponse: AnyObject = try PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
+                                if let cloudResponse: AnyObject = try PFCloud.callFunction("DifferenceBetweenActiveUserFromUsersWithMultipleCurrencies", withParameters: ["ids": friendIds]) {
                                     
                                     let responseJson = JSON(cloudResponse)
                                     
@@ -298,8 +304,8 @@ class User: PFUser {
                                             
                                             if friend.objectId == key {
                                                 
-                                                friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
-                                                friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                                let results = Currency.CurrencyDifferencesFromCloudResponseWithStringKey(differenceJson)
+                                                friendInfo[friend.objectId!] = results // NSNumber(double: differenceJson.doubleValue)
                                             }
                                         }
                                     }
@@ -313,7 +319,7 @@ class User: PFUser {
                                     
                                     try PFObject.pinAll(self.friends)
                                     
-                                    self.friendsIdsWithDifference = friendInfo
+                                    self.friendsIdsWithDifferenceWithMultipleCurrencies = friendInfo
                                     self.pinInBackground()
                                     self.saveInBackground()
                                 }
@@ -341,7 +347,7 @@ class User: PFUser {
                 
                 Task.sharedTasker().executeTaskInBackgroundWithIdentifier("GetFriends", task: { () -> Void in
                     
-                    var friendInfo = Dictionary<String, NSNumber>()
+                    var friendInfo = Dictionary<String, Dictionary<String, NSNumber>>()
                     
                     var queries = [PFQuery]()
                     let query1 = User.currentUser()?.relationForKey(kParse_User_Friends_Key).query() // must add friends relation back to user
@@ -370,7 +376,7 @@ class User: PFUser {
                             friendIds.append(friend.objectId!)
                         }
                         
-                        if let cloudResponse: AnyObject = try PFCloud.callFunction("DifferenceBetweenActiveUserFromUsers", withParameters: ["ids": friendIds]) {
+                        if let cloudResponse: AnyObject = try PFCloud.callFunction("DifferenceBetweenActiveUserFromUsersWithMultipleCurrencies", withParameters: ["ids": friendIds]) {
                             
                             let responseJson = JSON(cloudResponse)
                             
@@ -380,8 +386,8 @@ class User: PFUser {
                                     
                                     if friend.objectId == key {
                                         
-                                        friend.localeDifferenceBetweenActiveUser = differenceJson.doubleValue
-                                        friendInfo[friend.objectId!] = NSNumber(double: differenceJson.doubleValue)
+                                        let results = Currency.CurrencyDifferencesFromCloudResponseWithStringKey(differenceJson)
+                                        friendInfo[friend.objectId!] = results // NSNumber(double: differenceJson.doubleValue)
                                     }
                                 }
                             }
@@ -395,14 +401,12 @@ class User: PFUser {
                             
                             try PFObject.pinAll(self.friends)
                             
-                            self.friendsIdsWithDifference = friendInfo
+                            self.friendsIdsWithDifferenceWithMultipleCurrencies = friendInfo
                             self.pinInBackground()
                             self.saveInBackground()
                         }
                     }
                     catch {}
-                    
-                    
                     
                 }, completion: { () -> () in
                     
@@ -417,7 +421,7 @@ class User: PFUser {
         
         var ids = [String]()
         
-        if let friendInfos = friendsIdsWithDifference{
+        if let friendInfos = friendsIdsWithDifferenceWithMultipleCurrencies {
             
             for friend in friendInfos{
                 
@@ -442,7 +446,8 @@ class User: PFUser {
                     
                     for friend in self.friends {
                         
-                        friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
+                        friend.differencesBetweenActiveUser = friendInfos[friend.objectId!]!
+                        //friend.localeDifferenceBetweenActiveUser = Double(friendInfos[friend.objectId!]!)
                     }
                     
                     completion(completedRemoteRequest: false)

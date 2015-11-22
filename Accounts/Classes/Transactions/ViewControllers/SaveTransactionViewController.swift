@@ -143,8 +143,6 @@ class SaveTransactionViewController: SaveItemViewController {
     
     override func formViewElements() -> Array<Array<FormViewConfiguration>> {
         
-        let locale = Settings.getCurrencyLocaleWithIdentifier().locale
-        
         var sections = Array<Array<FormViewConfiguration>>()
         
         if transaction.type == TransactionType.iou {
@@ -168,12 +166,21 @@ class SaveTransactionViewController: SaveItemViewController {
                 ])
         }
         
-        sections.append([
-            FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.localeAmount), identifier: "Amount", locale: locale),
+        var list = [
+            FormViewConfiguration.textFieldCurrency("Amount", value: Formatter.formatCurrencyAsString(transaction.currency(), value: transaction.localeAmount), identifier: "Amount", currency: Currency.CurrencyFromNSNumber(transaction.currencyId)),
             FormViewConfiguration.textField("Title", value: String.emptyIfNull(transaction.title), identifier: "Title"),
-            FormViewConfiguration.datePicker("Transaction date", date: transaction.transactionDate, identifier: "TransactionDate", format: nil)
+            FormViewConfiguration.datePicker("Transaction date", date: transaction.transactionDate, identifier: "TransactionDate", format: nil),
             //FormViewConfiguration.normalCell("Location")
-            ])
+            
+        ]
+        
+        if transaction.purchaseTransactionLinkUUID == nil {
+            
+            list.append(FormViewConfiguration.normalCell("Currency"))
+        }
+        
+        sections.append(list)
+        
         
         if transaction.purchaseTransactionLinkUUID != nil {
             
@@ -252,6 +259,14 @@ class SaveTransactionViewController: SaveItemViewController {
             cell.setup()
             return cell
         }
+        else if identifier == "Currency" {
+            
+            let cell = UITableViewCell(style: .Value1, reuseIdentifier: "Cell")
+            cell.textLabel?.text = "Currency"
+            cell.detailTextLabel?.text = "\(Currency.CurrencyFromNSNumber(transaction.currencyId))"
+            cell.accessoryType = .DisclosureIndicator
+            return cell
+        }
         
         return UITableViewCell()
     }
@@ -293,7 +308,7 @@ class SaveTransactionViewController: SaveItemViewController {
         
         if identifier == "Delete" {
             
-            UIAlertController.showAlertControllerWithButtonTitle("Delete", confirmBtnStyle: UIAlertActionStyle.Destructive, message: "Delete transaction: \(self.transaction.title!) for \(Formatter.formatCurrencyAsString(transaction.localeAmount))?", completion: { (response) -> () in
+            UIAlertController.showAlertControllerWithButtonTitle("Delete", confirmBtnStyle: UIAlertActionStyle.Destructive, message: "Delete transaction: \(self.transaction.title!) for \(Formatter.formatCurrencyAsString(transaction.currency(), value: transaction.localeAmount))?", completion: { (response) -> () in
                 
                 if response == AlertResponse.Confirm {
                     
@@ -344,6 +359,12 @@ class SaveTransactionViewController: SaveItemViewController {
             else if identifier == "Location" {
                 
                 selectPlace()
+            }
+            else if identifier == "Currency" {
+                
+                let v = SelectCurrencyViewController(previousValue: transaction.currencyId)
+                v.delegate = self
+                navigationController?.pushViewController(v, animated: true)
             }
         }
         else {
@@ -465,6 +486,17 @@ extension SaveTransactionViewController: SelectUserDelegate {
             }
         }
         
+        itemDidChange = true
+        showOrHideSaveButton()
+        reloadForm()
+    }
+}
+
+extension SaveTransactionViewController: SelectCurrencyDelegate {
+    
+    func didSelectCurrencyId(id: NSNumber) {
+        
+        transaction.currencyId = id
         itemDidChange = true
         showOrHideSaveButton()
         reloadForm()

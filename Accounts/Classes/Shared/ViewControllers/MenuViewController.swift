@@ -25,12 +25,13 @@ private let kSubscriptionSection = 0
 private let kProfileIndexPath = NSIndexPath(forRow: 0, inSection: kProfileSection)
 private let kLogoutIndexPath = NSIndexPath(forRow: 1, inSection: kProfileSection)
 
-private let kCurrencyIndexPath = NSIndexPath(forRow: 999, inSection: 9999)
+//private let kCurrencyIndexPath = NSIndexPath(forRow: 999, inSection: 9999)
 
 private let kFeedbackIndexPath = NSIndexPath(forRow: 0, inSection: kFeedbackSection)
 private let kShareIndexPath = NSIndexPath(forRow: 1, inSection: kFriendsSection)
 
-private let kTestBotIndexPath = NSIndexPath(forRow: 0, inSection: kTestBotSection)
+private let kTestBotIndexPath = NSIndexPath(forRow: 1, inSection: kTestBotSection)
+private let kCurrencyIndexPath = NSIndexPath(forRow: 0, inSection: kTestBotSection)
 
 private let kFriendsIndexPath = NSIndexPath(forRow: 0, inSection: kFriendsSection)
 
@@ -50,7 +51,7 @@ class MenuViewController: ACBaseViewController {
         //[kSubscriptionIndexPath],
         [kFriendsIndexPath, kShareIndexPath],
         [kFeedbackIndexPath],
-        [kTestBotIndexPath],
+        [kCurrencyIndexPath, kTestBotIndexPath],
         //[kAboutIndexPath],
         [kProfileIndexPath, kLogoutIndexPath]
     ]
@@ -117,8 +118,8 @@ extension MenuViewController: UITableViewDataSource {
         
         if indexPath == kCurrencyIndexPath {
             
-            cell.textLabel?.text = "Currency"
-            cell.detailTextLabel?.text = Defaults[kCurrencySettingKey].string
+            cell.textLabel?.text = "Preferred Currency"
+            cell.detailTextLabel?.text = Currency.descriptionForCurrencyId(Settings.defaultCurrencyId())
             cell.accessoryType = .DisclosureIndicator
         }
         else if indexPath == kLogoutIndexPath {
@@ -216,8 +217,9 @@ extension MenuViewController: UITableViewDataSource {
         
         if indexPath == kCurrencyIndexPath {
             
-            //let v = SelectCurrencyViewController()
-            //navigationController?.pushViewController(v, animated: true)
+            let v = SelectCurrencyViewController(previousValue: Settings.defaultCurrencyId())
+            v.delegate = self
+            navigationController?.pushViewController(v, animated: true)
         }
         else if indexPath == kLogoutIndexPath {
             
@@ -428,3 +430,11 @@ extension MenuViewController: SaveUserDelegate {
     }
 }
 
+extension MenuViewController: SelectCurrencyDelegate {
+    
+    func didSelectCurrencyId(id: NSNumber) {
+        
+        Settings.setDefaultCurrencyId(id)
+        tableView.reloadData()
+    }
+}

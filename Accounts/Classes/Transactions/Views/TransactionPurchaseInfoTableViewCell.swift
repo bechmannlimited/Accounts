@@ -49,8 +49,8 @@ class TransactionPurchaseInfoTableViewCell: UITableViewCell {
             self.accessoryView = nil
             
             if error == nil {
-                
-                self.detailTextLabel?.text = Formatter.formatCurrencyAsString(total)
+ 
+                self.detailTextLabel?.text = Formatter.formatCurrencyAsString(self.transaction.currency(), value: total)
             }
             else {
                 

@@ -115,19 +115,21 @@ extension FormViewTextFieldCell: UITextFieldDelegate {
                 }
             }
             
-            let formatter = NSNumberFormatter()
-            formatter.numberStyle = NSNumberFormatterStyle.CurrencyStyle
-            formatter.locale = config.currencyLocale
+//            let formatter = NSNumberFormatter()
+//            formatter.numberStyle = NSNumberFormatterStyle.CurrencyStyle
+//            formatter.locale = config.currencyLocale
             let numberFromField = (NSString(string: digitText).doubleValue)/100
-            newText = formatter.stringFromNumber(numberFromField)
+//            newText = formatter.stringFromNumber(numberFromField)
+//            
+//            textField.text = String(newText)
+//            
+//            if config.currencyLocale == NSLocale(localeIdentifier: "da_DK") {
+//                
+//                textField.text = textField.text!.replaceString("kr", withString: "").removeLastCharacter()
+//                textField.text = "kr, \(textField.text)"
+//            }
             
-            textField.text = String(newText)
-            
-            if config.currencyLocale == NSLocale(localeIdentifier: "da_DK") {
-                
-                textField.text = textField.text!.replaceString("kr", withString: "").removeLastCharacter()
-                textField.text = "kr, \(textField.text)"
-            }
+            textField.text = Formatter.formatCurrencyAsString(config.currency, value: numberFromField)
             
             formViewDelegate?.formViewTextFieldCurrencyEditingChanged(config.identifier, value: numberFromField)
             formViewDelegate?.formViewElementDidChange(config.identifier, value: numberFromField)

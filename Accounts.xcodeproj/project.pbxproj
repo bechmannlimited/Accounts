@@ -51,6 +51,7 @@
 		E442C3521B52C3150061CAE6 /* FriendRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E442C3511B52C3150061CAE6 /* FriendRequest.swift */; };
 		E44681501BC18E3E00056691 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E446814F1BC18E3E00056691 /* AboutViewController.swift */; };
 		E44881F51B7D145900043237 /* IOSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = E44881F41B7D145900043237 /* IOSession.swift */; };
+		E45167A41C00DE8000F88430 /* Currency.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45167A31C00DE8000F88430 /* Currency.swift */; };
 		E455C4EA1B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E455C4E91B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift */; };
 		E45F0B4A1B7F3DD8004D59E2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E45F0B491B7F3DD8004D59E2 /* Constants.swift */; };
 		E46BCE551B66D4E800CA09BF /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E46BCE541B66D4E800CA09BF /* AudioToolbox.framework */; };
@@ -76,6 +77,7 @@
 		E490EF8A1BC5A8D400EE4739 /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E490EF891BC5A8D400EE4739 /* LocalAuthentication.framework */; };
 		E49BFC8E1B7F8DCA00142AFD /* TransactionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */; };
 		E4BA9C5C1B84FD2F00E8DFF6 /* NSDate+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */; };
+		E4E6E23F1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E6E23E1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift */; };
 		E4E7CAD91B66D24E0027833E /* StartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E7CAD81B66D24E0027833E /* StartViewController.swift */; };
 		E4EBCF041B8275EF00690A60 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EBCF031B8275EF00690A60 /* Font.swift */; };
 		E4F2E6691BBB463E00CD7E94 /* AutoLayoutHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F2E62F1BBB463E00CD7E94 /* AutoLayoutHelper.swift */; };
@@ -187,6 +189,7 @@
 		E442C3511B52C3150061CAE6 /* FriendRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendRequest.swift; sourceTree = "<group>"; };
 		E446814F1BC18E3E00056691 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AboutViewController.swift; path = About/ViewControllers/AboutViewController.swift; sourceTree = "<group>"; };
 		E44881F41B7D145900043237 /* IOSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IOSession.swift; sourceTree = "<group>"; };
+		E45167A31C00DE8000F88430 /* Currency.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Currency.swift; sourceTree = "<group>"; };
 		E455C4E91B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionPurchaseInfoTableViewCell.swift; sourceTree = "<group>"; };
 		E45F0B491B7F3DD8004D59E2 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		E46BCE541B66D4E800CA09BF /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -215,6 +218,7 @@
 		E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionTableViewCell.swift; sourceTree = "<group>"; };
 		E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+Extension.swift"; sourceTree = "<group>"; };
 		E4C2A43B1B68052000730BAB /* ABToolKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ABToolKit.framework; path = "Pods/../build/Debug-iphoneos/Pods/ABToolKit.framework"; sourceTree = "<group>"; };
+		E4E6E23E1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MultiCurrencyTableViewDelegate.swift; path = Delegates/MultiCurrencyTableViewDelegate.swift; sourceTree = "<group>"; };
 		E4E7CAD81B66D24E0027833E /* StartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartViewController.swift; sourceTree = "<group>"; };
 		E4EBCF031B8275EF00690A60 /* Font.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 		E4F2E62F1BBB463E00CD7E94 /* AutoLayoutHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoLayoutHelper.swift; sourceTree = "<group>"; };
@@ -563,6 +567,7 @@
 		E442C30C1B510E940061CAE6 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				E45167A31C00DE8000F88430 /* Currency.swift */,
 				E412F9161B7CC3FC00A30F60 /* ABImageLoader.swift */,
 				E442C3081B510E940061CAE6 /* AccountColor.swift */,
 				E442C30A1B510E940061CAE6 /* AppTools.swift */,
@@ -602,6 +607,7 @@
 		E442C3181B510E940061CAE6 /* Transactions */ = {
 			isa = PBXGroup;
 			children = (
+				E4E6E2401C00D13C00081663 /* Delegates */,
 				E442C3191B510E940061CAE6 /* Models */,
 				E442C31B1B510E940061CAE6 /* ViewControllers */,
 				E442C31E1B510E940061CAE6 /* Views */,
@@ -701,6 +707,14 @@
 				E47FD8111B5700AF004B4C56 /* Extensions.swift */,
 			);
 			name = Extensions;
+			sourceTree = "<group>";
+		};
+		E4E6E2401C00D13C00081663 /* Delegates */ = {
+			isa = PBXGroup;
+			children = (
+				E4E6E23E1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift */,
+			);
+			name = Delegates;
 			sourceTree = "<group>";
 		};
 		E4F2E62D1BBB462E00CD7E94 /* ABToolKit */ = {
@@ -1037,6 +1051,7 @@
 				E442C3371B510E940061CAE6 /* RelationStatus.swift in Sources */,
 				E4F2E67B1BBB463E00CD7E94 /* UIColor+Extension.swift in Sources */,
 				E442C3421B510E940061CAE6 /* TransactionsViewController.swift in Sources */,
+				E4E6E23F1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift in Sources */,
 				E4F2E6931BBB463E00CD7E94 /* BaseViewController.swift in Sources */,
 				E4F2E67C1BBB463E00CD7E94 /* UIImage+Extension.swift in Sources */,
 				E442C33E1B510E940061CAE6 /* SelectPurchaseOrTransactionViewController.swift in Sources */,
@@ -1115,6 +1130,7 @@
 				E4F2E6921BBB463E00CD7E94 /* Session.swift in Sources */,
 				E4F2E6691BBB463E00CD7E94 /* AutoLayoutHelper.swift in Sources */,
 				E40958111B72D32C00B5289A /* UIAppearance+Swift.m in Sources */,
+				E45167A41C00DE8000F88430 /* Currency.swift in Sources */,
 				E4F2E6811BBB463E00CD7E94 /* UIView+Extension.swift in Sources */,
 				E4F2E6841BBB463E00CD7E94 /* FormViewCell.swift in Sources */,
 				E490EF861BC59E2300EE4739 /* FormViewSwitchCell.swift in Sources */,

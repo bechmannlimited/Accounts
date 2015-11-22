@@ -51,6 +51,9 @@ class TransactionsViewController: ACBaseViewController {
     var popoverViewController: UIViewController?
     private var blurViewHasBeenConverted = false
     
+    var multiCurrencyTableViewDelegate = MultiCurrencyTableViewDelegate()
+    let multiCurrencyTableView = UITableView()
+    
 //    func clean() {
 //        
 //        PFObject.unpinAllInBackground(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase])
@@ -112,6 +115,69 @@ class TransactionsViewController: ACBaseViewController {
         refresh(nil)
         
         tableView.contentInset = UIEdgeInsets(top: tableView.contentInset.top - 64, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
+    }
+    
+    func setTableViewHeaderFromLocalData() {
+        
+        if let user = User.currentUser() {
+            
+            if let results = user.friendsIdsWithDifferenceWithMultipleCurrencies?[friend.objectId!] {
+                
+                self.multiCurrencyTableViewDelegate.results = results
+                self.multiCurrencyTableViewDelegate.friend = self.friend
+                self.multiCurrencyTableView.delegate = self.multiCurrencyTableViewDelegate
+                self.multiCurrencyTableView.dataSource = self.multiCurrencyTableViewDelegate
+                self.multiCurrencyTableView.frame = CGRect(x: 0, y: 0, width: 100, height: CGFloat(results.keys.count) * self.multiCurrencyTableViewDelegate.tableCellHeight)
+                self.multiCurrencyTableView.reloadData()
+                
+                if self.transactions.count > 0 {
+                    
+                    self.tableView.tableHeaderView = self.multiCurrencyTableView
+                }
+                else {
+                    
+                    self.tableView.tableHeaderView = nil
+                }
+            }
+        }
+    }
+    
+    func setupTableViewHeader() {
+        
+        setTableViewHeaderFromLocalData()
+        
+        //TODO: cache changes to friend object + currenct user
+        PFCloud.callFunctionInBackground("DifferenceBetweenActiveUserWithMultipleCurrencies", withParameters: ["compareUserId": friend.objectId!]) { (r, error) -> Void in
+            
+            if let r = r {
+                
+                let result:JSON = JSON(r)
+                var results = Dictionary<CurrencyEnum, NSNumber>()
+                var stringResults = Dictionary<String, NSNumber>()
+                
+                for (currencyId, amountJson):(String, JSON) in result {
+                    
+                    let currencyNSNumber = NSNumber(float: NSNumberFormatter().numberFromString(currencyId)!.floatValue)
+                    let currency = Currency.CurrencyFromNSNumber(currencyNSNumber)
+                    let amount = amountJson.numberValue
+                    
+                    if amount != 0 {
+                        
+                        results[currency] = amount
+                        stringResults["\(currencyNSNumber)"] = amount
+                    }
+                }
+                
+                self.friend.differencesBetweenActiveUser = stringResults
+                User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[self.friend.objectId!] = stringResults
+                
+                self.setTableViewHeaderFromLocalData()
+            }
+            else {
+                
+                //ParseUtilities.showAlertWithErrorIfExists(error)
+            }
+        }
     }
     
     func setupBackgroundBlurView() {
@@ -224,35 +290,29 @@ class TransactionsViewController: ACBaseViewController {
     
     func setHeaderTitleText() {
         
-        var text = friend.appropriateDisplayName()
-        
-        if friend.localeDifferenceBetweenActiveUser > 0 {
-            
-            text = "\(friend.appropriateDisplayName()) owes \(Formatter.formatCurrencyAsString(abs(friend.localeDifferenceBetweenActiveUser)))"
-        }
-        else if friend.localeDifferenceBetweenActiveUser < 0 {
-            
-            text = "You owe \(friend.appropriateDisplayName()) \(Formatter.formatCurrencyAsString(abs(friend.localeDifferenceBetweenActiveUser)))"
-        }
-        
+        let text = friend.appropriateDisplayName()
         headerView?.setupTitle(text)
+        
+        setupTableViewHeader()
     }
     
     func getDifferenceBetweenActiveUser() {
     
-        PFCloud.callFunctionInBackground("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) { (response, error) -> Void in
-            
-            if let response: AnyObject = response {
-                
-                let responseJson = JSON(response)
-                let difference = responseJson.doubleValue
-                
-                self.friend.localeDifferenceBetweenActiveUser = difference
-                User.currentUser()?.friendsIdsWithDifference?[self.friend.objectId!] = difference
-                
-                self.setHeaderTitleText()
-            }
-        }
+        
+        //TODO: Get diff between active user
+//        PFCloud.callFunctionInBackground("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) { (response, error) -> Void in
+//            
+//            if let response: AnyObject = response {
+//                
+//                let responseJson = JSON(response)
+//                let difference = responseJson.doubleValue
+//                
+//                self.friend.localeDifferenceBetweenActiveUser = difference
+//                User.currentUser()?.friendsIdsWithDifference?[self.friend.objectId!] = difference
+//                
+//                self.setHeaderTitleText()
+//            }
+//        }
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -535,6 +595,8 @@ class TransactionsViewController: ACBaseViewController {
                 self.tableView.reloadData()
                 self.view.hideLoader()
                 self.showOrHideTableOrNoDataView()
+                self.setupTableViewHeader()
+                self.setTableViewHeaderFromLocalData()
                 self.refreshBarButtonItem?.enabled = true
                 //self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
                 
@@ -616,8 +678,6 @@ class TransactionsViewController: ACBaseViewController {
     
     override func setupTableViewConstraints(tableView: UITableView) {
         
-        //setupBounceView()
-        
         tableView.translatesAutoresizingMaskIntoConstraints = false
         
         tableView.addLeftConstraint(toView: view, attribute: NSLayoutAttribute.Left, relation: NSLayoutRelation.GreaterThanOrEqual, constant: -0)
@@ -633,7 +693,6 @@ class TransactionsViewController: ACBaseViewController {
     
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
-        
         
         tableView.delegate = nil
     }

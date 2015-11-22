@@ -11,16 +11,42 @@ import SwiftyUserDefaults
 
 class Formatter: NSObject {
    
-    class func formatCurrencyAsString(value: Double) -> String {
+    class func formatCurrencyAsString(currency: CurrencyEnum, value: Double) -> String {
         
-        let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
+        var rc = ""
         
-        if currencyIdentifier == "DKK" {
+        //let currencyIdentifier = Settings.getCurrencyLocaleWithIdentifier().identifier
+        
+        switch currency {
             
-            return "kr, \(value.toStringWithDecimalPlaces(2))"
+        case CurrencyEnum.GBP:
+            
+            rc = "£\(value.toStringWithDecimalPlaces(2))"
+            
+            break;
+            
+        case CurrencyEnum.EUR:
+            
+            rc = "€\(value.toStringWithDecimalPlaces(2))"
+            
+            break;
+            
+        case CurrencyEnum.USD:
+            
+            rc = "$\(value.toStringWithDecimalPlaces(2))"
+            
+            break;
+            
+        case CurrencyEnum.DKK:
+            
+            rc = "kr. \(value.toStringWithDecimalPlaces(2))"
+            
+            break;
+            
+        default:break;
         }
         
-        return "£\(value.toStringWithDecimalPlaces(2))"
+        return rc
     }
     
 }
