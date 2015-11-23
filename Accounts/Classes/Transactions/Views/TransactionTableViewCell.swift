@@ -70,7 +70,7 @@ class TransactionTableViewCell: UITableViewCell {
             //secureCell()
         }
         
-        dateLabel.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
+        dateLabel.frame = CGRect(x: 0, y: 0, width: 120, height: 50)
         dateLabel.font = UIFont.lightFont(14)
         dateLabel.textAlignment = .Right
         dateLabel.textColor = UIColor.grayColor()
@@ -82,7 +82,7 @@ class TransactionTableViewCell: UITableViewCell {
         dateLabel.addRightConstraint(toView: contentView, relation: .Equal, constant: 0)
         dateLabel.addTopConstraint(toView: contentView, relation: .Equal, constant: 0)
         dateLabel.addBottomConstraint(toView: contentView, relation: .Equal, constant: 0)
-        dateLabel.addWidthConstraint(relation: .Equal, constant: 100)
+        dateLabel.addWidthConstraint(relation: .Equal, constant: 120)
         
         textLabel?.font = UIFont.normalFont(textLabel!.font.pointSize)
         detailTextLabel?.font = UIFont.normalFont(detailTextLabel!.font.pointSize)
@@ -126,14 +126,14 @@ class TransactionTableViewCell: UITableViewCell {
         
         imageView?.contentMode = UIViewContentMode.ScaleAspectFit
         
-        if let originalTextLabelFrame = originalTextLabelFrame {
+        if let originalTextLabelFrame = originalTextLabelFrame { // needed ? lol
             
-            textLabel?.frame = CGRect(x: imageWidth + imageMargins, y: originalTextLabelFrame.origin.y, width: contentView.frame.width - 145, height: originalTextLabelFrame.height)
+            textLabel?.frame = CGRect(x: imageWidth + imageMargins, y: originalTextLabelFrame.origin.y, width: contentView.frame.width - 170, height: originalTextLabelFrame.height)
         }
         
         if let originalDetailTextLabelFrame = originalDetailTextLabelFrame {
             
-            detailTextLabel?.frame = CGRect(x: imageWidth + imageMargins, y: originalDetailTextLabelFrame.origin.y, width: contentView.frame.width - 145, height: originalDetailTextLabelFrame.height)
+            detailTextLabel?.frame = CGRect(x: imageWidth + imageMargins, y: originalDetailTextLabelFrame.origin.y, width: contentView.frame.width - 170, height: originalDetailTextLabelFrame.height)
         }
     }
 }

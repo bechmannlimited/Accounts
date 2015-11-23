@@ -104,7 +104,7 @@ extension FormViewTextFieldCell: UITextFieldDelegate {
             
             // Construct the text that will be in the field if this change is accepted
             let oldText =  NSString(string: textField.text!)
-            var newText = oldText.stringByReplacingCharactersInRange(range, withString: string) as NSString!
+            let newText = oldText.stringByReplacingCharactersInRange(range, withString: string) as NSString!
             var newTextString = String(newText)
             
             let digits = NSCharacterSet.decimalDigitCharacterSet()

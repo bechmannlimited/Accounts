@@ -78,6 +78,11 @@ extension NSDate {
             rc = "just now"
         }
         
+        if dateRange.minutes < 0 {
+            
+            rc = self.toString("dd/MM/yyyy HH:mm")
+        }
+        
         return rc
     }
 }

@@ -809,11 +809,6 @@ extension TransactionsViewController: UITableViewDataSource {
         
     }
     
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        
-        return "Latest Transactions"
-    }
-    
     func reorderTransactions() {
         
         transactions.sortInPlace { return $0.transactionDate.timeIntervalSince1970 > $1.transactionDate.timeIntervalSince1970 }

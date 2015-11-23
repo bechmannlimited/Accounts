@@ -245,7 +245,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                                 
                                 if !isActiveTransaction {
                                     
-                                     UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: nil)
+                                    if let v = v as SaveTransactionViewController? {
+                                        
+                                        v.triggerRefreshOnDissapear = true
+                                    }
+                                    
+                                    UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: { void in
+                                    
+                                        //NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+                                    })
                                 }
                             })
                         })

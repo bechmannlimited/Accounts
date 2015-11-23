@@ -19,6 +19,7 @@ class SaveItemViewController: ACFormViewController {
     var isInsidePopover = false
     
     var delegate: SaveItemDelegate?
+    var triggerRefreshOnDissapear = false
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
@@ -26,6 +27,19 @@ class SaveItemViewController: ACFormViewController {
         if kDevice == .Pad && !isInsidePopover{
             
             tableView.separatorColor = .clearColor()
+        }
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        if triggerRefreshOnDissapear {
+            
+            NSTimer.schedule(delay: 1.2, handler: { timer in
+            
+                // this is used to trigger update of transactions page if notification is tapped from outside app
+                NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
+            })
         }
     }
     

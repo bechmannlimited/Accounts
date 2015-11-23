@@ -29,7 +29,7 @@ class MultiCurrencyTableViewDelegate: NSObject, UITableViewDelegate, UITableView
         
         if amount > 0 {
             
-            cell.textLabel?.text = "Owes you"
+            cell.textLabel?.text = "owes you"
         }
         else{
             

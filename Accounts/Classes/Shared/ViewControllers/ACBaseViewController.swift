@@ -89,7 +89,7 @@ class ACBaseViewController: BaseViewController {
     
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
-        
+
         for query in activeQueries {
             
             query?.cancel()
