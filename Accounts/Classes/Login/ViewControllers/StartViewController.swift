@@ -112,7 +112,7 @@ class StartViewController: ACBaseViewController {
         
         SwiftOverlays.showBlockingWaitOverlayWithText(User.currentUser()?.facebookId != nil ? "Fetching facebook info..." : "Setting some things up...")
         
-        let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me", parameters: ["fields": "id, name, email"])
+        let graphRequest : FBSDKGraphRequest = FBSDKGraphRequest(graphPath: "me", parameters: ["fields": "id, name"])
         graphRequest.startWithCompletionHandler({ (connection, result, error) -> Void in
             
             if let json: AnyObject = result {
@@ -125,15 +125,17 @@ class StartViewController: ACBaseViewController {
                     
                     user["displayName"] = result["name"].stringValue
                 }
-                
-                if user["email"] == nil {
-                    
-                    user["email"] = result["email"].stringValue
-                }
+//                if user["email"] == nil {
+//                    
+//                    user["email"] = result["email"].stringValue
+//                }
                 
                 Task.sharedTasker().executeTaskInBackground({ () -> Void in
                     
-                    do { try user.save() } catch {}
+                    do { try user.save() } catch
+                    {
+                        user.saveEventually()
+                    }
                     
                 }, completion: { () -> () in
                     

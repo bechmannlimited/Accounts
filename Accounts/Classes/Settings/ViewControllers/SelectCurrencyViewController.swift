@@ -79,6 +79,6 @@ extension SelectCurrencyViewController {
         
         tableView.reloadData()
         
-        navigationController?.popViewControllerAnimated(true)
+        close()
     }
 }

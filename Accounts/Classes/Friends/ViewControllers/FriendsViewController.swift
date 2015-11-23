@@ -88,10 +88,18 @@ class FriendsViewController: ACBaseViewController {
         }
     }
     
+    private var hasAskedForPreferredCurrency = false
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
         AppDelegate.registerForNotifications()
+        
+        if !hasAskedForPreferredCurrency {
+            
+            askForPreferredCurrencyIfNotSet()
+            hasAskedForPreferredCurrency = true
+        }
     }
     
     override func didReceivePushNotification(notification: NSNotification) {
@@ -110,6 +118,28 @@ class FriendsViewController: ACBaseViewController {
                     
                 //getInvites()
             }
+        }
+    }
+    
+    func askForPreferredCurrencyIfNotSet() {
+        
+        if User.currentUser()?.preferredCurrencyId == nil {
+            
+            let currency = Currency.CurrencyFromNSNumber(User.currentUser()?.preferredCurrencyId)
+            
+            UIAlertController.showAlertControllerWithButtonTitle("Change", confirmBtnStyle: .Default, message: "Your preferred currency is \(currency), would you like to change it?", completion: { (response) -> () in
+                
+                if response == AlertResponse.Confirm {
+                    
+                    let v = SelectCurrencyViewController()
+                    let nvc = UINavigationController(rootViewController: v)
+                    v.delegate = self
+                    v.addCloseButton()
+                    v.previousValue = User.currentUser()?.preferredCurrencyId
+                    self.presentViewController(nvc, animated: true, completion: { () -> Void in
+                    })
+                }
+            })
         }
     }
     
@@ -571,5 +601,16 @@ extension FriendsViewController: MenuDelegate {
     func menuDidClose() {
         
         refresh(nil)
+    }
+}
+
+extension FriendsViewController: SelectCurrencyDelegate {
+    
+    func didSelectCurrencyId(id: NSNumber) {
+        
+        Settings.setDefaultCurrencyId(id)
+        User.currentUser()?.preferredCurrencyId = id
+        User.currentUser()?.saveInBackground()
+        tableView.reloadData()
     }
 }

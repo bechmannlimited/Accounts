@@ -236,6 +236,11 @@ class Transaction: PFObject {
                         transaction.toUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
                         User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.toUser!.objectId!] = transaction.toUser!.differencesBetweenActiveUser
                     }
+                    
+                    if User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]?[currencyId] == 0 {
+                        
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]?.removeValueForKey(currencyId)
+                    }
                 }
                 else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
                     
@@ -255,6 +260,11 @@ class Transaction: PFObject {
                         let amount = -transaction.amount
                         transaction.fromUser?.differencesBetweenActiveUser[currencyId] = NSNumber(double: amount)
                         User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.fromUser!.objectId!] = transaction.fromUser!.differencesBetweenActiveUser
+                    }
+                    
+                    if User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]?[currencyId] == 0 {
+                        
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]?.removeValueForKey(currencyId)
                     }
                 }
             }
@@ -288,10 +298,10 @@ class Transaction: PFObject {
                         User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.toUser!.objectId!] = transaction.toUser!.differencesBetweenActiveUser
                     }
                     
-//                    if User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]?[currencyId] == 0 {
-//    
-//                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]?.removeValueForKey(currencyId)
-//                    }
+                    if User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]?[currencyId] == 0 {
+    
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.toUser!.objectId!]?.removeValueForKey(currencyId)
+                    }
                 }
                 else if transaction.toUser?.objectId == User.currentUser()?.objectId  {
                     
@@ -312,10 +322,10 @@ class Transaction: PFObject {
                         User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies![transaction.fromUser!.objectId!] = transaction.fromUser!.differencesBetweenActiveUser
                     }
                     
-//                    if User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]?[currencyId] == 0 {
-//                        
-//                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]?.removeValueForKey(currencyId)
-//                    }
+                    if User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]?[currencyId] == 0 {
+                        
+                        User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[transaction.fromUser!.objectId!]?.removeValueForKey(currencyId)
+                    }
                 }
                 
             }

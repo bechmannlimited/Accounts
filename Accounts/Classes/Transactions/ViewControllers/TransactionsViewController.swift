@@ -293,11 +293,12 @@ class TransactionsViewController: ACBaseViewController {
         let text = friend.appropriateDisplayName()
         headerView?.setupTitle(text)
         
-        setupTableViewHeader()
+        //setupTableViewHeader()
     }
     
     func getDifferenceBetweenActiveUser() {
     
+        setupTableViewHeader()
         
         //TODO: Get diff between active user
 //        PFCloud.callFunctionInBackground("DifferenceBetweenActiveUser", withParameters: ["compareUserId": friend.objectId!]) { (response, error) -> Void in
@@ -595,7 +596,7 @@ class TransactionsViewController: ACBaseViewController {
                 self.tableView.reloadData()
                 self.view.hideLoader()
                 self.showOrHideTableOrNoDataView()
-                self.setupTableViewHeader()
+                //self.setupTableViewHeader()
                 self.setTableViewHeaderFromLocalData()
                 self.refreshBarButtonItem?.enabled = true
                 //self.findAndScrollToCalculatedSelectedCellAtIndexPath(true)
@@ -806,6 +807,11 @@ extension TransactionsViewController: UITableViewDataSource {
     override func setupTableViewRefreshControl(tableView: UITableView) {
         
         
+    }
+    
+    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        
+        return "Latest Transactions"
     }
     
     func reorderTransactions() {
