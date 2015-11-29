@@ -77,7 +77,7 @@
 		E490EF8A1BC5A8D400EE4739 /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E490EF891BC5A8D400EE4739 /* LocalAuthentication.framework */; };
 		E49BFC8E1B7F8DCA00142AFD /* TransactionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */; };
 		E4BA9C5C1B84FD2F00E8DFF6 /* NSDate+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */; };
-		E4E6E23F1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E6E23E1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift */; };
+		E4E6E23F1C00D13400081663 /* MultiCurrencyTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E6E23E1C00D13400081663 /* MultiCurrencyTableView.swift */; };
 		E4E7CAD91B66D24E0027833E /* StartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E7CAD81B66D24E0027833E /* StartViewController.swift */; };
 		E4EBCF041B8275EF00690A60 /* Font.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4EBCF031B8275EF00690A60 /* Font.swift */; };
 		E4F2E6691BBB463E00CD7E94 /* AutoLayoutHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F2E62F1BBB463E00CD7E94 /* AutoLayoutHelper.swift */; };
@@ -218,7 +218,7 @@
 		E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionTableViewCell.swift; sourceTree = "<group>"; };
 		E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+Extension.swift"; sourceTree = "<group>"; };
 		E4C2A43B1B68052000730BAB /* ABToolKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ABToolKit.framework; path = "Pods/../build/Debug-iphoneos/Pods/ABToolKit.framework"; sourceTree = "<group>"; };
-		E4E6E23E1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MultiCurrencyTableViewDelegate.swift; path = Delegates/MultiCurrencyTableViewDelegate.swift; sourceTree = "<group>"; };
+		E4E6E23E1C00D13400081663 /* MultiCurrencyTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MultiCurrencyTableView.swift; path = ../Delegates/MultiCurrencyTableView.swift; sourceTree = "<group>"; };
 		E4E7CAD81B66D24E0027833E /* StartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartViewController.swift; sourceTree = "<group>"; };
 		E4EBCF031B8275EF00690A60 /* Font.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Font.swift; sourceTree = "<group>"; };
 		E4F2E62F1BBB463E00CD7E94 /* AutoLayoutHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoLayoutHelper.swift; sourceTree = "<group>"; };
@@ -635,6 +635,7 @@
 		E442C31E1B510E940061CAE6 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				E4E6E23E1C00D13400081663 /* MultiCurrencyTableView.swift */,
 				E48C52371B6970860056A7E3 /* BouncyHeaderView.swift */,
 				E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */,
 				E455C4E91B98B2A100D2E264 /* TransactionPurchaseInfoTableViewCell.swift */,
@@ -712,7 +713,6 @@
 		E4E6E2401C00D13C00081663 /* Delegates */ = {
 			isa = PBXGroup;
 			children = (
-				E4E6E23E1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift */,
 			);
 			name = Delegates;
 			sourceTree = "<group>";
@@ -1051,7 +1051,7 @@
 				E442C3371B510E940061CAE6 /* RelationStatus.swift in Sources */,
 				E4F2E67B1BBB463E00CD7E94 /* UIColor+Extension.swift in Sources */,
 				E442C3421B510E940061CAE6 /* TransactionsViewController.swift in Sources */,
-				E4E6E23F1C00D13400081663 /* MultiCurrencyTableViewDelegate.swift in Sources */,
+				E4E6E23F1C00D13400081663 /* MultiCurrencyTableView.swift in Sources */,
 				E4F2E6931BBB463E00CD7E94 /* BaseViewController.swift in Sources */,
 				E4F2E67C1BBB463E00CD7E94 /* UIImage+Extension.swift in Sources */,
 				E442C33E1B510E940061CAE6 /* SelectPurchaseOrTransactionViewController.swift in Sources */,

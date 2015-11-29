@@ -258,8 +258,8 @@ class FriendsViewController: ACBaseViewController {
         //var rc = Array<Array<User>>()
         
         var friendsWhoOweMoney = Array<User>()
-        var friendsWhoYouOweMoney = Array<User>()
-        var friendsWhoAreEven = Array<User>()
+        let friendsWhoYouOweMoney = Array<User>()
+        let friendsWhoAreEven = Array<User>()
         
         if let currentUser = User.currentUser() {
             

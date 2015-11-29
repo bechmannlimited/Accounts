@@ -8,11 +8,17 @@
 
 import UIKit
 
-class MultiCurrencyTableViewDelegate: NSObject, UITableViewDelegate, UITableViewDataSource {
+class MultiCurrencyTableView: UITableView, UITableViewDelegate, UITableViewDataSource {
     
     var tableCellHeight:CGFloat = 38
     var results = Dictionary<String, NSNumber>()
     var friend = User()
+    
+    func calculatedHeight() -> CGFloat {
+        
+        return CGFloat(results.keys.count) * self.tableCellHeight
+    }
+    
     
     // MARK: - TableView Delegate
     
@@ -22,7 +28,7 @@ class MultiCurrencyTableViewDelegate: NSObject, UITableViewDelegate, UITableView
             
             return UITableViewCell(style: .Value1, reuseIdentifier: identifier)
         }
-
+        
         let currencyId = Array(results.keys)[indexPath.row]
         let currency = Currency.CurrencyFromNSNumber(NSNumber(integer: Int(currencyId)!))
         let amount = Double(results[currencyId]!)

@@ -189,7 +189,7 @@ class SavePurchaseViewController: SaveItemViewController {
     
     override func formViewElements() -> Array<Array<FormViewConfiguration>> {
         
-        let locale: NSLocale? = Currency.localeForCurrencyId(purchase.currencyId)
+        //let locale: NSLocale? = Currency.localeForCurrencyId(purchase.currencyId)
         
         var sections = Array<Array<FormViewConfiguration>>()
         

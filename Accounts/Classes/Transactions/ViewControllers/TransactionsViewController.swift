@@ -51,8 +51,7 @@ class TransactionsViewController: ACBaseViewController {
     var popoverViewController: UIViewController?
     private var blurViewHasBeenConverted = false
     
-    var multiCurrencyTableViewDelegate = MultiCurrencyTableViewDelegate()
-    let multiCurrencyTableView = UITableView()
+    let multiCurrencyTableView = MultiCurrencyTableView()
     
 //    func clean() {
 //        
@@ -123,11 +122,11 @@ class TransactionsViewController: ACBaseViewController {
             
             if let results = user.friendsIdsWithDifferenceWithMultipleCurrencies?[friend.objectId!] {
                 
-                self.multiCurrencyTableViewDelegate.results = results
-                self.multiCurrencyTableViewDelegate.friend = self.friend
-                self.multiCurrencyTableView.delegate = self.multiCurrencyTableViewDelegate
-                self.multiCurrencyTableView.dataSource = self.multiCurrencyTableViewDelegate
-                self.multiCurrencyTableView.frame = CGRect(x: 0, y: 0, width: 100, height: CGFloat(results.keys.count) * self.multiCurrencyTableViewDelegate.tableCellHeight)
+                self.multiCurrencyTableView.results = results
+                self.multiCurrencyTableView.friend = self.friend
+                self.multiCurrencyTableView.delegate = self.multiCurrencyTableView
+                self.multiCurrencyTableView.dataSource = self.multiCurrencyTableView
+                self.multiCurrencyTableView.frame = CGRect(x: 0, y: 0, width: 100, height: self.multiCurrencyTableView.calculatedHeight())
                 self.multiCurrencyTableView.reloadData()
                 
                 if self.transactions.count > 0 {
