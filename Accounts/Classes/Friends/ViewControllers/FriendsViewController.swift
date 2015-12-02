@@ -19,7 +19,8 @@ private let kPopoverContentSize = CGSize(width: 320, height: 360)
 
 class FriendsViewController: ACBaseViewController {
     
-    var tableView = UITableView(frame: CGRectZero, style: kDevice == .Pad ? .Grouped : .Plain)
+    //var tableView = UITableView(frame: CGRectZero, style: kDevice == .Pad ? .Grouped : .Plain)
+    var collectionView = UICollectionView(frame: CGRectZero, collectionViewLayout: UICollectionViewFlowLayout())
     
     var addBarButtonItem: UIBarButtonItem?
     var friendInvitesBarButtonItem: UIBarButtonItem?
@@ -38,19 +39,20 @@ class FriendsViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupTableView(tableView, delegate: self, dataSource: self)
+        //setupTableView(tableView, delegate: self, dataSource: self)
+        setupCollectionView()
         setBarButtonItems()
         
         title = "Friends"
         view.showLoader()
         
-        if kDevice == .Pad {
-            
-            tableView.separatorStyle = UITableViewCellSeparatorStyle.None
-        }
+//        if kDevice == .Pad {
+//            
+//            tableView.separatorStyle = UITableViewCellSeparatorStyle.None
+//        }
         
         let text = User.currentUser()?.facebookId != nil ? "Your Facebook friends who have this app, will appear here!" : "Tap settings and send a friend invite to get started!"
-        setupNoDataLabel(noDataView, text: text, originView: tableView) //To get started, invite some friends!
+        setupNoDataLabel(noDataView, text: text, originView: collectionView) //To get started, invite some friends!
         setupTextLabelForSaveStatusInToolbarWithLabel()
         setupToolbar()
         
@@ -73,19 +75,19 @@ class FriendsViewController: ACBaseViewController {
             self.refreshUpdatedDate = lastSyncedDate
         }
         
-        tableView.separatorColor = .clearColor()
+        //tableView.separatorColor = .clearColor()
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
         refresh(nil)
-        setEditing(false, animated: false)
-        
-        if let indexPath = tableView.indexPathForSelectedRow {
-            
-            tableView.deselectRowAtIndexPath(indexPath, animated: false)
-        }
+//        setEditing(false, animated: false)
+//        
+//        if let indexPath = tableView.indexPathForSelectedRow {
+//            
+//            tableView.deselectRowAtIndexPath(indexPath, animated: false)
+//        }
     }
     
     private var hasAskedForPreferredCurrency = false
@@ -104,8 +106,6 @@ class FriendsViewController: ACBaseViewController {
     
     override func didReceivePushNotification(notification: NSNotification) {
         
-        print(notification.object)
-        
         if let object: AnyObject = notification.object{
             
             let value = JSON(object[kPushNotificationTypeKey]!!).intValue
@@ -119,6 +119,18 @@ class FriendsViewController: ACBaseViewController {
                 //getInvites()
             }
         }
+    }
+    
+    func setupCollectionView() {
+        
+        collectionView.registerClass(FriendCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        view.addSubview(collectionView)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.fillSuperView(UIEdgeInsetsZero)
+        
+        collectionView.backgroundColor = .clearColor()
     }
     
     func askForPreferredCurrencyIfNotSet() {
@@ -151,7 +163,8 @@ class FriendsViewController: ACBaseViewController {
     
     func colorForViewBackground() -> UIColor {
 
-        return kDevice == .Phone ? UIColor.whiteColor() : kViewBackgroundColor
+        return kViewBackgroundColor
+        //return kDevice == .Phone ? UIColor.whiteColor() : kViewBackgroundColor
     }
     
     func setupToolbar(){
@@ -171,31 +184,31 @@ class FriendsViewController: ACBaseViewController {
                 !NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 1, patchVersion: 0)){
                 
                 height += UIApplication.sharedApplication().statusBarFrame.height
-                tableView.contentInset = UIEdgeInsets(top: height, left: tableView.contentInset.left, bottom: tableView.contentInset.bottom, right: tableView.contentInset.right)
+                collectionView.contentInset = UIEdgeInsets(top: height, left: collectionView.contentInset.left, bottom: collectionView.contentInset.bottom, right: collectionView.contentInset.right)
             }
         }
         
-        let previousInsets = tableView.contentInset
-        tableView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
+        let previousInsets = collectionView.contentInset
+        collectionView.contentInset = UIEdgeInsets(top: previousInsets.top, left: previousInsets.left, bottom: previousInsets.bottom + toolbar.frame.height, right: previousInsets.right)
         
         toolbar.tintColor = kNavigationBarTintColor
     }
     
-    override func setEditing(editing: Bool, animated: Bool) {
-        super.setEditing(editing, animated: animated)
-        
-        tableView.setEditing(editing, animated: animated)
-        
-        if view.bounds.width >= kTableViewMaxWidth {
-            
-            //tableView.reloadData()
-        }
-        
-        if data[2].count > 0 && editing {
-            
-            tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 2), atScrollPosition: .Top, animated: true)
-        }
-    }
+//    override func setEditing(editing: Bool, animated: Bool) {
+//        super.setEditing(editing, animated: animated)
+//        
+//        //collectionView.setEditing(editing, animated: animated)
+//        
+//        if view.bounds.width >= kTableViewMaxWidth {
+//            
+//            //tableView.reloadData()
+//        }
+//        
+//        if data[2].count > 0 && editing {
+//            
+//            tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: 0, inSection: 2), atScrollPosition: .Top, animated: true)
+//        }
+//    }
     
     func setBarButtonItems() {
         
@@ -320,7 +333,7 @@ class FriendsViewController: ACBaseViewController {
             
             refreshControl?.endRefreshing()
             self.setDataForTable()
-            self.tableView.reloadData()
+            self.collectionView.reloadData()
             self.view.hideLoader()
             self.showOrHideAddButton()
             self.showOrHideTableOrNoDataView()
@@ -381,7 +394,7 @@ class FriendsViewController: ACBaseViewController {
             
             self.noDataView.layer.opacity = User.currentUser()?.friends.count > 0 ? 0 : 1
             self.view.backgroundColor = User.currentUser()?.friends.count > 0 ? self.colorForViewBackground() : kViewBackgroundColor
-            self.tableView.separatorColor = User.currentUser()?.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
+            //self.tableView.separatorColor = User.currentUser()?.friends.count > 0 ? kTableViewSeparatorColor : .clearColor()
         })
     }
     
@@ -392,34 +405,32 @@ class FriendsViewController: ACBaseViewController {
     }
 }
 
-extension FriendsViewController: UITableViewDataSource {
+extension FriendsViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    
+    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
         
         return data.count
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+
         return data[section].count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
-        let cell = FriendTableViewCell(reuseIdentifier: "Cell");
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier("cell", forIndexPath: indexPath) as! FriendCollectionViewCell
         
         let friend = data[indexPath.section][indexPath.row]
-        (cell as FriendTableViewCell).setup(friend)
-        (cell as FriendTableViewCell).delegate = self
-        (cell as FriendTableViewCell).currentIndexPath = indexPath
-        
-        //cell.layer.rasterizationScale = UIScreen.mainScreen().scale
-        //cell.layer.shouldRasterize = true
-        
+        cell.setup(friend)
+        cell.delegate = self
+        cell.currentIndexPath = indexPath
+
         return cell
     }
-
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         
         let friend = data[indexPath.section][indexPath.row]
         let v = TransactionsViewController()
@@ -427,85 +438,38 @@ extension FriendsViewController: UITableViewDataSource {
         navigationController?.pushViewController(v, animated: true)
     }
     
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-
-//        if data[section].count > 0 {
-//            
-//            if section == 0 {
-//                
-//                return "People I owe"
-//            }
-//            else if section == 1 {
-//                
-//                return "People who owe me"
-//            }
-//            else if section == 2 {
-//                
-//                return "People I'm even with"
-//            }
-//        }
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         
-        return ""
-    }
-    
-//    func tableView(tableView: UITableView, titleForFooterInSection section: Int) -> String? {
-//        
-//        if section == numberOfSectionsInTableView(tableView) - 1 && User.currentUser()?.friends.count > 0 && User.currentUser()?.friends.count < 2 {
-//            
-//            return "Your Facebook friends who have this app, will appear here!"
-//        }
-//        
-//        return nil
-//    }
-    
-    func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
-        
-        return tableView.editing ? .Delete : .None
-    }
-    
-    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+        let baseHeight:CGFloat = FriendCollectionViewCell.cellPadding() * 1 + FriendCollectionViewCell.friendImageViewWidth()
+        var dynamicExtraHeight:CGFloat = 1 * FriendCollectionViewCell.multiCurrencyTableViewCellHeight()
         
         let friend = data[indexPath.section][indexPath.row]
         
-        return indexPath.section == 2 && friend.facebookId == nil
-    }
-    
-    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        
-        let friend = data[indexPath.section][indexPath.row]
-        
-        UIAlertController.showAlertControllerWithButtonTitle("Delete", confirmBtnStyle: .Destructive, message: "Are you sure you want to remove \(friend.appropriateDisplayName()) as a friend?") { (response) -> () in
+        if let data = User.currentUser()?.friendsIdsWithDifferenceWithMultipleCurrencies?[friend.objectId!] {
             
-            if response == .Confirm {
-                
-                tableView.beginUpdates()
-                
-                self.data[indexPath.section].removeAtIndex(indexPath.row)
-                
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Top)
-                tableView.endUpdates()
-                
-                User.currentUser()?.removeFriend(friend, completion: { (success) -> () in
-
-                    self.refresh(nil)
-                })
-            }
-            else {
-                
-                self.tableView.reloadData()
-            }
+            dynamicExtraHeight = CGFloat(data.keys.count >= 2 ? data.keys.count : 2) * FriendCollectionViewCell.multiCurrencyTableViewCellHeight()
         }
-    }
-    
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         
-        return 70
+        let height = baseHeight + dynamicExtraHeight + (FriendCollectionViewCell.cellPadding() * 2)
+        
+        var width = (view.frame.width - 60) / 3
+        
+        if view.frame.width < 700 {
+            
+            width = view.frame.width - 30
+        }
+        
+        return CGSize(width: width, height: height)
     }
     
-    func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-
-        return 0
-        //return data[section].count > 0 ? 35 : 0 // use this with table header
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAtIndex section: Int) -> UIEdgeInsets {
+        
+        return UIEdgeInsets(top: 15, left: 15, bottom: 15, right: 15)
+    }
+    
+    override func didRotateFromInterfaceOrientation(fromInterfaceOrientation: UIInterfaceOrientation) {
+        
+        collectionView.reloadData()
     }
 }
 
@@ -582,11 +546,13 @@ extension FriendsViewController: FriendTableViewCellDelegate {
         
         if let indexPath = indexPath {
             
-            tableView.beginUpdates()
-            //User.currentUser()?.friends.removeAtIndex(find(User.currentUser()!.friends, friend)!)
-            data[indexPath.section].removeAtIndex(indexPath.row)
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Top)
-            tableView.endUpdates()
+//            collectionView.beginUpdates()
+//            //User.currentUser()?.friends.removeAtIndex(find(User.currentUser()!.friends, friend)!)
+//            data[indexPath.section].removeAtIndex(indexPath.row)
+//            collectionView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Top)
+//            collectionView.endUpdates()
+            
+            collectionView.deleteItemsAtIndexPaths([indexPath])
         }
         
         NSTimer.schedule(delay: 0.5, handler: { timer in
@@ -611,6 +577,6 @@ extension FriendsViewController: SelectCurrencyDelegate {
         Settings.setDefaultCurrencyId(id)
         User.currentUser()?.preferredCurrencyId = id
         User.currentUser()?.saveInBackground()
-        tableView.reloadData()
+        collectionView.reloadData()
     }
 }

@@ -53,14 +53,6 @@ class TransactionsViewController: ACBaseViewController {
     
     let multiCurrencyTableView = MultiCurrencyTableView()
     
-//    func clean() {
-//        
-//        PFObject.unpinAllInBackground(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase])
-//        PFObject.unpinAllInBackground(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction])
-//        //PFObject.unpinAll(Purchase.query()?.fromLocalDatastore().findObjects() as? [Purchase], withName: self.pinLabel())
-//        //PFObject.unpinAll(Transaction.query()?.fromLocalDatastore().findObjects() as? [Transaction], withName: self.pinLabel())
-//    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -122,15 +114,16 @@ class TransactionsViewController: ACBaseViewController {
             
             if let results = user.friendsIdsWithDifferenceWithMultipleCurrencies?[friend.objectId!] {
                 
-                self.multiCurrencyTableView.results = results
-                self.multiCurrencyTableView.friend = self.friend
-                self.multiCurrencyTableView.delegate = self.multiCurrencyTableView
-                self.multiCurrencyTableView.dataSource = self.multiCurrencyTableView
-                self.multiCurrencyTableView.frame = CGRect(x: 0, y: 0, width: 100, height: self.multiCurrencyTableView.calculatedHeight())
-                self.multiCurrencyTableView.reloadData()
-                
                 if self.transactions.count > 0 {
                     
+                    self.multiCurrencyTableView.results = results
+                    self.multiCurrencyTableView.friend = self.friend
+                    self.multiCurrencyTableView.delegate = self.multiCurrencyTableView
+                    self.multiCurrencyTableView.dataSource = self.multiCurrencyTableView
+                    let extraHeight:CGFloat = kDevice == .Pad ? 20 : 0
+                    self.multiCurrencyTableView.frame = CGRect(x: 0, y: 0, width: 100, height: self.multiCurrencyTableView.calculatedHeight() + extraHeight * 2)
+                    self.multiCurrencyTableView.separatorColor = .clearColor()
+                    self.multiCurrencyTableView.reloadData()
                     self.tableView.tableHeaderView = self.multiCurrencyTableView
                 }
                 else {

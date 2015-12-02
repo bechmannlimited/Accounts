@@ -8,7 +8,7 @@
 
 import UIKit
 
-let kPadding: CGFloat = 15
+private let kPadding: CGFloat = 15
 
 public class FormViewTextFieldCell: FormViewCell {
 

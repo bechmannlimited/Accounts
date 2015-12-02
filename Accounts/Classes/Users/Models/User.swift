@@ -691,11 +691,18 @@ class User: PFUser {
     
     func getProfilePicture(completion: (image: UIImage) -> ()) {
         
-        let url = urlForProfilePicture()
-        
-        ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+        if objectId != kTestBotObjectId {
             
-            completion(image: image)
-        })
+            let url = urlForProfilePicture()
+            
+            ABImageLoader.sharedLoader().loadImageFromCacheThenNetwork(url, completion: { (image) -> () in
+                
+                completion(image: image)
+            })
+        }
+        else {
+            
+            completion(image: AppTools.iconAssetNamed("50981152_thumbnail.jpg"))
+        }
     }
 }

@@ -10,9 +10,10 @@ import UIKit
 
 class MultiCurrencyTableView: UITableView, UITableViewDelegate, UITableViewDataSource {
     
-    var tableCellHeight:CGFloat = 38
+    var tableCellHeight:CGFloat = 30
     var results = Dictionary<String, NSNumber>()
     var friend = User()
+    var textColor: UIColor?
     
     func calculatedHeight() -> CGFloat {
         
@@ -26,7 +27,7 @@ class MultiCurrencyTableView: UITableView, UITableViewDelegate, UITableViewDataS
         
         let cell = tableView.dequeueOrCreateReusableCellWithIdentifier("Cell") { (identifier) -> (UITableViewCell) in
             
-            return UITableViewCell(style: .Value1, reuseIdentifier: identifier)
+            return multiCurrencyTableViewCell(style: .Value1, reuseIdentifier: identifier)
         }
         
         let currencyId = Array(results.keys)[indexPath.row]
@@ -35,7 +36,7 @@ class MultiCurrencyTableView: UITableView, UITableViewDelegate, UITableViewDataS
         
         if amount > 0 {
             
-            cell.textLabel?.text = "owes you"
+            cell.textLabel?.text = "Owes you"
         }
         else{
             
@@ -44,9 +45,13 @@ class MultiCurrencyTableView: UITableView, UITableViewDelegate, UITableViewDataS
         
         cell.detailTextLabel?.text = Formatter.formatCurrencyAsString(currency, value: abs(amount))
         cell.backgroundColor = UIColor.clearColor()
-        
-        //cell.backgroundColor = UIColor.blackColor().colorWithAlphaComponent(0)
         tableView.backgroundColor = .clearColor()
+        
+        if let color = textColor {
+            
+            cell.textLabel?.textColor = color
+            cell.detailTextLabel?.textColor = color
+        }
         
         return cell
     }
@@ -76,5 +81,12 @@ class MultiCurrencyTableView: UITableView, UITableViewDelegate, UITableViewDataS
     func numberOfRowsInSection() -> Int {
         
         return results.count
+    }
+}
+
+private class multiCurrencyTableViewCell: UITableViewCell {
+    
+    private override func setHighlighted(highlighted: Bool, animated: Bool) {
+        
     }
 }

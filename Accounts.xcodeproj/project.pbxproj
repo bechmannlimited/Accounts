@@ -75,6 +75,7 @@
 		E490EF861BC59E2300EE4739 /* FormViewSwitchCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E490EF851BC59E2300EE4739 /* FormViewSwitchCell.swift */; };
 		E490EF881BC5A59400EE4739 /* NKTouchID.swift in Sources */ = {isa = PBXBuildFile; fileRef = E490EF871BC5A59400EE4739 /* NKTouchID.swift */; };
 		E490EF8A1BC5A8D400EE4739 /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E490EF891BC5A8D400EE4739 /* LocalAuthentication.framework */; };
+		E499F9AE1C0B1B18006E9D7C /* FriendCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E499F9AD1C0B1B18006E9D7C /* FriendCollectionViewCell.swift */; };
 		E49BFC8E1B7F8DCA00142AFD /* TransactionTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */; };
 		E4BA9C5C1B84FD2F00E8DFF6 /* NSDate+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */; };
 		E4E6E23F1C00D13400081663 /* MultiCurrencyTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E6E23E1C00D13400081663 /* MultiCurrencyTableView.swift */; };
@@ -215,6 +216,7 @@
 		E490EF851BC59E2300EE4739 /* FormViewSwitchCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormViewSwitchCell.swift; sourceTree = "<group>"; };
 		E490EF871BC5A59400EE4739 /* NKTouchID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NKTouchID.swift; sourceTree = "<group>"; };
 		E490EF891BC5A8D400EE4739 /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
+		E499F9AD1C0B1B18006E9D7C /* FriendCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendCollectionViewCell.swift; sourceTree = "<group>"; };
 		E49BFC8D1B7F8DCA00142AFD /* TransactionTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionTableViewCell.swift; sourceTree = "<group>"; };
 		E4BA9C5B1B84FD2F00E8DFF6 /* NSDate+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSDate+Extension.swift"; sourceTree = "<group>"; };
 		E4C2A43B1B68052000730BAB /* ABToolKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ABToolKit.framework; path = "Pods/../build/Debug-iphoneos/Pods/ABToolKit.framework"; sourceTree = "<group>"; };
@@ -456,6 +458,7 @@
 			isa = PBXGroup;
 			children = (
 				E411FE201B6E784F00C29D1F /* FriendTableViewCell.swift */,
+				E499F9AD1C0B1B18006E9D7C /* FriendCollectionViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1093,6 +1096,7 @@
 				E44881F51B7D145900043237 /* IOSession.swift in Sources */,
 				E4F2E6731BBB463E00CD7E94 /* Double+Extension.swift in Sources */,
 				E47FD8191B5FF042004B4C56 /* Task.swift in Sources */,
+				E499F9AE1C0B1B18006E9D7C /* FriendCollectionViewCell.swift in Sources */,
 				E4F2E68E1BBB463E00CD7E94 /* WebApiDefaults.swift in Sources */,
 				E442C33C1B510E940061CAE6 /* MenuViewController.swift in Sources */,
 				E48C52681B6978CC0056A7E3 /* ViewController.swift in Sources */,
