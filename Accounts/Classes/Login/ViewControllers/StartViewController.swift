@@ -67,7 +67,7 @@ class StartViewController: ACBaseViewController {
     
     func help() {
         
-        SupportKit.show()
+        Smooch.show()
     }
     
     func titleView() -> UIView {

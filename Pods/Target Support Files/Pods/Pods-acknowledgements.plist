@@ -235,9 +235,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 		</dict>
 		<dict>
 			<key>FooterText</key>
-			<string>Radialpoint.  All rights reserved.</string>
+			<string>Smooch Technologies Inc.  All rights reserved.</string>
 			<key>Title</key>
-			<string>SupportKit</string>
+			<string>Smooch</string>
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 		</dict>

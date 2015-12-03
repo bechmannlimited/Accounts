@@ -290,7 +290,7 @@ extension MenuViewController: UITableViewDataSource {
         }
         else if indexPath == kFeedbackIndexPath {
             
-            SupportKit.show()
+            Smooch.show()
         }
         else if indexPath == kShareIndexPath {
             

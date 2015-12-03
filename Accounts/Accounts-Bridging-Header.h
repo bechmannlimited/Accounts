@@ -15,7 +15,7 @@
 
 #import <Bolts/BFTask.h>
 
-#import <SupportKit/SupportKit.h>
+#import <Smooch/Smooch.h>
 
 #import "UIAppearance+Swift.h"
 
