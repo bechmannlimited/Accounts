@@ -238,17 +238,17 @@ class SavePurchaseViewController: SaveItemViewController {
             FormViewConfiguration.datePicker("Date Purchased", date: purchasedDate, identifier: "DatePurchased", format: nil),
             FormViewConfiguration.normalCell("Currency")
             //FormViewConfiguration.normalCell("Location")
-            ])
+        ])
         
-//        sections.append([
-//            FormViewConfiguration.switchCell("Secure", isOn: purchase.isSecure, identifier: "isSecure")
-//        ])
+        sections.append([
+            FormViewConfiguration.switchCell("Secure", isOn: purchase.isSecure, identifier: "isSecure")
+        ])
         
         if purchaseObjectId != nil {
             
             sections.append([
                 FormViewConfiguration.button("Delete", buttonTextColor: kFormDeleteButtonTextColor, identifier: "Delete")
-                ])
+            ])
         }
         
         return sections
@@ -435,10 +435,10 @@ class SavePurchaseViewController: SaveItemViewController {
     
     override func formViewElementIsEditable(identifier: String) -> Bool {
         
-        if identifier == "isSecure" {
-            
-            return User.currentUser()?.userType == UserType.ProUser.rawValue && allowEditing
-        }
+//        if identifier == "isSecure" {
+//            
+//            return User.currentUser()?.userType == UserType.ProUser.rawValue && allowEditing
+//        }
         
         return allowEditing
     }

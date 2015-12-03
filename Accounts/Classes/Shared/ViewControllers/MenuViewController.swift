@@ -377,33 +377,8 @@ extension MenuViewController: UITableViewDataSource {
             return "Use ioubot to test out the app before all your friends get setup. "
         }
         else if section == kFriendsSection {
-            
-            let username = User.currentUser()?.username
-            let displayName = User.currentUser()?.displayName
-            
-            var text = ""
-            var namesAdded = 0
-            
-            if displayName?.isEmpty == false {
-                
-                text += "\"\(displayName!)\""
-                namesAdded++
-            }
-            if username?.isEmpty == false && User.currentUser()?.facebookId == nil {
-                
-                let connector = namesAdded == 0 ? "" : ", "
-                text += "\(connector)\"\(username!)\""
-            }
-            
-            let orYourEmail: String = User.currentUser()?.email?.isEmpty == false ? " or your email" : ""
-            text = "Your friends can find you by searching for \(text)\(orYourEmail) in the friend invites section. "
-            
-            if User.currentUser()?.facebookId != nil {
-                
-                text += "Your Facebook friends who have this app, will appear in your friends list!"
-            }
            
-            return text
+            return User.currentUser()?.descriptionForHowToAddAsFriend()
         }
         
         return nil

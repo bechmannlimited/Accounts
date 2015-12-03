@@ -250,10 +250,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                                         v.triggerRefreshOnDissapear = true
                                     }
                                     
-                                    UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: { void in
+                                    if v.transaction.isSecure {
+                                        
+                                        if #available(iOS 9.0, *) {
+                                            
+                                            if transaction.isSecure && NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) && NKTouchID.canUseTouchID() {
+                                                
+                                                NKTouchID.authenticateWithTouchId(reason: "Please verify yourself to open this transaction!", callback: { (success, error) in
+                                                    
+                                                    if success {
+                                                        
+                                                        UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: { void in
+                                                        })
+                                                    }
+                                                })
+                                            }
+                                            else {
+                                                
+                                                UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: { void in
+                                                })
+                                            }
+                                        }
+                                        else{
+                                            
+                                            UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: { void in
+                                            })
+                                        }
+                                    }
+                                    else {
+                                        
+                                        UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: { void in
+                                        })
+                                    } 
                                     
-                                        //NSNotificationCenter.defaultCenter().postNotificationName(kNotificationCenterSaveEventuallyItemDidSaveKey, object: nil, userInfo: nil)
-                                    })
+//                                    UIViewController.topMostController().presentViewController(UINavigationController(rootViewController: v), animated: true, completion: { void in
+//                                    })
                                 }
                             })
                         })

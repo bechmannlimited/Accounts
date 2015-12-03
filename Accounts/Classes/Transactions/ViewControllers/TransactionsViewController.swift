@@ -121,7 +121,7 @@ class TransactionsViewController: ACBaseViewController {
                     self.multiCurrencyTableView.delegate = self.multiCurrencyTableView
                     self.multiCurrencyTableView.dataSource = self.multiCurrencyTableView
                     let extraHeight:CGFloat = kDevice == .Pad ? 20 : 0
-                    self.multiCurrencyTableView.frame = CGRect(x: 0, y: 0, width: 100, height: self.multiCurrencyTableView.calculatedHeight() + extraHeight * 2)
+                    self.multiCurrencyTableView.frame = CGRect(x: 0, y: 0, width: 100, height: self.multiCurrencyTableView.calculatedHeight() + extraHeight)
                     self.multiCurrencyTableView.separatorColor = .clearColor()
                     self.multiCurrencyTableView.reloadData()
                     self.tableView.tableHeaderView = self.multiCurrencyTableView
@@ -745,31 +745,31 @@ extension TransactionsViewController: UITableViewDataSource {
             v.isInsidePopover = kDevice == .Pad
             v.delegate = self
             
-//            if #available(iOS 9.0, *) {
-//                
-//                if transaction.isSecure && NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) && NKTouchID.canUseTouchID() {
-//                    
-//                    NKTouchID.authenticateWithTouchId(reason: "Please verify yourself to open this transaction!", callback: { (success, error) in
-//                        
-//                        if success {
-//                            
-//                            self.openView(v, sourceView: cell.contentView)
-//                        }
-//                        else {
-//                            
-//                            self.deselectSelectedCell(tableView)
-//                        }
-//                    })
-//                }
-//                else {
-//                    
-//                    openView(v, sourceView: cell.contentView)
-//                }
-//            }
-//            else {
+            if #available(iOS 9.0, *) {
+                
+                if transaction.isSecure && NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) && NKTouchID.canUseTouchID() {
+                    
+                    NKTouchID.authenticateWithTouchId(reason: "Please verify yourself to open this transaction!", callback: { (success, error) in
+                        
+                        if success {
+                            
+                            self.openView(v, sourceView: cell.contentView)
+                        }
+                        else {
+                            print(error)
+                            self.deselectSelectedCell(tableView)
+                        }
+                    })
+                }
+                else {
+                    
+                    openView(v, sourceView: cell.contentView)
+                }
+            }
+            else {
             
                 openView(v, sourceView: cell.contentView)
-            //}  
+            }
         }
         
         selectedRow = indexPath

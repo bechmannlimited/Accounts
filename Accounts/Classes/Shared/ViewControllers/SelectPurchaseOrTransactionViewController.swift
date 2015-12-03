@@ -9,6 +9,7 @@
 
 import UIKit
  
+private let kAddFriendImage = AppTools.iconAssetNamed("973-user-toolbar.png")
 
 class SelectPurchaseOrTransactionViewController: ACBaseViewController {
 
@@ -17,7 +18,8 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     var data = [
         (identifier: "Transaction", textLabelText: "Add an i.o.u", footer: "Add an iou if you owe one of your friends some money, or if they owe you.", image: kIouImage),
         (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, on behalf of multiple others.", image: kPurchaseImage),
-        (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid by one of your friends.", image: kPaymentImage)
+        (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid by one of your friends.", image: kPaymentImage),
+        (identifier: "Invites", textLabelText: "Add a friend", footer: User.currentUser()?.descriptionForHowToAddAsFriend(), image: kAddFriendImage)
     ]
 
     var contextualFriend: User?
@@ -118,6 +120,11 @@ extension SelectPurchaseOrTransactionViewController: UITableViewDataSource {
             v.delegate = saveItemDelegate
             saveItemDelegate?.newItemViewControllerWasPresented(v)
             
+            navigationController?.pushViewController(v, animated: true)
+        }
+        else if identifier == "Invites" {
+            
+            let v = FriendInvitesViewController()
             navigationController?.pushViewController(v, animated: true)
         }
     }

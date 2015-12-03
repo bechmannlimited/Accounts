@@ -15,7 +15,7 @@ private let kPlusImage = AppTools.iconAssetNamed("746-plus-circle-selected.png")
 private let kMinusImage = AppTools.iconAssetNamed("34-circle.minus.png")
 private let kMenuIcon = AppTools.iconAssetNamed("740-gear-toolbar")
 
-private let kPopoverContentSize = CGSize(width: 320, height: 360)
+private let kPopoverContentSize = CGSize(width: 380, height: 520)
 
 class FriendsViewController: ACBaseViewController {
     
@@ -130,6 +130,7 @@ class FriendsViewController: ACBaseViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.fillSuperView(UIEdgeInsetsZero)
         
+        collectionView.alwaysBounceVertical = true
         collectionView.backgroundColor = .clearColor()
     }
     

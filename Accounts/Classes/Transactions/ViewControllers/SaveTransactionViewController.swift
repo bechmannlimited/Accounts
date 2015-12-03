@@ -189,9 +189,9 @@ class SaveTransactionViewController: SaveItemViewController {
                 ])
         }
         
-//        sections.append([
-//            FormViewConfiguration.switchCell("Secure", isOn: transaction.isSecure, identifier: "isSecure")
-//        ])
+        sections.append([
+            FormViewConfiguration.switchCell("Secure", isOn: transaction.isSecure, identifier: "isSecure")
+        ])
         
         if isExistingTransaction && allowEditing {
             
@@ -375,10 +375,10 @@ class SaveTransactionViewController: SaveItemViewController {
     
     override func formViewElementIsEditable(identifier: String) -> Bool {
         
-        if identifier == "isSecure" {
-            
-            return User.currentUser()?.userType == UserType.ProUser.rawValue && allowEditing
-        }
+//        if identifier == "isSecure" {
+//            
+//            return User.currentUser()?.userType == UserType.ProUser.rawValue && allowEditing
+//        }
         
         return allowEditing
     }

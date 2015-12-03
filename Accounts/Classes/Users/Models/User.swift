@@ -705,4 +705,31 @@ class User: PFUser {
             completion(image: AppTools.iconAssetNamed("50981152_thumbnail.jpg"))
         }
     }
+    
+    func descriptionForHowToAddAsFriend() -> String {
+        
+        var text = ""
+        var namesAdded = 0
+        
+        if displayName?.isEmpty == false {
+            
+            text += "\"\(displayName!)\""
+            namesAdded++
+        }
+        if username?.isEmpty == false && facebookId == nil {
+            
+            let connector = namesAdded == 0 ? "" : ", "
+            text += "\(connector)\"\(username!)\""
+        }
+        
+        let orYourEmail: String = email?.isEmpty == false ? " or your email" : ""
+        text = "Your friends can find you by searching for \(text)\(orYourEmail) in the friend invites section. "
+        
+        if facebookId != nil {
+            
+            text += "Your Facebook friends who have this app, will appear in your friends list!"
+        }
+
+        return text
+    }
 }

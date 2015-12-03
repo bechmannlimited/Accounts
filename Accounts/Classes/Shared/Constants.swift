@@ -15,12 +15,12 @@ let kDeleteTimeoutForRemoteUpdate: NSTimeInterval = 3
 
 let kProSubscriptionProductID = "iouProSubscription"
 
-private let kIsSecureDescriptionIos9SpecifcText = NSProcessInfo().isOperatingSystemAtLeastVersion(NSOperatingSystemVersion(majorVersion: 9, minorVersion: 0, patchVersion: 0)) ? "This will also secure it with TouchID." : ""
+private let kIsSecureDescriptionIos9SpecifcText = NKTouchID.touchIDIsAvailableForIOUApp() ? "This will also secure it with TouchID." : ""
 
 private var kIsSecureRequiresSubscription: String {
 
     get {
-        
+        return "" // while pro sub not developed yet
         return User.currentUser()?.userType == UserType.ProUser.rawValue ? "" : "NB: Requires Pro subscription."
     }
 }

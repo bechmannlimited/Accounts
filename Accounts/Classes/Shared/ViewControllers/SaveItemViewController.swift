@@ -134,13 +134,13 @@ class SaveItemViewController: ACFormViewController {
     
     override func formViewElementWasDeniedEditing(identifier: String) {
 
-        if identifier == "isSecure" {
-            
-            User.currentUser()?.launchProSubscriptionDialogue("Securing transactions requires a Pro subscription.", completion: ({
-                
-                
-            }))
-        }
+//        if identifier == "isSecure" {
+//            
+//            User.currentUser()?.launchProSubscriptionDialogue("Securing transactions requires a Pro subscription.", completion: ({
+//                
+//                
+//            }))
+//        }
     }
 }
 
