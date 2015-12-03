@@ -70,7 +70,7 @@ class FindFriendsViewController: ACBaseViewController {
                     User.query()!.whereKey(kParse_User_Username_Key, matchesRegex: "^\(searchText)$", modifiers: "i"),
                     User.query()!.whereKey(kParse_User_DisplayName_Key, matchesRegex: "^\(searchText)$", modifiers: "i"),
                     User.query()!.whereKey("email", matchesRegex: "^\(searchText)$", modifiers: "i")
-                    ])
+                ])
                 
                 self.matchesQuery?.whereKey("objectId", notEqualTo: User.currentUser()!.objectId!)
                 
@@ -88,7 +88,7 @@ class FindFriendsViewController: ACBaseViewController {
                 self.matchesQuery?.findObjectsInBackgroundWithBlock({ (objects, error) -> Void in
                     
                     if var matches = objects as? [User] {
-                        
+                        print(matches)
                         //remove match if already in invite pool
                         for match in matches {
                             

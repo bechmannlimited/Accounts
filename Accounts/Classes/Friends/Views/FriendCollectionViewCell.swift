@@ -154,7 +154,8 @@ class FriendCollectionViewCell: UICollectionViewCell {
             
             contentView.addSubview(currencyTableView)
             
-            currencyTableView.frame = CGRect(x: 0, y: 70, width: contentView.frame.width, height: CGFloat(data.keys.count) * kMultiCurrencyTableViewCellHeight)
+            currencyTableView.frame = CGRect(x: 0, y: 70, width: frame.width, height: CGFloat(data.keys.count) * kMultiCurrencyTableViewCellHeight)
+            print(currencyTableView.frame)
             
             currencyTableView.delegate = currencyTableView
             currencyTableView.dataSource = currencyTableView

@@ -15,12 +15,7 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
 
     var tableView = UITableView(frame: CGRectZero, style: .Grouped)
     
-    var data = [
-        (identifier: "Transaction", textLabelText: "Add an i.o.u", footer: "Add an iou if you owe one of your friends some money, or if they owe you.", image: kIouImage),
-        (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, on behalf of multiple others.", image: kPurchaseImage),
-        (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid by one of your friends.", image: kPaymentImage),
-        (identifier: "Invites", textLabelText: "Add a friend", footer: User.currentUser()?.descriptionForHowToAddAsFriend(), image: kAddFriendImage)
-    ]
+    var data:Array<(identifier: String, textLabelText: String, footer: String, image: UIImage)> = []
 
     var contextualFriend: User?
     var saveItemDelegate: SaveItemDelegate?
@@ -29,6 +24,8 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setData()
+        
         setupTableView(tableView, delegate: self, dataSource: self)
         tableView.setEditing(true, animated: false)
         tableView.allowsSelectionDuringEditing = true
@@ -36,10 +33,37 @@ class SelectPurchaseOrTransactionViewController: ACBaseViewController {
         addCloseButton()
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        refresh(nil)
+    }
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
         saveItemDelegate?.newItemViewControllerWasPresented(nil)
+    }
+    
+    override func refresh(refreshControl: UIRefreshControl?) {
+        
+        setData()
+        tableView.reloadData()
+    }
+    
+    func setData() {
+        print("user has \(User.currentUser()?.friends.count) friends")
+        data = []
+        if User.currentUser()?.friends.count > 0 {
+            
+            data.appendContentsOf([
+                (identifier: "Transaction", textLabelText: "Add an i.o.u", footer: "Add an iou if you owe one of your friends some money, or if they owe you.", image: kIouImage),
+                (identifier: "Purchase", textLabelText: "Split a bill", footer: "Split a bill if someone paid the full price for something, on behalf of multiple others.", image: kPurchaseImage),
+                (identifier: "TransactionPayment", textLabelText: "Add a payment", footer: "Add a payment to log when you paid or got paid by one of your friends.", image: kPaymentImage)
+            ])
+        }
+        
+        data.append((identifier: "Invites", textLabelText: "Add a friend", footer: (User.currentUser()?.descriptionForHowToAddAsFriend())!, image: kAddFriendImage))
     }
     
     override func close() {

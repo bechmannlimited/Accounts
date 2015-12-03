@@ -35,6 +35,7 @@ class FriendsViewController: ACBaseViewController {
     var hasCheckedForInvites = false
     
     var refreshBarButtonItem: UIBarButtonItem?
+    var plusViewController: SelectPurchaseOrTransactionViewController?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,6 +77,7 @@ class FriendsViewController: ACBaseViewController {
         }
         
         //tableView.separatorColor = .clearColor()
+        addBarButtonItem?.enabled = true
     }
     
     override func viewWillAppear(animated: Bool) {
@@ -250,7 +252,7 @@ class FriendsViewController: ACBaseViewController {
             navigationItem.rightBarButtonItems = []
         }
         
-        addBarButtonItem?.enabled = User.currentUser()?.friends.count > 0
+        //addBarButtonItem?.enabled = User.currentUser()?.friends.count > 0
     }
     
     func friendInvites() {
@@ -345,6 +347,8 @@ class FriendsViewController: ACBaseViewController {
                 self.refreshUpdatedDate = NSDate()
                 self.refreshBarButtonItem?.enabled = true
             }
+            
+            self.plusViewController?.refresh(nil)
         })
         
         //getInvites()
@@ -367,7 +371,7 @@ class FriendsViewController: ACBaseViewController {
     
     func add() {
         
-        if User.currentUser()?.friends.count > 0 {
+        //if User.currentUser()?.friends.count > 0 {
             
             let view = SelectPurchaseOrTransactionViewController()
             let v = UINavigationController(rootViewController: view)
@@ -377,16 +381,17 @@ class FriendsViewController: ACBaseViewController {
             v.preferredContentSize = kPopoverContentSize
             v.popoverPresentationController?.barButtonItem = addBarButtonItem
             v.popoverPresentationController?.delegate = self
-            
+        
+            plusViewController = view
             presentViewController(v, animated: true, completion: nil)
-        }
-        else{
-            
-            UIAlertController.showAlertControllerWithButtonTitle("Ok", confirmBtnStyle: .Default, message: "You havn't added any friends yet!", completion: { (response) -> () in
-                
-                
-            })
-        }
+        //}
+//        else{
+//            
+//            UIAlertController.showAlertControllerWithButtonTitle("Ok", confirmBtnStyle: .Default, message: "You havn't added any friends yet!", completion: { (response) -> () in
+//                
+//                
+//            })
+//        }
     }
     
     func showOrHideTableOrNoDataView() {
@@ -471,6 +476,13 @@ extension FriendsViewController: UICollectionViewDataSource, UICollectionViewDel
     override func didRotateFromInterfaceOrientation(fromInterfaceOrientation: UIInterfaceOrientation) {
         
         collectionView.reloadData()
+        
+//        collectionView.collectionViewLayout.invalidateLayout()
+//        
+//        for cell in collectionView.visibleCells() as! [FriendCollectionViewCell] {
+//            
+//            cell.setupCurrencyTableConstraints()
+//        }
     }
 }
 
@@ -479,6 +491,7 @@ extension FriendsViewController: UIPopoverPresentationControllerDelegate {
     func popoverPresentationControllerDidDismissPopover(popoverPresentationController: UIPopoverPresentationController) {
         
         popoverViewController = nil
+        plusViewController = nil
         refresh(nil)
     }
     
@@ -546,14 +559,9 @@ extension FriendsViewController: FriendTableViewCellDelegate {
     func didRemoveFriend(friend: User, indexPath: NSIndexPath?) {
         
         if let indexPath = indexPath {
-            
-//            collectionView.beginUpdates()
-//            //User.currentUser()?.friends.removeAtIndex(find(User.currentUser()!.friends, friend)!)
-//            data[indexPath.section].removeAtIndex(indexPath.row)
-//            collectionView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: UITableViewRowAnimation.Top)
-//            collectionView.endUpdates()
-            
-            collectionView.deleteItemsAtIndexPaths([indexPath])
+    
+            data[indexPath.section].removeAtIndex(indexPath.row)
+            collectionView.reloadData()//.deleteItemsAtIndexPaths([indexPath])
         }
         
         NSTimer.schedule(delay: 0.5, handler: { timer in
